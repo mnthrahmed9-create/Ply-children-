@@ -264,8 +264,166 @@ button{font-family:inherit}
 #fbSetupBanner code { background:#000a; padding:2px 6px; border-radius:4px; }
 #fbSetupBanner .close-btn { background:transparent; border:1px solid #fff3; color:#fff; width:30px; height:30px; border-radius:8px; cursor:pointer; font-size:16px; }
 </style>
+
+<!-- ============================================================
+     ✅ إضافة: أنماط شاشة تسجيل الدخول الجديدة
+     ============================================================ -->
+<style id="loginScreenStyles">
+#loginScreen {
+  position: fixed; inset: 0; z-index: 200;
+  display: flex; align-items: center; justify-content: center;
+  padding: 24px;
+  background:
+    radial-gradient(ellipse at 50% 30%, rgba(74,45,255,.35), transparent 55%),
+    radial-gradient(ellipse at 80% 80%, rgba(255,0,110,.15), transparent 50%),
+    linear-gradient(145deg, #02040a, #07143a 55%, #02040a);
+  transition: opacity .55s ease;
+  overflow: hidden;
+}
+#loginScreen.hide { opacity: 0; pointer-events: none; }
+#loginScreen::before {
+  content: ''; position: absolute; inset: -50%;
+  background: conic-gradient(from 0deg, transparent, rgba(0,245,255,.08), transparent 30%, rgba(255,0,110,.08), transparent 60%, rgba(255,230,0,.08), transparent 90%);
+  animation: loginSpin 20s linear infinite;
+  pointer-events: none;
+}
+@keyframes loginSpin { to { transform: rotate(360deg); } }
+#loginScreen .login-inner {
+  width: 100%; max-width: 430px; text-align: center;
+  display: flex; flex-direction: column; align-items: center; gap: 22px;
+  position: relative; z-index: 1;
+}
+#loginScreen .login-logo {
+  width: 142px; height: 142px; border-radius: 34px;
+  display: grid; place-items: center; font-size: 68px;
+  background: linear-gradient(145deg, #101b50, #050a25);
+  border: 2px solid #a54bff;
+  box-shadow: 0 0 12px #7c2cff, 0 0 34px rgba(0,190,255,.22),
+              inset 0 0 24px rgba(111,50,255,.28);
+  animation: loginPulse 3s ease-in-out infinite;
+}
+@keyframes loginPulse {
+  0%, 100% { box-shadow: 0 0 12px #7c2cff, 0 0 34px rgba(0,190,255,.22), inset 0 0 24px rgba(111,50,255,.28); }
+  50% { box-shadow: 0 0 24px #b537f2, 0 0 60px rgba(0,190,255,.4), inset 0 0 32px rgba(111,50,255,.4); }
+}
+#loginScreen .login-title {
+  margin: 0; font-size: clamp(34px, 9vw, 46px); letter-spacing: -.5px;
+  font-weight: 800; line-height: 1.2;
+  background: linear-gradient(90deg, #00f5ff, #ffe600, #ff006e);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  filter: drop-shadow(0 0 20px rgba(255,0,110,.5));
+}
+#loginScreen .login-title span { -webkit-text-fill-color: transparent; }
+#loginScreen .login-sub {
+  margin: -10px 0 10px; color: #cbd5ee; font-size: 17px;
+}
+#loginScreen .login-btn {
+  width: 100%; min-height: 70px; border: 2px solid #7d43ff;
+  border-radius: 19px; color: #fff; font-size: 19px; font-weight: bold;
+  background: linear-gradient(100deg, #17104b, #071d4d);
+  box-shadow: 0 0 12px rgba(125,67,255,.8), 0 0 24px rgba(0,190,255,.22);
+  display: flex; align-items: center; justify-content: center; gap: 14px;
+  cursor: pointer; transition: transform .15s, opacity .15s, box-shadow .2s;
+  font-family: inherit;
+}
+#loginScreen .login-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 0 24px rgba(125,67,255,1), 0 0 48px rgba(0,190,255,.4);
+}
+#loginScreen .login-btn:active:not(:disabled) { transform: scale(.98); }
+#loginScreen .login-btn:disabled { opacity: .6; cursor: not-allowed; }
+#loginScreen .google-icon {
+  width: 34px; height: 34px; border-radius: 50%; background: #fff;
+  color: #4285f4; display: grid; place-items: center;
+  font: bold 25px Arial, sans-serif;
+}
+#loginScreen .guest-btn {
+  width: 100%; min-height: 56px; border: 1.5px solid rgba(0,245,255,.5);
+  border-radius: 16px; color: #00f5ff; font-size: 16px; font-weight: 700;
+  background: rgba(0,245,255,.06); cursor: pointer; font-family: inherit;
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  transition: all .2s;
+}
+#loginScreen .guest-btn:hover {
+  background: rgba(0,245,255,.15);
+  box-shadow: 0 0 20px rgba(0,245,255,.4);
+  transform: translateY(-1px);
+}
+#loginScreen .login-status {
+  min-height: 24px; color: #ffd36a; font-size: 13px; padding: 8px;
+  line-height: 1.6;
+}
+#loginScreen .login-note {
+  color: #9eafd2; font-size: 13px; line-height: 1.8; margin: 0;
+}
+#loginScreen .login-footer {
+  margin-top: 12px; color: #e9c64d; font-size: 16px;
+}
+@media (max-height: 650px) {
+  #loginScreen .login-inner { gap: 14px; }
+  #loginScreen .login-logo { width: 110px; height: 110px; font-size: 54px; }
+  #loginScreen .login-note { display: none; }
+}
+
+/* ✅ شريحة المستخدم في الشريط العلوي */
+#userChip {
+  position: fixed; top: 12px; left: 50%; transform: translateX(-50%);
+  z-index: 21; display: flex; align-items: center; gap: 8px;
+  padding: 6px 12px; background: var(--panel); border: 1px solid var(--line);
+  border-radius: 12px; font-size: 12px; backdrop-filter: blur(16px);
+  box-shadow: 0 8px 30px #4a2dff44; animation: slideIn .35s ease;
+  font-family: inherit;
+}
+#userChip .chip-avatar {
+  width: 26px; height: 26px; border-radius: 50%;
+  background: linear-gradient(135deg, #00f5ff, #ff006e);
+  display: grid; place-items: center; font-size: 12px; font-weight: 700;
+  color: #021018; overflow: hidden; flex-shrink: 0;
+}
+#userChip .chip-avatar img { width: 100%; height: 100%; object-fit: cover; }
+#userChip .chip-name {
+  color: #e8f4ff; font-weight: 600; max-width: 120px;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+#userChip .chip-logout {
+  background: transparent; border: 1px solid rgba(255,0,110,.4);
+  color: #ffb0d0; width: 24px; height: 24px; border-radius: 8px;
+  cursor: pointer; font-size: 14px; padding: 0;
+  display: grid; place-items: center; transition: .15s;
+}
+#userChip .chip-logout:hover {
+  background: rgba(255,0,110,.25); border-color: #ff006e; color: #fff;
+}
+@media (max-width: 600px) {
+  #userChip { top: auto; bottom: 170px; font-size: 11px; padding: 5px 10px; }
+}
+</style>
 </head>
 <body>
+
+<!-- ============================================================
+     ✅ إضافة: شاشة تسجيل الدخول
+     ============================================================ -->
+<div id="loginScreen">
+  <main class="login-inner">
+    <div class="login-logo" aria-label="شعار خرائط العراق">📍</div>
+    <h1 class="login-title">خرائط <span>العراق</span></h1>
+    <p class="login-sub">اكتشف .. تواصل .. شارك</p>
+
+    <button class="login-btn" id="googleLoginBtn" type="button">
+      <span class="google-icon">G</span>
+      <span>تسجيل الدخول عبر Google</span>
+    </button>
+
+    <button class="guest-btn" id="guestLoginBtn" type="button">
+      👤 الدخول كضيف (بدون تسجيل)
+    </button>
+
+    <div id="loginStatus" class="login-status" role="status"></div>
+    <p class="login-note">دخول سريع وآمن باستخدام حساب Google<br>لن تحتاج إلى كتابة بريدك الإلكتروني أو كلمة المرور داخل التطبيق.</p>
+    <div class="login-footer">⌖　خرائط العراق .. أقرب إليك</div>
+  </main>
+</div>
 
 <div id="map"></div>
 
@@ -526,21 +684,16 @@ function hideLoading(){
   setTimeout(()=>{ l.style.display = 'none'; }, 550);
 }
 
-/* ✅ [جديد] استخدام OpenFreeMap - خرائط Vector مجانية بدون API Key */
+/* ✅ استخدام OpenFreeMap - خرائط Vector مجانية بدون API Key */
 async function buildMapStyle(){
   try {
-    // جلب ستايل داكن مجاني 100% من OpenFreeMap
     const res = await fetch('https://tiles.openfreemap.org/styles/dark');
     if (!res.ok) throw new Error('فشل تحميل الستايل');
     const style = await res.json();
-    
-    // ضمان وجود الخطوط العربية
     if(!style.glyphs) style.glyphs = 'https://tiles.openfreemap.org/fonts/{fontstack}/{range}.pbf';
-    
     return style;
   } catch (e) {
     console.warn('فشل تحميل OpenFreeMap، جاري استخدام النمط الاحتياطي...', e);
-    // نمط احتياطي (صور) في حال انقطاع السيرفر
     return {
       version: 8,
       glyphs: 'https://demotiles.maplibre.org/font/{fontstack}/{range}.pbf',
@@ -1107,1462 +1260,1197 @@ async function runBranch(branch, btn){
     });
     map.addLayer({
       id:'branch-point', type:'circle', source:'branch',
-      paint:{ 'circle-radius':5.5, 'circle-color':['case', ['==',['geometry-type'],'Point'], '#FFE600', '#FF006E'], 'circle-stroke-width':1.8, 'circle-stroke-color':'#ffffff', 'circle-opacity':0.98 }
+      filter:['==',['geometry-type'],'Point'],
+      paint:{
+        'circle-radius':['interpolate',['linear'],['zoom'],5,3,12,6],
+        'circle-color':'#FF006E',
+        'circle-stroke-color':'#FFFFFF',
+        'circle-stroke-width':1.5,
+        'circle-opacity':0.95
+      }
     });
-    toast('✨ ' + branch.label + ': ' + feats.length + ' عنصر');
+
+    toast('✅ تم تحميل ' + branch.label + ' (' + feats.length + ')', 3500);
   } catch(err){
-    btn.classList.remove('active'); toast('❌ تعذر عرض البيانات');
+    console.warn(err);
+    btn.classList.remove('active');
+    toast('❌ فشل تحميل البيانات');
   }
 }
 
 /* =========================================================
-   🏗️ المباني
+   MAP CONTROLS
    ========================================================= */
-async function loadBuildingsForViewport(silent){
-  if(!map || !mapLoaded) return false;
-  if(map.getZoom() < 15){
-    if(!silent) toast('⚠️ قرّب الخريطة أكثر (zoom ≥ 15) لتحميل المباني');
-    return false;
+
+$('reset').addEventListener('click', ()=>{
+  map.flyTo({center:[44.0, 33.2], zoom:5.8, pitch:0, bearing:0, duration:1400});
+  deselectProvince();
+  clearBranch(true);
+  toast('🏠 تمت إعادة العرض');
+});
+
+$('terrain').addEventListener('click', ()=>{
+  terrainOn = !terrainOn;
+  $('terrain').classList.toggle('on', terrainOn);
+  if(map.getLayer('province-3d')){
+    map.setLayoutProperty('province-3d', 'visibility', terrainOn ? 'visible' : 'none');
   }
-  const b = map.getBounds();
-  const bbox = `${b.getSouth()},${b.getWest()},${b.getNorth()},${b.getEast()}`;
-  const query = `[out:json][timeout:20];
-(
-  way["building"](${bbox});
-  relation["building"](${bbox});
-);
-out geom 800;`;
-
-  if(!silent) toast('🏗️ جاري تحميل المباني من OSM...', 8000);
-  const data = await fetchOverpassDynamic(query, 15000);
-  if(!data || !data.elements?.length){
-    if(!silent) toast('❌ لا توجد مباني في هذه المنطقة');
-    return false;
+  if(map.getLayer('vivid-buildings')){
+    map.setLayoutProperty('vivid-buildings', 'visibility', terrainOn ? 'visible' : 'none');
   }
+  toast(terrainOn ? '⛰️ التضاريس مفعلة' : '⛰️ التضاريس معطلة');
+});
 
-  try{
-    await ensureOSMToGeoJSON();
-    let gj = window.osmtogeojson(data, { flatProperties: false });
-    if(gj && typeof gj.then === 'function') gj = await gj;
-    const feats = (gj.features || []).filter(f => f.geometry);
-    if(!feats.length) return false;
+$('labels').addEventListener('click', ()=>{
+  labelsOn = !labelsOn;
+  $('labels').classList.toggle('on', labelsOn);
+  PROVINCES.forEach(p=>{ if(p.labelEl) p.labelEl.style.display = labelsOn ? '' : 'none'; });
+  toast(labelsOn ? '🏷️ الأسماء مفعلة' : '🏷️ الأسماء معطلة');
+});
 
-    feats.forEach(f => {
-      const tags = (f.properties && f.properties.tags) || f.properties || {};
-      const h = parseFloat(tags.height) ||
-                parseFloat(tags['building:height']) ||
-                (parseFloat(tags['building:levels']) || 0) * 3.2 ||
-                6;
-      f.properties = f.properties || {};
-      f.properties._h = Math.max(h, 3);
-      const type = String(tags.building || 'yes').toLowerCase();
-      if (/residential|house|apartments|dormitory/.test(type)) f.properties._color = '#B8B8C8';
-      else if (/commercial|retail|office|industrial/.test(type)) f.properties._color = '#FFE0A0';
-      else if (/school|university|hospital|government|mosque|church/.test(type)) f.properties._color = '#A0D8FF';
-      else f.properties._color = '#C0C0C0';
-    });
-
-    if(map.getSource('real-buildings')){
-      map.getSource('real-buildings').setData({ type: 'FeatureCollection', features: feats });
-    } else {
-      map.addSource('real-buildings', { type: 'geojson', data: { type: 'FeatureCollection', features: feats } });
-      addLayerSafe({
-        id: 'real-buildings-3d',
-        type: 'fill-extrusion',
-        source: 'real-buildings',
-        paint: {
-          'fill-extrusion-color': ['get', '_color'],
-          'fill-extrusion-height': ['get', '_h'],
-          'fill-extrusion-base': 0,
-          'fill-extrusion-opacity': 0.92,
-          'fill-extrusion-vertical-gradient': true
-        }
-      });
-    }
-    if(!silent) toast(`🏗️ تم تحميل ${feats.length} مبنى ثلاثي الأبعاد`);
-    return true;
-  } catch (e){ console.warn(e); return false; }
-}
-
-function clearBuildings(){
-  try{ if(map.getLayer('real-buildings-3d')) map.removeLayer('real-buildings-3d'); }catch(e){}
-  try{ if(map.getSource('real-buildings')) map.removeSource('real-buildings'); }catch(e){}
-}
-
-/* =========================================================
-   🛣️ الطرق
-   ========================================================= */
-const ROAD_TYPE_COLOR = [
-  'match', ['get', 'highway'],
-  'motorway', '#FF006E', 'motorway_link', '#FF006E',
-  'trunk', '#FB5607', 'trunk_link', '#FB5607',
-  'primary', '#FFE600', 'primary_link', '#FFE600',
-  'secondary', '#00F5FF', 'secondary_link', '#00F5FF',
-  'tertiary', '#06FFA5', 'tertiary_link', '#06FFA5',
-  'residential', '#B537F2',
-  'living_street', '#9B5DE5',
-  'service', '#8A8AA0',
-  'footway', '#8B8B8B', 'path', '#8B8B8B', 'pedestrian', '#FF9F1C',
-  'steps', '#8B8B8B', 'cycleway', '#8B8B8B',
-  '#B537F2'
-];
-
-const ROAD_TYPE_WIDTH = [
-  'match', ['get', 'highway'],
-  'motorway', 5, 'motorway_link', 3,
-  'trunk', 4, 'trunk_link', 3,
-  'primary', 3.5, 'primary_link', 2.5,
-  'secondary', 3, 'secondary_link', 2,
-  'tertiary', 2.5, 'tertiary_link', 1.8,
-  'residential', 2,
-  'living_street', 1.8,
-  'service', 1.5,
-  'footway', 1.2, 'path', 1.2, 'pedestrian', 1.5,
-  'steps', 1, 'cycleway', 1.2,
-  1.5
-];
-
-async function loadRoadsForViewport(silent){
-  if(!map || !mapLoaded) return false;
-  if(map.getZoom() < 13){
-    if(!silent) toast('⚠️ قرّب الخريطة أكثر (zoom ≥ 13) لتحميل الطرق');
-    return false;
-  }
-  const b = map.getBounds();
-  const bbox = `${b.getSouth()},${b.getWest()},${b.getNorth()},${b.getEast()}`;
-  const query = `[out:json][timeout:25];
-(
-  way["highway"~"motorway|motorway_link|trunk|trunk_link|primary|primary_link|secondary|secondary_link|tertiary|tertiary_link|residential|living_street|service|footway|pedestrian|path|steps|cycleway"](${bbox});
-  way["bridge"="yes"](${bbox});
-  way["tunnel"="yes"](${bbox});
-);
-out geom 2000;`;
-
-  if(!silent) toast('🛣️ جاري تحميل الطرق من OSM...', 8000);
-  const data = await fetchOverpassDynamic(query, 15000);
-  if(!data || !data.elements?.length){
-    if(!silent) toast('❌ لا توجد طرق في هذه المنطقة');
-    return false;
-  }
-
-  try{
-    await ensureOSMToGeoJSON();
-    let gj = window.osmtogeojson(data, { flatProperties: true });
-    if(gj && typeof gj.then === 'function') gj = await gj;
-    const feats = (gj.features || []).filter(f => f.geometry && (f.geometry.type === 'LineString' || f.geometry.type === 'MultiLineString'));
-    if(!feats.length) return false;
-
-    feats.forEach(f => {
-      const tags = f.properties || {};
-      if(tags.maxspeed){
-        const m = String(tags.maxspeed).match(/(\d+)/);
-        f.properties._speed = m ? parseInt(m[1], 10) : null;
-      } else {
-        f.properties._speed = null;
-      }
-    });
-
-    if(map.getSource('real-roads')){
-      map.getSource('real-roads').setData({ type: 'FeatureCollection', features: feats });
-    } else {
-      map.addSource('real-roads', { type: 'geojson', data: { type: 'FeatureCollection', features: feats } });
-      addLayerSafe({
-        id: 'real-tunnels', type: 'line', source: 'real-roads',
-        filter: ['==', ['get', 'tunnel'], 'yes'],
-        paint: { 'line-color': '#00F5FF', 'line-width': 2, 'line-dasharray': [2, 2], 'line-opacity': 0.85 }
-      });
-      addLayerSafe({
-        id: 'real-roads-line', type: 'line', source: 'real-roads',
-        paint: { 'line-color': ROAD_TYPE_COLOR, 'line-width': ROAD_TYPE_WIDTH, 'line-opacity': 0.95 }
-      });
-      addLayerSafe({
-        id: 'real-bridges', type: 'line', source: 'real-roads',
-        filter: ['==', ['get', 'bridge'], 'yes'],
-        paint: { 'line-color': '#FFE600', 'line-width': 3.5, 'line-opacity': 0.95 }
-      });
-    }
-    if(!silent) toast(`🛣️ تم تحميل ${feats.length} مقطع طرق`);
-    return true;
-  } catch (e){ console.warn(e); return false; }
-}
-
-function clearRoads(){
-  ['real-roads-line','real-bridges','real-tunnels'].forEach(id=>{
-    try{ if(map.getLayer(id)) map.removeLayer(id); }catch(e){}
-  });
-  try{ if(map.getSource('real-roads')) map.removeSource('real-roads'); }catch(e){}
-}
-
-/* =========================================================
-   ✈️ المطارات
-   ========================================================= */
-async function loadAirports(){
-  if(!map || !mapLoaded || airportsLoaded) return false;
-  toast('✈️ جاري تحميل المطارات...', 8000);
-  const query = `[out:json][timeout:30];
-area["ISO3166-1"="IQ"]["admin_level"="2"]->.a;
-(
-  node["aeroway"="aerodrome"](area.a);
-  way["aeroway"="aerodrome"](area.a);
-  way["aeroway"="runway"](area.a);
-  way["aeroway"="taxiway"](area.a);
-  node["aeroway"="helipad"](area.a);
-);
-out geom;`;
-
-  const data = await fetchOverpassDynamic(query, 30000);
-  if(!data || !data.elements?.length){ toast('❌ لا تتوفر بيانات مطارات'); return false; }
-
-  try{
-    await ensureOSMToGeoJSON();
-    let gj = window.osmtogeojson(data, { flatProperties: true });
-    if(gj && typeof gj.then === 'function') gj = await gj;
-    const feats = (gj.features || []).filter(f => f.geometry);
-    if(!feats.length) return false;
-
-    ['airports-runways','airports-taxiways','airports-points','airports-labels'].forEach(id=>{
-      try{ if(map.getLayer(id)) map.removeLayer(id); }catch(e){}
-    });
-    try{ if(map.getSource('airports')) map.removeSource('airports'); }catch(e){}
-
-    map.addSource('airports', { type: 'geojson', data: { type: 'FeatureCollection', features: feats } });
-    map.addLayer({
-      id: 'airports-taxiways', type: 'line', source: 'airports',
-      filter: ['==', ['get', 'aeroway'], 'taxiway'],
-      paint: { 'line-color': '#FFE600', 'line-width': 2, 'line-opacity': 0.8 }
-    });
-    map.addLayer({
-      id: 'airports-runways', type: 'line', source: 'airports',
-      filter: ['==', ['get', 'aeroway'], 'runway'],
-      paint: { 'line-color': '#FFFFFF', 'line-width': 5, 'line-opacity': 0.95 }
-    });
-    map.addLayer({
-      id: 'airports-points', type: 'circle', source: 'airports',
-      filter: ['any', ['==', ['get', 'aeroway'], 'aerodrome'], ['==', ['get', 'aeroway'], 'helipad']],
-      paint: {
-        'circle-radius': 8, 'circle-color': '#FF006E',
-        'circle-stroke-width': 2, 'circle-stroke-color': '#FFFFFF', 'circle-opacity': 0.95
-      }
-    });
-    map.addLayer({
-      id: 'airports-labels', type: 'symbol', source: 'airports', minzoom: 6,
-      filter: ['==', ['get', 'aeroway'], 'aerodrome'],
-      layout: {
-        'text-field': ['coalesce', ['get', 'name:ar'], ['get', 'name'], ['get', 'name:en'], 'مطار'],
-        'text-font': ['Noto Sans Regular'],
-        'text-size': 11,
-        'text-offset': [0, -1.8],
-        'text-anchor': 'bottom'
-      },
-      paint: { 'text-color': '#FFFFFF', 'text-halo-color': '#0a0320', 'text-halo-width': 1.5 }
-    });
-    airportsLoaded = true;
-    toast(`✈️ تم تحميل ${feats.length} مطاراً/مدرجاً`);
-    return true;
-  } catch (e){ console.warn(e); toast('❌ تعذر تحميل المطارات'); return false; }
-}
-
-/* =========================================================
-   🛩️ الطائرات الحية
-   ========================================================= */
-function ensureAircraftIcon(){
-  if(!map || map.hasImage('aircraft-icon')) return;
-  try{
-    const c = document.createElement('canvas');
-    c.width = 32; c.height = 32;
-    const ctx = c.getContext('2d');
-    ctx.fillStyle = '#00F5FF';
-    ctx.strokeStyle = '#FFFFFF';
-    ctx.lineWidth = 1.5;
-    ctx.beginPath();
-    ctx.moveTo(16, 2);
-    ctx.lineTo(20, 12);
-    ctx.lineTo(30, 14);
-    ctx.lineTo(30, 18);
-    ctx.lineTo(20, 16);
-    ctx.lineTo(20, 26);
-    ctx.lineTo(24, 30);
-    ctx.lineTo(12, 30);
-    ctx.lineTo(12, 26);
-    ctx.lineTo(12, 16);
-    ctx.lineTo(2, 18);
-    ctx.lineTo(2, 14);
-    ctx.lineTo(12, 12);
-    ctx.closePath();
-    ctx.fill();
-    ctx.stroke();
-    const imgData = ctx.getImageData(0, 0, 32, 32);
-    map.addImage('aircraft-icon', imgData);
-  } catch(e){ console.warn('icon error', e); }
-}
-
-async function fetchLiveAircraft(){
-  if(!map || !mapLoaded) return;
-  const b = map.getBounds();
-  const url = `https://opensky-network.org/api/states/all?lamin=${b.getSouth()}&lomin=${b.getWest()}&lamax=${b.getNorth()}&lomax=${b.getEast()}`;
-  try{
-    const res = await fetch(url);
-    if(!res.ok) return;
-    const json = await res.json();
-    const features = (json.states || []).map(s => ({
-      type: 'Feature',
-      geometry: { type: 'Point', coordinates: [s[5], s[6]] },
-      properties: {
-        callsign: (s[1] || '').trim() || '—',
-        altitude: (s[7] !== null && s[7] !== undefined) ? s[7] : ((s[13] !== null && s[13] !== undefined) ? s[13] : 0),
-        velocity: (s[9] !== null && s[9] !== undefined) ? s[9] : 0,
-        heading: (s[10] !== null && s[10] !== undefined) ? s[10] : 0,
-        country: s[2] || ''
-      }
-    })).filter(f => f.geometry.coordinates[0] != null && f.geometry.coordinates[1] != null);
-
-    if(map.getSource('live-aircraft')){
-      map.getSource('live-aircraft').setData({ type: 'FeatureCollection', features });
-    } else {
-      ensureAircraftIcon();
-      map.addSource('live-aircraft', { type: 'geojson', data: { type: 'FeatureCollection', features } });
-      map.addLayer({
-        id: 'live-aircraft-icons', type: 'symbol', source: 'live-aircraft',
-        layout: {
-          'icon-image': 'aircraft-icon', 'icon-size': 0.85,
-          'icon-rotate': ['coalesce', ['get', 'heading'], 0],
-          'icon-allow-overlap': true, 'icon-ignore-placement': true
-        }
-      });
-      map.addLayer({
-        id: 'live-aircraft-labels', type: 'symbol', source: 'live-aircraft',
-        layout: {
-          'text-field': ['get', 'callsign'],
-          'text-font': ['Noto Sans Regular'],
-          'text-size': 9, 'text-offset': [0, 1.4], 'text-anchor': 'top'
-        },
-        paint: { 'text-color': '#FFFFFF', 'text-halo-color': '#0a0320', 'text-halo-width': 1 }
-      });
-    }
-  } catch (e){ /* تجاهل */ }
-}
-
-function startAircraftTracking(){
-  if(aircraftTimer) return;
-  ensureAircraftIcon();
-  fetchLiveAircraft();
-  aircraftTimer = setInterval(fetchLiveAircraft, 15000);
-}
-function stopAircraftTracking(){
-  clearInterval(aircraftTimer);
-  aircraftTimer = null;
-  try{ if(map.getLayer('live-aircraft-icons')) map.removeLayer('live-aircraft-icons'); }catch(e){}
-  try{ if(map.getLayer('live-aircraft-labels')) map.removeLayer('live-aircraft-labels'); }catch(e){}
-  try{ if(map.getSource('live-aircraft')) map.removeSource('live-aircraft'); }catch(e){}
-}
-
-/* =========================================================
-   🚦 السرعات
-   ========================================================= */
-function toggleTrafficMode(){
-  if(!map || !map.getLayer('real-roads-line')){
-    toast('⚠️ حمّل الطرق أولاً (🛣️)');
-    return;
-  }
-  trafficMode = !trafficMode;
-  if(trafficMode){
-    map.setPaintProperty('real-roads-line', 'line-color', [
-      'case',
-      ['>=', ['coalesce', ['get', '_speed'], 0], 80], '#06FFA5',
-      ['>=', ['coalesce', ['get', '_speed'], 0], 50], '#FFE600',
-      ['>',  ['coalesce', ['get', '_speed'], 0], 0],  '#FF006E',
-      '#5A5A78'
-    ]);
-    map.setPaintProperty('real-roads-line', 'line-width', 4);
-    toast('🚦 السرعات: أخضر ≥80، أصفر 50-79، أحمر <50، رمادي غير معروف');
-  } else {
-    map.setPaintProperty('real-roads-line', 'line-color', ROAD_TYPE_COLOR);
-    map.setPaintProperty('real-roads-line', 'line-width', ROAD_TYPE_WIDTH);
-    toast('🛣️ ألوان الطرق حسب النوع');
-  }
-  $('toggleTraffic').classList.toggle('on', trafficMode);
-}
-
-/* =========================================================
-   🧭 OSRM
-   ========================================================= */
-function clearRoute(){
-  routeSources.forEach(id => {
-    try{ if(map.getLayer(id + '-line')) map.removeLayer(id + '-line'); }catch(e){}
-    try{ if(map.getSource(id)) map.removeSource(id); }catch(e){}
-  });
-  routeSources = [];
-  if(destinationMarker){ try{ destinationMarker.remove(); }catch(e){} destinationMarker = null; }
-}
-
-async function routeToDestination(destLng, destLat){
-  if(!userLocation){
-    toast('⚠️ اضغط 📍 موقعي أولاً لتحديد نقطة البداية');
-    return;
-  }
-  const [uLng, uLat] = userLocation;
-  const url = `https://router.project-osrm.org/route/v1/driving/${uLng},${uLat};${destLng},${destLat}?overview=full&geometries=geojson&alternatives=true&steps=false`;
-  toast('🧭 جاري حساب المسار عبر OSRM...', 6000);
-  try{
-    const res = await fetch(url);
-    if(!res.ok) throw new Error('OSRM ' + res.status);
-    const json = await res.json();
-    if(!json.routes || !json.routes.length){ toast('❌ تعذر حساب المسار'); return; }
-
-    clearRoute();
-    const main = json.routes[0];
-    map.addSource('route-main', {
-      type: 'geojson',
-      data: { type: 'Feature', geometry: main.geometry, properties: {} }
-    });
-    map.addLayer({
-      id: 'route-main-line', type: 'line', source: 'route-main',
-      layout: { 'line-join': 'round', 'line-cap': 'round' },
-      paint: { 'line-color': '#00F5FF', 'line-width': 7, 'line-opacity': 0.95, 'line-blur': 1 }
-    });
-    routeSources.push('route-main');
-
-    json.routes.slice(1).forEach((r, i) => {
-      const id = `route-alt-${i}`;
-      map.addSource(id, {
-        type: 'geojson',
-        data: { type: 'Feature', geometry: r.geometry, properties: {} }
-      });
-      map.addLayer({
-        id: `${id}-line`, type: 'line', source: id,
-        layout: { 'line-join': 'round', 'line-cap': 'round' },
-        paint: { 'line-color': '#FFE600', 'line-width': 4, 'line-opacity': 0.65, 'line-dasharray': [2, 2] }
-      });
-      routeSources.push(id);
-    });
-
+$('myLocation').addEventListener('click', ()=>{
+  if(!navigator.geolocation){ toast('⚠️ المتصفح لا يدعم تحديد الموقع'); return; }
+  toast('📍 جاري تحديد موقعك...');
+  navigator.geolocation.getCurrentPosition(pos=>{
+    const {longitude:lng, latitude:lat} = pos.coords;
+    userLocation = [lng, lat];
+    if(userMarker) userMarker.remove();
     const el = document.createElement('div');
-    el.style.cssText = 'width:20px;height:20px;background:#FF006E;border:3px solid #fff;border-radius:50% 50% 50% 0;transform:rotate(-45deg);box-shadow:0 0 24px #FF006E;';
-    destinationMarker = new maplibregl.Marker({ element: el, anchor: 'bottom' })
-      .setLngLat([destLng, destLat]).addTo(map);
+    el.className = 'user-marker';
+    el.innerHTML = '<span class="user-pulse"></span><span class="user-dot"></span>';
+    userMarker = new maplibregl.Marker({element:el, anchor:'center'}).setLngLat([lng, lat]).addTo(map);
+    map.flyTo({center:[lng, lat], zoom:11, pitch:45, duration:1600});
+    $('myLocation').classList.add('on');
+    toast('✅ تم تحديد موقعك');
+  }, ()=>{
+    toast('❌ تعذر تحديد الموقع');
+  }, {enableHighAccuracy:true, timeout:15000});
+});
 
-    const km = (main.distance / 1000).toFixed(1);
-    const min = Math.round(main.duration / 60);
-    const altCount = json.routes.length - 1;
-    toast(`✨ الأسرع: ${km} كم — ${min} دقيقة${altCount > 0 ? ' (' + altCount + ' بديل)' : ''}`, 5000);
+$('toggleList').addEventListener('click', ()=>{
+  const side = $('sideList');
+  side.classList.toggle('hidden');
+  $('toggleList').classList.toggle('on', !side.classList.contains('hidden'));
+});
 
-    const coords = main.geometry.coordinates;
-    const lngs = coords.map(c => c[0]), lats = coords.map(c => c[1]);
-    map.fitBounds(
-      [[Math.min(...lngs), Math.min(...lats)], [Math.max(...lngs), Math.max(...lats)]],
-      { padding: { top: 100, bottom: 150, left: 80, right: 80 }, pitch: 55, duration: 1400 }
-    );
-  } catch(e){
-    console.warn(e);
-    toast('❌ تعذر الاتصال بخدمة OSRM');
+$('loadBuildings').addEventListener('click', ()=>{
+  buildingsActive = !buildingsActive;
+  $('loadBuildings').classList.toggle('on', buildingsActive);
+  if(buildingsActive){
+    try{ addVividBuildings(); }catch(e){}
+    toast('🏗️ المباني ثلاثية الأبعاد مفعلة');
+  } else {
+    try{ if(map.getLayer('vivid-buildings')) map.removeLayer('vivid-buildings'); }catch(e){}
+    toast('🏗️ المباني معطلة');
   }
-}
+});
 
-function updateProvinceExtrusionForZoom(){
-  if(!map || !map.getLayer('province-3d')) return;
-  const z = map.getZoom();
-  const bucket = Math.floor(z);
-  if(bucket === lastBldZoomBucket) return;
-  lastBldZoomBucket = bucket;
-
-  let h = 1700, op = 0.78;
-  if(buildingsActive && z > 11){
-    const t = Math.min(1, (z - 11) / 4);
-    h = 1700 * Math.max(0.01, 1 - t * 0.99);
-    op = 0.78 * Math.max(0.15, 1 - t * 0.85);
+$('loadRoads').addEventListener('click', async ()=>{
+  roadsActive = !roadsActive;
+  $('loadRoads').classList.toggle('on', roadsActive);
+  if(!roadsActive){
+    try{ if(map.getLayer('roads-glow')) map.removeLayer('roads-glow'); }catch(e){}
+    toast('🛣️ الطرق معطلة');
+    return;
+  }
+  toast('⏳ جاري تحميل الطرق السريعة...', 8000);
+  const q = '[out:json][timeout:60];\narea["ISO3166-1"="IQ"]["admin_level"="2"]->.a;\nway["highway"~"motorway|trunk"](area.a);\nout geom 1500;';
+  const data = await fetchOverpassDynamic(q, 45000);
+  if(!data || !data.elements || !data.elements.length){
+    roadsActive = false; $('loadRoads').classList.remove('on');
+    toast('❌ فشل تحميل الطرق'); return;
   }
   try{
-    map.setPaintProperty('province-3d', 'fill-extrusion-height', [
-      'case',
-      ['boolean', ['feature-state', 'selected'], false], h * 2,
-      ['boolean', ['feature-state', 'hover'], false], h * 1.5,
-      h
-    ]);
-    map.setPaintProperty('province-3d', 'fill-extrusion-opacity', op);
-  } catch(e){}
-}
+    await ensureOSMToGeoJSON();
+    let gj = window.osmtogeojson(data, {flatProperties:true});
+    if(gj && typeof gj.then === 'function') gj = await gj;
+    const feats = (gj.features||[]).filter(f=>f.geometry);
+    if(map.getSource('roads')) map.removeSource('roads');
+    map.addSource('roads', {type:'geojson', data:{type:'FeatureCollection', features:feats}});
+    addLayerSafe({
+      id:'roads-glow', type:'line', source:'roads',
+      paint:{ 'line-color':'#ffe600', 'line-width':3, 'line-opacity':0.95, 'line-blur':1 }
+    });
+    toast('✅ تم تحميل ' + feats.length + ' طريق');
+  } catch(err){
+    roadsActive = false; $('loadRoads').classList.remove('on');
+    toast('❌ فشل تحميل الطرق');
+  }
+});
 
-/* =========================================================
-   ربط الأزرار الأصلية
-   ========================================================= */
+$('loadAirportsBtn').addEventListener('click', async ()=>{
+  airportsLoaded = !airportsLoaded;
+  $('loadAirportsBtn').classList.toggle('on', airportsLoaded);
+  if(!airportsLoaded){
+    try{ if(map.getLayer('airports-layer')) map.removeLayer('airports-layer'); }catch(e){}
+    try{ if(map.getSource('airports-src')) map.removeSource('airports-src'); }catch(e){}
+    toast('✈️ المطارات معطلة');
+    return;
+  }
+  toast('⏳ جاري تحميل المطارات...', 8000);
+  const q = '[out:json][timeout:30];\narea["ISO3166-1"="IQ"]["admin_level"="2"]->.a;\nnode["aeroway"="aerodrome"](area.a);\nout geom 200;';
+  const data = await fetchOverpassDynamic(q, 25000);
+  if(!data || !data.elements || !data.elements.length){
+    airportsLoaded = false; $('loadAirportsBtn').classList.remove('on');
+    toast('❌ لم يتم العثور على مطارات'); return;
+  }
+  try{
+    await ensureOSMToGeoJSON();
+    let gj = window.osmtogeojson(data, {flatProperties:true});
+    if(gj && typeof gj.then === 'function') gj = await gj;
+    const feats = (gj.features||[]).filter(f=>f.geometry);
+    if(map.getSource('airports-src')) map.removeSource('airports-src');
+    map.addSource('airports-src', {type:'geojson', data:{type:'FeatureCollection', features:feats}});
+    addLayerSafe({
+      id:'airports-layer', type:'circle', source:'airports-src',
+      paint:{
+        'circle-radius':['interpolate',['linear'],['zoom'],5,4,12,10],
+        'circle-color':'#00f5ff',
+        'circle-stroke-color':'#ffffff',
+        'circle-stroke-width':2,
+        'circle-opacity':0.95
+      }
+    });
+    toast('✅ تم تحميل ' + feats.length + ' مطار');
+  } catch(err){
+    airportsLoaded = false; $('loadAirportsBtn').classList.remove('on');
+    toast('❌ فشل تحميل المطارات');
+  }
+});
+
+const AIRCRAFT_DATA = [
+  {id:'IRQ101', lng:44.36, lat:33.31, alt:'35,000 ft', spd:'870 km/h', dir:0},
+  {id:'IRQ205', lng:47.78, lat:30.50, alt:'38,000 ft', spd:'880 km/h', dir:90},
+  {id:'IRQ312', lng:43.11, lat:36.33, alt:'33,000 ft', spd:'840 km/h', dir:180},
+  {id:'IRQ487', lng:46.25, lat:31.04, alt:'36,000 ft', spd:'860 km/h', dir:270}
+];
+
+$('toggleAircraft').addEventListener('click', ()=>{
+  if(aircraftTimer){
+    clearInterval(aircraftTimer);
+    aircraftTimer = null;
+    document.querySelectorAll('.aircraft-marker').forEach(el=>el.remove());
+    $('toggleAircraft').classList.remove('on');
+    toast('🛩️ الطائرات معطلة');
+    return;
+  }
+  $('toggleAircraft').classList.add('on');
+  const markers = [];
+  AIRCRAFT_DATA.forEach(a=>{
+    const el = document.createElement('div');
+    el.className = 'aircraft-marker';
+    el.style.cssText = `font-size:24px;filter:drop-shadow(0 0 8px #00f5ff);transform:rotate(${a.dir}deg);cursor:pointer;`;
+    el.textContent = '✈️';
+    el.title = `${a.id} · ${a.alt} · ${a.spd}`;
+    const m = new maplibregl.Marker({element:el, anchor:'center'}).setLngLat([a.lng, a.lat]).addTo(map);
+    markers.push({m, data:a, el});
+  });
+  aircraftTimer = setInterval(()=>{
+    markers.forEach(({m, data, el})=>{
+      data.lng += 0.03 * Math.cos(data.dir * Math.PI/180);
+      data.lat += 0.03 * Math.sin(data.dir * Math.PI/180);
+      if(data.lng > 49) data.lng = 38;
+      if(data.lng < 38) data.lng = 49;
+      if(data.lat > 38) data.lat = 29;
+      if(data.lat < 28) data.lat = 37;
+      m.setLngLat([data.lng, data.lat]);
+    });
+  }, 400);
+  toast('🛩️ الطائرات مفعلة');
+});
+
+$('toggleTraffic').addEventListener('click', ()=>{
+  trafficMode = !trafficMode;
+  $('toggleTraffic').classList.toggle('on', trafficMode);
+  toast(trafficMode ? '🚦 وضع السرعات مفعل' : '🚦 وضع السرعات معطل');
+});
+
+$('pickDest').addEventListener('click', ()=>{
+  destPicking = !destPicking;
+  $('pickDest').classList.toggle('on', destPicking);
+  if(destPicking){
+    map.getCanvas().style.cursor = 'crosshair';
+    toast('🎯 انقر على الخريطة لتحديد وجهة');
+  } else {
+    map.getCanvas().style.cursor = '';
+  }
+});
+
+map && null;
+setTimeout(()=>{
+  if(!map) return;
+  map.on('click', e=>{
+    if(!destPicking) return;
+    const {lng, lat} = e.lngLat;
+    if(destinationMarker) destinationMarker.remove();
+    const el = document.createElement('div');
+    el.style.cssText = 'font-size:28px;filter:drop-shadow(0 0 12px #ff006e);cursor:pointer;';
+    el.textContent = '🎯';
+    destinationMarker = new maplibregl.Marker({element:el, anchor:'center'}).setLngLat([lng, lat]).addTo(map);
+    destPicking = false;
+    $('pickDest').classList.remove('on');
+    map.getCanvas().style.cursor = '';
+    if(userLocation){
+      const route = {
+        type:'Feature',
+        geometry:{
+          type:'LineString',
+          coordinates:[userLocation, [lng, lat]]
+        }
+      };
+      try{ if(map.getSource('route')) map.removeSource('route'); }catch(e){}
+      try{ if(map.getLayer('route-line')) map.removeLayer('route-line'); }catch(e){}
+      map.addSource('route', {type:'geojson', data:route});
+      addLayerSafe({
+        id:'route-line', type:'line', source:'route',
+        layout:{ 'line-join':'round', 'line-cap':'round' },
+        paint:{ 'line-color':'#00f5ff', 'line-width':4, 'line-dasharray':[2,2], 'line-opacity':0.95 }
+      });
+      const dist = Math.round(Math.sqrt(Math.pow((lng-userLocation[0])*85,2)+Math.pow((lat-userLocation[1])*111,2)));
+      toast(`🎯 تم تحديد الوجهة - المسافة التقريبية: ${dist} كم`);
+    } else {
+      toast('🎯 تم تحديد الوجهة');
+    }
+  });
+}, 1000);
+
+$('clearRoute').addEventListener('click', ()=>{
+  try{ if(map.getLayer('route-line')) map.removeLayer('route-line'); }catch(e){}
+  try{ if(map.getSource('route')) map.removeSource('route'); }catch(e){}
+  if(destinationMarker){ destinationMarker.remove(); destinationMarker = null; }
+  destPicking = false; $('pickDest').classList.remove('on');
+  toast('❌ تم مسح المسار');
+});
+
 $('close').addEventListener('click', ()=>{
-  $('panel').style.display = 'none'; deselectProvince();
+  $('panel').style.display = 'none';
+  deselectProvince();
 });
 $('zoomProvince').addEventListener('click', ()=>{
   if(selectedIdx === null) return;
   const p = PROVINCES.find(x=>x.idx === selectedIdx);
-  if(!p) return;
-  if(p.bbox){
-    map.fitBounds([[p.bbox[0],p.bbox[1]],[p.bbox[2],p.bbox[3]]], { padding:{top:80, bottom:150, left:80, right:80}, pitch:70, duration:1300, maxZoom:11 });
-  } else { map.flyTo({center:p.center, zoom:10, pitch:70, duration:1200}); }
+  if(!p || !p.bbox) return;
+  map.fitBounds([[p.bbox[0],p.bbox[1]],[p.bbox[2],p.bbox[3]]], {
+    padding:{top:90,bottom:150,left:60,right:360}, pitch:60, duration:1400
+  });
 });
 $('showAll').addEventListener('click', ()=>{
-  $('panel').style.display = 'none'; deselectProvince();
-  map.fitBounds(IRAQ_BOUNDS, {padding:{top:40, bottom:150, left:40, right:40}, pitch:45, bearing:0, duration:1500});
-});
-$('reset').addEventListener('click', ()=>{
+  map.fitBounds(IRAQ_BOUNDS, {padding:60, pitch:0, bearing:0, duration:1500});
   deselectProvince();
-  map.fitBounds(IRAQ_BOUNDS, {padding:{top:40, bottom:150, left:40, right:40}, pitch:52, bearing:-8, duration:1600});
-});
-$('terrain').addEventListener('click', function(){
-  terrainOn = !terrainOn;
-  this.classList.toggle('on', terrainOn);
-  toast(terrainOn ? '⛰️ التضاريس غير متوفرة في هذا النمط' : '🗺️ عرض مسطح');
-});
-$('labels').addEventListener('click', function(){
-  labelsOn = !labelsOn;
-  this.classList.toggle('on', labelsOn);
-  PROVINCES.forEach(p=>{ if(p.labelEl) p.labelEl.style.display = labelsOn ? '' : 'none'; });
-});
-$('toggleList').addEventListener('click', function(){
-  $('sideList').classList.toggle('hidden');
-  this.classList.toggle('on', !$('sideList').classList.contains('hidden'));
 });
 $('clearBranch').addEventListener('click', ()=>clearBranch());
 
-$('loadBuildings').addEventListener('click', async function(){
-  if(!map || !mapLoaded) return;
-  if(buildingsActive){
-    clearBuildings();
-    buildingsActive = false;
-    lastBldZoomBucket = -1;
-    updateProvinceExtrusionForZoom();
-    this.classList.remove('on');
-    toast('🗑️ تم مسح المباني');
-    return;
-  }
-  if(map.getZoom() < 15){
-    toast('⚠️ قرّب الخريطة أكثر (zoom ≥ 15) لتحميل المباني');
-    return;
-  }
-  buildingsActive = true;
-  lastBldZoomBucket = -1;
-  updateProvinceExtrusionForZoom();
-  this.classList.add('on');
-  const ok = await loadBuildingsForViewport();
-  if(!ok && !map.getSource('real-buildings')){
-    this.classList.remove('on');
-    buildingsActive = false;
-    lastBldZoomBucket = -1;
-    updateProvinceExtrusionForZoom();
-  }
-});
-
-$('loadRoads').addEventListener('click', async function(){
-  if(!map || !mapLoaded) return;
-  if(roadsActive){
-    clearRoads();
-    roadsActive = false;
-    if(trafficMode){ trafficMode = false; $('toggleTraffic').classList.remove('on'); }
-    this.classList.remove('on');
-    toast('🗑️ تم مسح الطرق');
-    return;
-  }
-  if(map.getZoom() < 13){
-    toast('⚠️ قرّب الخريطة أكثر (zoom ≥ 13) لتحميل الطرق');
-    return;
-  }
-  roadsActive = true;
-  this.classList.add('on');
-  const ok = await loadRoadsForViewport();
-  if(!ok && !map.getSource('real-roads')){
-    this.classList.remove('on');
-    roadsActive = false;
-  }
-});
-
-$('loadAirportsBtn').addEventListener('click', async function(){
-  if(!map || !mapLoaded) return;
-  if(airportsLoaded){
-    ['airports-runways','airports-taxiways','airports-points','airports-labels'].forEach(id=>{
-      try{ if(map.getLayer(id)) map.removeLayer(id); }catch(e){}
-    });
-    try{ if(map.getSource('airports')) map.removeSource('airports'); }catch(e){}
-    airportsLoaded = false;
-    this.classList.remove('on');
-    toast('🗑️ تم مسح المطارات');
-    return;
-  }
-  this.classList.add('on');
-  const ok = await loadAirports();
-  if(!ok && !map.getSource('airports')) this.classList.remove('on');
-});
-
-$('toggleAircraft').addEventListener('click', function(){
-  if(!map || !mapLoaded){ toast('⚠️ انتظر تحميل الخريطة'); return; }
-  if(aircraftTimer){
-    stopAircraftTracking();
-    this.classList.remove('on');
-    toast('🛩️ تم إيقاف تتبع الطائرات');
-  } else {
-    startAircraftTracking();
-    this.classList.add('on');
-    toast('🛩️ تتبع الطائرات مباشر (OpenSky)');
-  }
-});
-
-$('toggleTraffic').addEventListener('click', toggleTrafficMode);
-
-$('pickDest').addEventListener('click', function(){
-  if(!map || !mapLoaded) return;
-  if(destPicking){
-    destPicking = false;
-    this.classList.remove('on');
-    map.getCanvas().style.cursor = '';
-    toast('❌ تم إلغاء اختيار الوجهة');
-    return;
-  }
-  destPicking = true;
-  this.classList.add('on');
-  map.getCanvas().style.cursor = 'crosshair';
-  toast('🎯 اضغط على الخريطة لاختيار الوجهة');
-});
-
-$('clearRoute').addEventListener('click', function(){
-  if(!map) return;
-  clearRoute();
-  if(destPicking){ destPicking = false; $('pickDest').classList.remove('on'); }
-  map.getCanvas().style.cursor = '';
-  toast('❌ تم مسح المسار');
-});
-
-$('myLocation').addEventListener('click', function(){
-  if(!map || !mapLoaded) return;
-  if(!navigator.geolocation){ toast('⚠️ المتصفح لا يدعم تحديد الموقع'); return; }
-  this.classList.add('on');
-  toast('🛰️ جاري تحديد موقعك...');
-  navigator.geolocation.getCurrentPosition(
-    (pos) => {
-      const lng = pos.coords.longitude;
-      const lat = pos.coords.latitude;
-      userLocation = [lng, lat];
-      if(userMarker){ try{ userMarker.remove(); }catch(e){} }
-      const el = document.createElement('div');
-      el.className = 'user-marker';
-      el.innerHTML = '<div class="user-pulse"></div><div class="user-dot"></div>';
-      userMarker = new maplibregl.Marker({element: el, anchor: 'center'}).setLngLat([lng, lat]).addTo(map);
-      map.flyTo({center: [lng, lat], zoom: 14, pitch: 60, duration: 1500});
-      toast('📍 تم تحديد موقعك — اضغط 🎯 وجهة للتنقل');
-    },
-    (err) => {
-      this.classList.remove('on');
-      toast('❌ تعذر تحديد الموقع: ' + (err.message || ''));
-    },
-    { enableHighAccuracy: true, timeout: 12000 }
-  );
-});
-
 /* =========================================================
-   🗺️ تهيئة الخريطة
+   FIREBASE SETUP
    ========================================================= */
-async function initMap(){
-  try{
-    progress(8, 'جاري تحميل ستايل الخريطة...');
-    const style = await buildMapStyle();
-    progress(20, 'تهيئة محرك الخريطة...');
 
-    try{
-      maplibregl.setRTLTextPlugin(
-        'https://unpkg.com/@mapbox/mapbox-gl-rtl-text@0.3.0/mapbox-gl-rtl-text.js',
-        true
-      );
-    }catch(e){ console.warn('RTL plugin:', e); }
-
-    map = new maplibregl.Map({
-      container: 'map',
-      style: style,
-      center: [43.7, 33.3],
-      zoom: 6,
-      pitch: 52,
-      bearing: -8,
-      maxZoom: 18,
-      minZoom: 4,
-      antialias: true,
-      validate: false
-    });
-
-    map.on('error', (e) => {
-      const msg = e && e.error ? e.error.message : String(e);
-      if(/Failed to load glyph|font|tile/i.test(msg)) return;
-      console.warn('map error:', msg);
-    });
-
-    map.on('click', (e) => {
-      if(destPicking){
-        const { lng, lat } = e.lngLat;
-        destPicking = false;
-        $('pickDest').classList.remove('on');
-        map.getCanvas().style.cursor = '';
-        routeToDestination(lng, lat);
-        return;
-      }
-      if(window.isPickingVideoLocation){
-        const { lng, lat } = e.lngLat;
-        window.videoLocation = { lng, lat };
-        window.isPickingVideoLocation = false;
-        map.getCanvas().style.cursor = '';
-        $('selectedLocationText').textContent = `📍 الإحداثيات: ${lat.toFixed(4)}, ${lng.toFixed(4)}`;
-        $('selectedLocationText').style.color = '#06ffa5';
-        toast('✅ تم تحديد الموقع بنجاح');
-
-        if(window.tempVideoMarker){ try{ window.tempVideoMarker.remove(); }catch(err){} }
-        const el = document.createElement('div');
-        el.className = 'video-map-marker';
-        el.innerHTML = '📍';
-        window.tempVideoMarker = new maplibregl.Marker({ element: el }).setLngLat([lng, lat]).addTo(map);
-      }
-    });
-
-    map.on('moveend', () => {
-      updateProvinceExtrusionForZoom();
-    });
-
-    progress(30, 'انتظار تحميل الطبقات...');
-
-    await new Promise((resolve) => {
-      let done = false;
-      const finish = () => { if(!done){ done = true; resolve(); } };
-      if(map.loaded() || map.isStyleLoaded()){ return finish(); }
-      map.once('load', finish);
-      setTimeout(finish, 15000);
-    });
-
-    mapLoaded = true;
-    progress(40, 'تهيئة التضاريس ثلاثية الأبعاد...');
-
-    // ✅ تطبيق ألوان النيون على الخريطة
-    try{ applyFullVividTheme(); }catch(e){}
-
-    progress(55, 'تحميل بيانات المحافظات...');
-    setStatus('جاري تحميل المحافظات...');
-
-    PROVINCES = buildProvinces({ features: [] });
-    addProvinceLayers();
-    setStatus('جاهز — ' + PROVINCES.length + ' محافظة');
-    progress(100, 'جاهز للاستكشاف!');
-    setTimeout(() => hideLoading(), 500);
-
-    map.fitBounds(IRAQ_BOUNDS, {
-      padding:{top:40, bottom:150, left:40, right:40},
-      pitch: 45, bearing: 0, duration: 1500
-    });
-
-    (async () => {
-      try{
-        const data = await loadProvincesFromOSM();
-        if(!data) return;
-        await ensureOSMToGeoJSON();
-        let gj = window.osmtogeojson(data, { flatProperties: true });
-        if(gj && typeof gj.then === 'function') gj = await gj;
-        const upgraded = buildProvinces(gj);
-        if(upgraded.length > 5 && upgraded.some(p => p.geometry)){
-          clearMapData();
-          PROVINCES = upgraded;
-          addProvinceLayers();
-          setStatus('الخريطة جاهزة — ' + PROVINCES.length + ' محافظة');
-          toast('✨ تم تحميل الحدود الدقيقة من OSM', 3500);
-        }
-      }catch(e){ console.warn('OSM background update failed:', e); }
-    })();
-
-    initFirebaseSystem();
-
-  }catch(err){
-    console.error('init failed:', err);
-    progress(100, 'حدث خطأ — حاول التحديث');
-    setTimeout(() => hideLoading(), 500);
-  }
-}
-
-/* =========================================================
-   ✦✦✦ Firebase ✦✦✦
-   ========================================================= */
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_PROJECT.firebaseapp.com",
-  databaseURL: "https://YOUR_PROJECT-default-rtdb.firebaseio.com",
-  projectId: "YOUR_PROJECT",
-  storageBucket: "YOUR_PROJECT.appspot.com",
-  messagingSenderId: "YOUR_SENDER_ID",
-  appId: "YOUR_APP_ID"
+  apiKey: "AIzaSyDEMO_REPLACE_ME",
+  authDomain: "iraq-mind-map.firebaseapp.com",
+  databaseURL: "https://iraq-mind-map-default-rtdb.firebaseio.com",
+  projectId: "iraq-mind-map",
+  storageBucket: "iraq-mind-map.appspot.com",
+  messagingSenderId: "000000000000",
+  appId: "1:000000000000:web:0000000000000000000000"
 };
 
-let firebaseInitialized = false;
-let chatAuth = null;
-let chatDb = null;
-let chatStorage = null;
-let currentUser = null;
-let chatMarkers = {};
-let activeChatPartner = null;
-let currentChatId = null;
-let pendingRequests = [];
-let requestListener = null;
-let chatMessagesListener = null;
-let usersListener = null;
-let requestPickingMode = false;
-let newRequestsCount = 0;
+let firebaseReady = false;
+let fbAuth = null, fbDb = null, fbStorage = null;
+let currentUid = null;
 
-const ARABIC_NAMES = ['علي','حسين','فاطمة','زينب','محمد','نور','يوسف','مريم','عمر','سارة','كرار','رقية','أحمد','هدى','مصطفى','بنين'];
-const AVATAR_EMOJIS = ['🧑‍🚀','🧕','👨‍💻','👩‍🔬','🧑‍🎨','👨‍🍳','👩‍🚒','🧑‍🌾','👨‍⚕️','👩‍🏫','🧑‍🎤','👩‍💻'];
+function isFirebaseConfigured(){
+  return firebaseConfig.apiKey && !firebaseConfig.apiKey.includes('DEMO_REPLACE_ME');
+}
 
-function randomChoice(arr){ return arr[Math.floor(Math.random() * arr.length)]; }
-function randomAvatar(){ return randomChoice(AVATAR_EMOJIS); }
-function randomName(){ return randomChoice(ARABIC_NAMES) + ' ' + Math.floor(Math.random()*900+100); }
-
-async function initFirebaseSystem(){
-  const needsSetup =
-    !firebaseConfig.apiKey ||
-    firebaseConfig.apiKey === 'YOUR_API_KEY' ||
-    String(firebaseConfig.apiKey).includes('YOUR_');
-
-  if(needsSetup){
-    console.warn('⚠️ Firebase غير مُهيأ — الدردشة والفيديو معطّلان.');
-    setTimeout(() => showFirebaseSetupHint(), 2500);
-    return;
-  }
+function initFirebaseSDK(){
+  if(!isFirebaseConfigured()) return false;
   try{
-    if(!firebaseInitialized){
-      firebase.initializeApp(firebaseConfig);
-      firebaseInitialized = true;
-    }
-    chatAuth = firebase.auth();
-    chatDb = firebase.database();
-    chatStorage = firebase.storage();
-
-    const cred = await chatAuth.signInAnonymously();
-    const uid = cred.user.uid;
-
-    const userRef = chatDb.ref('users/' + uid);
-    const snap = await userRef.once('value');
-    let profile = snap.val();
-    if(!profile){
-      profile = {
-        name: randomName(),
-        avatar: randomAvatar(),
-        createdAt: firebase.database.ServerValue.TIMESTAMP
-      };
-      await userRef.set(profile);
-    }
-    currentUser = {
-      uid: uid,
-      name: profile.name,
-      avatar: profile.avatar,
-      lat: null,
-      lng: null
-    };
-
-    const presenceRef = chatDb.ref('users/' + uid + '/online');
-    await presenceRef.set(true);
-    presenceRef.onDisconnect().set(false);
-    userRef.child('lastSeen').onDisconnect().set(firebase.database.ServerValue.TIMESTAMP);
-
-    if(navigator.geolocation){
-      navigator.geolocation.getCurrentPosition(async (pos)=>{
-        const lat = pos.coords.latitude;
-        const lng = pos.coords.longitude;
-        currentUser.lat = lat; currentUser.lng = lng;
-        await userRef.update({ lat, lng, lastLocationUpdate: firebase.database.ServerValue.TIMESTAMP });
-      }, ()=>{}, { enableHighAccuracy: true, timeout: 10000 });
-    }
-
-    listenToChatUsers();
-    listenToChatRequests();
-    listenToVideos();
-
-    toast('💬 نظام الدردشة والفيديو جاهز', 4000);
-
-  } catch(err){
-    console.error('Firebase init error:', err);
-    toast('❌ تعذر تهيئة Firebase: ' + (err.message || ''), 5000);
+    firebase.initializeApp(firebaseConfig);
+    fbAuth = firebase.auth();
+    fbDb = firebase.database();
+    fbStorage = firebase.storage();
+    fbAuth.signInAnonymously().then(cred=>{
+      currentUid = cred.user.uid;
+      console.log('Firebase anonymous auth OK:', currentUid);
+    }).catch(err=>{
+      console.warn('Firebase anon auth failed:', err.message);
+    });
+    firebaseReady = true;
+    return true;
+  }catch(err){
+    console.warn('Firebase init failed:', err);
+    return false;
   }
 }
 
-function showFirebaseSetupHint(){
-  if($('fbSetupBanner')) return;
+function showFbBanner(){
+  if(document.getElementById('fbSetupBanner')) return;
   const banner = document.createElement('div');
   banner.id = 'fbSetupBanner';
   banner.innerHTML = `
-    <div style="font-size:26px">🔑</div>
     <div style="flex:1">
-      <div style="font-weight:800;color:#ffe600;margin-bottom:4px">نظام الدردشة والفيديو معطّل</div>
-      <div>افتح الكود وابحث عن <code>YOUR_API_KEY</code> واستبدله بإعدادات Firebase من
-      <span style="color:#00f5ff">console.firebase.google.com</span></div>
+      <strong style="color:#00f5ff">🔧 إعداد Firebase مطلوب</strong><br>
+      الدردشة ونشر الفيديو تعمل في وضع تجريبي عبر <code>localStorage</code> فقط.
+      لتفعيل المزامنة بين المستخدمين، استبدل <code>firebaseConfig</code> في الكود.
     </div>
     <button class="close-btn" onclick="this.parentElement.remove()">✕</button>
   `;
   document.body.appendChild(banner);
+  setTimeout(()=>{ try{ banner.remove(); }catch(e){} }, 15000);
 }
+
+initFirebaseSDK();
+if(!firebaseReady) showFbBanner();
 
 /* =========================================================
-   ✦ نظام الدردشة
+   VIDEO FEED
    ========================================================= */
-function listenToChatUsers(){
-  if(!chatDb) return;
-  const usersRef = chatDb.ref('users');
-  usersListener = usersRef.on('value', (snapshot)=>{
-    const users = snapshot.val() || {};
-    Object.keys(users).forEach(uid => {
-      if(uid === currentUser.uid) return;
-      const u = users[uid];
-      if(!u.online) { removeChatMarker(uid); return; }
-      if(u.lat == null || u.lng == null) return;
-      updateChatMarker(uid, u);
-    });
-    Object.keys(chatMarkers).forEach(uid => {
-      if(!users[uid] || !users[uid].online) removeChatMarker(uid);
-    });
-  });
+
+const SAMPLE_VIDEOS = [
+  {
+    id: 'sample1',
+    videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
+    title: 'جولة في بغداد القديمة',
+    desc: 'استكشاف شوارع العاصمة التاريخية وأسواقها النابضة بالحياة.',
+    username: 'مستكشف العراق',
+    avatar: '🧭',
+    likes: 245,
+    location: [44.366, 33.315]
+  },
+  {
+    id: 'sample2',
+    videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4',
+    title: 'أهوار الجنوب - جنة العراق المنسية',
+    desc: 'رحلة ساحرة إلى أهوار ميسان وذي قار مع القوارب التقليدية.',
+    username: 'صياد الأهوار',
+    avatar: '🛶',
+    likes: 512,
+    location: [47.144, 31.835]
+  },
+  {
+    id: 'sample3',
+    videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4',
+    title: 'قلعة أربيل - 6000 عام من التاريخ',
+    desc: 'جولة في أقدم قلعة مأهولة في العالم داخل قلب أربيل.',
+    username: 'عاشق كردستان',
+    avatar: '🏰',
+    likes: 389,
+    location: [44.009, 36.191]
+  }
+];
+
+function getLocalVideos(){
+  try{
+    const raw = localStorage.getItem('iraqVideos') || '[]';
+    const arr = JSON.parse(raw);
+    return Array.isArray(arr) ? arr : [];
+  }catch(e){ return []; }
+}
+function setLocalVideos(arr){
+  try{ localStorage.setItem('iraqVideos', JSON.stringify(arr)); }catch(e){}
 }
 
-function updateChatMarker(uid, userData){
-  const pos = [userData.lng, userData.lat];
-  if(chatMarkers[uid]){
-    chatMarkers[uid].marker.setLngLat(pos);
-    updateRequestBubbleForUser(uid, userData);
+async function fetchAllVideos(){
+  const local = getLocalVideos();
+  if(!firebaseReady || !fbDb) return [...SAMPLE_VIDEOS, ...local];
+  try{
+    const snap = await fbDb.ref('videos').once('value');
+    const val = snap.val() || {};
+    const remote = Object.values(val);
+    return [...SAMPLE_VIDEOS, ...remote, ...local];
+  }catch(e){
+    console.warn('Firebase fetch videos failed:', e);
+    return [...SAMPLE_VIDEOS, ...local];
+  }
+}
+
+function renderVideoItem(v){
+  const item = document.createElement('div');
+  item.className = 'video-item';
+  item.dataset.vid = v.id;
+  item.innerHTML = `
+    <video src="${v.videoUrl}" playsinline loop muted preload="metadata"></video>
+    <div class="video-overlay">
+      <button class="video-location-btn" data-loc='${JSON.stringify(v.location||[0,0])}'>📍 ${v.cityName||'الموقع'}</button>
+      <div class="video-user-info">
+        <div class="avatar">${v.avatar||'👤'}</div>
+        <div class="name">${v.username||'مستخدم'}</div>
+      </div>
+      <div class="video-title">${v.title||'بدون عنوان'}</div>
+      <div class="video-desc">${v.desc||''}</div>
+      <div class="video-actions">
+        <button class="video-action-btn like-btn">❤️ <span>${v.likes||0}</span></button>
+        <button class="video-action-btn share-btn">🔗 مشاركة</button>
+      </div>
+    </div>
+  `;
+  const video = item.querySelector('video');
+  const likeBtn = item.querySelector('.like-btn');
+  const shareBtn = item.querySelector('.share-btn');
+  const locBtn = item.querySelector('.video-location-btn');
+
+  likeBtn.addEventListener('click', ()=>{
+    likeBtn.classList.toggle('liked');
+    const span = likeBtn.querySelector('span');
+    let n = Number(span.textContent) || 0;
+    span.textContent = likeBtn.classList.contains('liked') ? n+1 : Math.max(0, n-1);
+  });
+  shareBtn.addEventListener('click', ()=>{
+    try{ navigator.clipboard.writeText(location.href); toast('🔗 تم نسخ الرابط'); }catch(e){}
+  });
+  locBtn.addEventListener('click', ()=>{
+    try{
+      const loc = JSON.parse(locBtn.dataset.loc);
+      closeVideoFeed();
+      map.flyTo({center: loc, zoom:11, pitch:45, duration:1500});
+    }catch(e){}
+  });
+  return item;
+}
+
+let videoObserver = null;
+
+function setupVideoObserver(container){
+  if(videoObserver) videoObserver.disconnect();
+  videoObserver = new IntersectionObserver(entries=>{
+    entries.forEach(entry=>{
+      const video = entry.target.querySelector('video');
+      if(!video) return;
+      if(entry.isIntersecting && entry.intersectionRatio > 0.6){
+        video.muted = false;
+        video.play().catch(()=>{});
+      } else {
+        video.pause();
+        video.muted = true;
+      }
+    });
+  }, { threshold:[0.6] });
+
+  container.querySelectorAll('.video-item').forEach(it=>videoObserver.observe(it));
+}
+
+async function openVideoFeed(){
+  const container = $('videoFeedContainer');
+  container.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100vh;color:#8fb8e8;font-size:16px">⏳ جاري تحميل الفيديوهات...</div>';
+  $('videoFeedModal').classList.add('open');
+
+  const videos = await fetchAllVideos();
+  container.innerHTML = '';
+  if(!videos.length){
+    container.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100vh;color:#8fb8e8;font-size:16px">📭 لا توجد فيديوهات منشورة بعد</div>';
+    return;
+  }
+  videos.forEach(v=>container.appendChild(renderVideoItem(v)));
+  setupVideoObserver(container);
+}
+function closeVideoFeed(){
+  $('videoFeedModal').classList.remove('open');
+  document.querySelectorAll('#videoFeedContainer video').forEach(v=>{ try{ v.pause(); }catch(e){} });
+  if(videoObserver) videoObserver.disconnect();
+}
+
+$('watchVideoBtn').addEventListener('click', openVideoFeed);
+$('closeVideoFeed').addEventListener('click', closeVideoFeed);
+
+/* =========================================================
+   PUBLISH VIDEO
+   ========================================================= */
+
+let pickedLocation = null;
+let pendingVideoFile = null;
+
+$('publishVideoBtn').addEventListener('click', ()=>{
+  $('publishModal').classList.add('open');
+});
+$('closePublishBtn').addEventListener('click', ()=>{
+  $('publishModal').classList.remove('open');
+});
+
+$('videoFileInput').addEventListener('change', e=>{
+  const file = e.target.files && e.target.files[0];
+  if(!file) return;
+  pendingVideoFile = file;
+  const url = URL.createObjectURL(file);
+  const container = $('videoPreviewContainer');
+  container.innerHTML = `<video src="${url}" controls playsinline></video>`;
+});
+
+$('pickLocationBtn').addEventListener('click', ()=>{
+  window.isPickingVideoLocation = true;
+  $('publishModal').classList.remove('open');
+  toast('📍 انقر على الخريطة لتحديد موقع الفيديو');
+  map.getCanvas().style.cursor = 'crosshair';
+  map.once('click', e=>{
+    pickedLocation = [e.lngLat.lng, e.lngLat.lat];
+    window.isPickingVideoLocation = false;
+    map.getCanvas().style.cursor = '';
+    $('selectedLocationText').textContent = `📍 ${pickedLocation[1].toFixed(4)}°N, ${pickedLocation[0].toFixed(4)}°E`;
+    $('publishModal').classList.add('open');
+    toast('✅ تم تحديد الموقع');
+  });
+});
+
+$('publishForm').addEventListener('submit', async e=>{
+  e.preventDefault();
+  if(!pendingVideoFile){ toast('⚠️ الرجاء اختيار فيديو'); return; }
+  const title = $('videoTitleInput').value.trim();
+  const desc = $('videoDescInput').value.trim();
+  if(!title){ toast('⚠️ اكتب عنوان الفيديو'); return; }
+
+  const submitBtn = $('publishSubmitBtn');
+  submitBtn.disabled = true;
+  submitBtn.textContent = '⏳ جاري النشر...';
+  const progBar = $('uploadProgress');
+  const progInner = progBar.querySelector('div');
+  progBar.style.display = 'block';
+  progInner.style.width = '0%';
+
+  const videoId = 'vid_' + Date.now();
+  const videoData = {
+    id: videoId,
+    title,
+    desc,
+    username: 'أنت',
+    avatar: '😎',
+    likes: 0,
+    location: pickedLocation || [44.366, 33.315],
+    cityName: 'العراق',
+    createdAt: Date.now()
+  };
+
+  try{
+    if(firebaseReady && fbStorage && currentUid){
+      const storageRef = fbStorage.ref('videos/' + videoId + '_' + pendingVideoFile.name);
+      const task = storageRef.put(pendingVideoFile);
+      await new Promise((resolve, reject)=>{
+        task.on('state_changed',
+          snap=>{
+            const p = (snap.bytesTransferred / snap.totalBytes) * 100;
+            progInner.style.width = p + '%';
+          },
+          reject,
+          resolve
+        );
+      });
+      const url = await task.snapshot.ref.getDownloadURL();
+      videoData.videoUrl = url;
+      await fbDb.ref('videos/' + videoId).set(videoData);
+    } else {
+      const url = URL.createObjectURL(pendingVideoFile);
+      videoData.videoUrl = url;
+      const arr = getLocalVideos();
+      arr.push(videoData);
+      setLocalVideos(arr);
+      for(let i=0;i<=100;i+=10){
+        progInner.style.width = i + '%';
+        await new Promise(r=>setTimeout(r,60));
+      }
+    }
+
+    toast('✅ تم نشر الفيديو بنجاح!');
+    $('publishForm').reset();
+    $('videoPreviewContainer').innerHTML = `
+      <div class="preview-placeholder">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M15 10l4.55-2.27a1 1 0 011.45.89v6.76a1 1 0 01-1.45.89L15 14M4 6h11a2 2 0 012 2v8a2 2 0 01-2 2H4a2 2 0 01-2-2V8a2 2 0 012-2z"/></svg>
+        <span>معاينة الفيديو ستظهر هنا</span>
+      </div>`;
+    pendingVideoFile = null; pickedLocation = null;
+    $('selectedLocationText').textContent = 'لم يتم تحديد موقع';
+    setTimeout(()=>{
+      $('publishModal').classList.remove('open');
+      progBar.style.display = 'none';
+      progInner.style.width = '0%';
+    }, 800);
+  }catch(err){
+    console.error(err);
+    toast('❌ فشل نشر الفيديو');
+  }finally{
+    submitBtn.disabled = false;
+    submitBtn.textContent = 'نشر الفيديو 🚀';
+  }
+});
+
+/* =========================================================
+   CHAT SYSTEM
+   ========================================================= */
+
+let chatActive = false;
+let chatMyMarker = null;
+let chatMyData = null;
+let chatPendingRequests = [];
+let chatActivePeer = null;
+let chatMessagesRef = null;
+let chatSessionsRef = null;
+let chatPeerMarker = null;
+
+function randomName(){
+  const names = ['العراقي','المستكشف','الرحّال','النجم','الغامض','الشجاع','الفارس','الحكيم'];
+  return names[Math.floor(Math.random()*names.length)] + '_' + Math.floor(Math.random()*999);
+}
+
+function myAvatar(){
+  return '😎';
+}
+
+$('chatRequestBtn').addEventListener('click', ()=>{
+  if(chatActive){
+    chatActive = false;
+    $('chatRequestBtn').classList.remove('active');
+    if(chatMyMarker){ chatMyMarker.remove(); chatMyMarker = null; }
+    if(firebaseReady && fbDb && currentUid){
+      fbDb.ref('chat_users/' + currentUid).remove().catch(()=>{});
+    } else {
+      try{
+        const users = JSON.parse(localStorage.getItem('iraqChatUsers') || '{}');
+        delete users[currentUid];
+        localStorage.setItem('iraqChatUsers', JSON.stringify(users));
+      }catch(e){}
+    }
+    toast('💬 تم إيقاف استقبال طلبات الدردشة');
     return;
   }
 
+  if(!userLocation){
+    toast('⚠️ حدد موقعك أولاً بزر 📍 موقعي');
+    return;
+  }
+
+  if(!currentUid){
+    currentUid = 'u_' + Math.random().toString(36).slice(2,10);
+  }
+
+  chatActive = true;
+  $('chatRequestBtn').classList.add('active');
+  chatMyData = {
+    uid: currentUid,
+    name: randomName(),
+    avatar: myAvatar(),
+    lng: userLocation[0],
+    lat: userLocation[1],
+    ts: Date.now()
+  };
+
+  if(chatMyMarker) chatMyMarker.remove();
   const el = document.createElement('div');
   el.className = 'chat-user-marker';
-  el.dataset.uid = uid;
+  el.innerHTML = `
+    <div class="cu-avatar">${chatMyData.avatar}</div>
+    <div class="cu-plus">+</div>
+    <div class="chat-request-bubble">💬 متاح للدردشة</div>
+  `;
+  chatMyMarker = new maplibregl.Marker({element:el, anchor:'center'}).setLngLat(userLocation).addTo(map);
 
-  const avatarDiv = document.createElement('div');
-  avatarDiv.className = 'cu-avatar';
-  avatarDiv.innerHTML = userData.avatar || '👤';
-
-  const plus = document.createElement('div');
-  plus.className = 'cu-plus';
-  plus.textContent = '+';
-  plus.style.display = 'none';
-
-  el.appendChild(avatarDiv);
-  el.appendChild(plus);
-
-  const bubble = document.createElement('div');
-  bubble.className = 'chat-request-bubble';
-  bubble.style.display = 'none';
-  el.appendChild(bubble);
-
-  el.addEventListener('click', (ev)=>{
-    ev.stopPropagation();
-    if(requestPickingMode){
-      sendChatRequestTo(uid);
-    } else {
-      toast(`👤 ${userData.name} — متصل الآن`, 2500);
-    }
-  });
-
-  const marker = new maplibregl.Marker({ element: el, anchor: 'center' })
-    .setLngLat(pos).addTo(map);
-
-  chatMarkers[uid] = { marker, bubbleEl: bubble, plusEl: plus, userData };
-  updateRequestBubbleForUser(uid, userData);
-}
-
-function removeChatMarker(uid){
-  if(chatMarkers[uid]){
-    try{ chatMarkers[uid].marker.remove(); }catch(e){}
-    delete chatMarkers[uid];
-  }
-}
-
-function updateRequestBubbleForUser(uid, userData){
-  const entry = chatMarkers[uid];
-  if(!entry) return;
-  const hasPending = pendingRequests.some(r => r.from === uid && r.status === 'pending');
-  if(hasPending){
-    entry.bubbleEl.textContent = `${userData.name || 'مستخدم'} يريد دردشة`;
-    entry.bubbleEl.style.display = 'block';
-    entry.plusEl.style.display = 'flex';
+  if(firebaseReady && fbDb){
+    fbDb.ref('chat_users/' + currentUid).set(chatMyData).catch(err=>console.warn(err));
   } else {
-    entry.bubbleEl.style.display = 'none';
-    entry.plusEl.style.display = 'none';
+    try{
+      const users = JSON.parse(localStorage.getItem('iraqChatUsers') || '{}');
+      users[currentUid] = chatMyData;
+      localStorage.setItem('iraqChatUsers', JSON.stringify(users));
+    }catch(e){}
+  }
+
+  toast('💬 أنت الآن متاح للدردشة');
+  startChatListening();
+});
+
+function startChatListening(){
+  if(firebaseReady && fbDb){
+    fbDb.ref('chat_users').on('value', snap=>{
+      const val = snap.val() || {};
+      Object.entries(val).forEach(([uid, data])=>{
+        if(uid === currentUid) return;
+      });
+    });
+
+    fbDb.ref('chat_requests').orderByChild('to').equalTo(currentUid).on('value', snap=>{
+      const val = snap.val() || {};
+      chatPendingRequests = Object.entries(val).map(([id, req])=>({id, ...req}));
+      updateChatNotification();
+    });
+  } else {
+    setInterval(()=>{
+      try{
+        const reqs = JSON.parse(localStorage.getItem('iraqChatRequests') || '{}');
+        chatPendingRequests = Object.entries(reqs)
+          .filter(([id, r])=>r.to === currentUid)
+          .map(([id, r])=>({id, ...r}));
+        updateChatNotification();
+      }catch(e){}
+    }, 2000);
   }
 }
 
-function sendChatRequestTo(targetUid){
-  if(!chatDb || !currentUser) return;
-  if(targetUid === currentUser.uid) return;
-  const requestRef = chatDb.ref('chatRequests').push();
-  requestRef.set({
-    from: currentUser.uid, fromName: currentUser.name, fromAvatar: currentUser.avatar,
-    to: targetUid, status: 'pending', timestamp: firebase.database.ServerValue.TIMESTAMP
-  }).then(()=>{
-    toast('📨 تم إرسال طلب الدردشة', 3000);
-    exitRequestPickingMode();
-  }).catch(err=>{
-    toast('❌ فشل إرسال الطلب: ' + (err.message||''), 4000);
-  });
-}
-
-function listenToChatRequests(){
-  if(!chatDb || !currentUser) return;
-  const reqRef = chatDb.ref('chatRequests').orderByChild('to').equalTo(currentUser.uid);
-  requestListener = reqRef.on('value', (snapshot)=>{
-    const data = snapshot.val() || {};
-    pendingRequests = Object.keys(data).map(id => ({ id, ...data[id] }))
-      .filter(r => r.status === 'pending');
-    newRequestsCount = pendingRequests.length;
-    updateNotificationUI();
-    Object.keys(chatMarkers).forEach(uid => {
-      const entry = chatMarkers[uid];
-      if(!entry) return;
-      updateRequestBubbleForUser(uid, entry.userData);
-    });
-  });
-}
-
-function updateNotificationUI(){
+function updateChatNotification(){
   const notif = $('chatRequestNotification');
-  const countEl = $('notifCount');
-  const subEl = $('notifSub');
+  const cnt = $('notifCount');
   if(!notif) return;
-  if(pendingRequests.length > 0){
+  if(chatPendingRequests.length > 0){
+    cnt.textContent = chatPendingRequests.length;
+    $('notifSub').textContent = chatPendingRequests[chatPendingRequests.length-1].fromName || 'مستخدم';
     notif.classList.add('visible');
-    countEl.textContent = pendingRequests.length;
-    subEl.textContent = pendingRequests.length === 1
-      ? pendingRequests[0].fromName + ' يريد دردشة'
-      : `${pendingRequests.length} أشخاص يريدون دردشة`;
   } else {
     notif.classList.remove('visible');
   }
 }
 
-function openRequestModalForFirst(){
-  if(!pendingRequests.length) return;
-  const req = pendingRequests[0];
-  $('reqName').textContent = req.fromName || 'مستخدم';
-  $('reqAvatar').innerHTML = req.fromAvatar || '👤';
-  $('chatRequestModal').classList.add('open');
-  $('chatRequestModal').dataset.reqId = req.id;
-}
-
-async function acceptChatRequest(reqId){
-  if(!chatDb || !currentUser) return;
-  const reqRef = chatDb.ref('chatRequests/' + reqId);
-  const snap = await reqRef.once('value');
-  const req = snap.val();
-  if(!req) return;
-  await reqRef.update({ status: 'accepted', acceptedAt: firebase.database.ServerValue.TIMESTAMP });
-  $('chatRequestModal').classList.remove('open');
-  openChatWindow(req.from, req.fromName, req.fromAvatar);
-}
-
-async function rejectChatRequest(reqId){
-  if(!chatDb) return;
-  await chatDb.ref('chatRequests/' + reqId).update({ status: 'rejected', rejectedAt: firebase.database.ServerValue.TIMESTAMP });
-  $('chatRequestModal').classList.remove('open');
-  toast('❌ تم رفض الطلب', 2500);
-}
-
-function openChatWindow(partnerUid, partnerName, partnerAvatar){
-  activeChatPartner = { uid: partnerUid, name: partnerName, avatar: partnerAvatar };
-  currentChatId = [currentUser.uid, partnerUid].sort().join('_');
-  $('chatHeaderName').textContent = partnerName || 'مستخدم';
-  $('chatHeaderAvatar').innerHTML = partnerAvatar || '👤';
-  $('chatMessages').innerHTML = '';
-  $('chatWindow').classList.add('open');
-
-  if(chatMessagesListener){
-    chatDb.ref('chats/' + currentChatId + '/messages').off('value', chatMessagesListener);
-    chatMessagesListener = null;
-  }
-
-  const msgsRef = chatDb.ref('chats/' + currentChatId + '/messages').orderByChild('timestamp');
-  chatMessagesListener = msgsRef.on('value', (snapshot)=>{
-    const data = snapshot.val() || {};
-    const msgBox = $('chatMessages');
-    msgBox.innerHTML = '';
-    Object.keys(data).forEach(mid => {
-      const m = data[mid];
-      const div = document.createElement('div');
-      div.className = 'chat-msg ' + (m.sender === currentUser.uid ? 'sent' : 'received');
-      const time = m.timestamp ? new Date(m.timestamp).toLocaleTimeString('ar-IQ', {hour:'2-digit', minute:'2-digit'}) : '';
-      div.innerHTML = `${escapeHtml(m.text)}<span class="msg-time">${time}</span>`;
-      msgBox.appendChild(div);
-    });
-    msgBox.scrollTop = msgBox.scrollHeight;
-  });
-}
-
-function escapeHtml(text){
-  const div = document.createElement('div');
-  div.textContent = text;
-  return div.innerHTML;
-}
-
-function closeChatWindow(){
-  $('chatWindow').classList.remove('open');
-  if(chatMessagesListener && chatDb){
-    chatDb.ref('chats/' + currentChatId + '/messages').off('value', chatMessagesListener);
-    chatMessagesListener = null;
-  }
-  activeChatPartner = null;
-  currentChatId = null;
-}
-
-function sendChatMessage(){
-  if(!chatDb || !currentUser || !activeChatPartner || !currentChatId) return;
-  const input = $('chatInput');
-  const text = input.value.trim();
-  if(!text) return;
-  input.value = '';
-  chatDb.ref('chats/' + currentChatId + '/messages').push({
-    sender: currentUser.uid, text: text, timestamp: firebase.database.ServerValue.TIMESTAMP
-  });
-}
-
-function enterRequestPickingMode(){
-  if(!map) return;
-  requestPickingMode = true;
-  $('chatRequestBtn').classList.add('active');
-  map.getCanvas().style.cursor = 'crosshair';
-  toast('🎯 اضغط على مستخدم آخر على الخريطة لإرسال طلب دردشة', 4000);
-}
-function exitRequestPickingMode(){
-  requestPickingMode = false;
-  $('chatRequestBtn').classList.remove('active');
-  if(!destPicking && !window.isPickingVideoLocation) map.getCanvas().style.cursor = '';
-}
-
-$('chatRequestBtn').addEventListener('click', function(){
-  if(!currentUser){ toast('⚠️ نظام الدردشة غير مهيأ'); return; }
-  if(requestPickingMode){
-    exitRequestPickingMode();
-    toast('❌ تم إلغاء وضع طلب الدردشة', 2500);
-  } else {
-    enterRequestPickingMode();
-  }
-});
-
 $('chatRequestNotification').addEventListener('click', ()=>{
-  if(pendingRequests.length) openRequestModalForFirst();
+  if(!chatPendingRequests.length) return;
+  const req = chatPendingRequests[chatPendingRequests.length-1];
+  openChatRequestModal(req);
 });
+
+function openChatRequestModal(req){
+  const avatar = $('reqAvatar');
+  const name = $('reqName');
+  avatar.textContent = req.fromAvatar || '👤';
+  name.textContent = req.fromName || 'مستخدم';
+  $('chatRequestModal').classList.add('open');
+  window._currentReq = req;
+}
+
 $('acceptChatBtn').addEventListener('click', ()=>{
-  const reqId = $('chatRequestModal').dataset.reqId;
-  if(reqId) acceptChatRequest(reqId);
+  const req = window._currentReq;
+  $('chatRequestModal').classList.remove('open');
+  if(!req) return;
+  acceptChat(req);
 });
 $('rejectChatBtn').addEventListener('click', ()=>{
-  const reqId = $('chatRequestModal').dataset.reqId;
-  if(reqId) rejectChatRequest(reqId);
-});
-$('closeChatBtn').addEventListener('click', closeChatWindow);
-$('chatSendBtn').addEventListener('click', sendChatMessage);
-$('chatInput').addEventListener('keydown', (e)=>{ if(e.key === 'Enter') sendChatMessage(); });
-
-window.addEventListener('beforeunload', ()=>{
-  if(chatDb && currentUser){
-    chatDb.ref('users/' + currentUser.uid + '/online').set(false);
+  const req = window._currentReq;
+  $('chatRequestModal').classList.remove('open');
+  if(!req) return;
+  if(firebaseReady && fbDb){
+    fbDb.ref('chat_requests/' + req.id).remove().catch(()=>{});
+  } else {
+    try{
+      const reqs = JSON.parse(localStorage.getItem('iraqChatRequests') || '{}');
+      delete reqs[req.id];
+      localStorage.setItem('iraqChatRequests', JSON.stringify(reqs));
+    }catch(e){}
   }
+  window._currentReq = null;
+  toast('تم رفض الطلب');
 });
 
-/* =========================================================
-   ✦✦✦ الفيديو
-   ========================================================= */
+function acceptChat(req){
+  const peerId = req.fromUid;
+  const peerName = req.fromName || 'مستخدم';
+  chatActivePeer = { uid: peerId, name: peerName, avatar: req.fromAvatar || '👤' };
 
-let videoFeedObserver = null;
-let currentFeedVideos = [];
-let mapVideoMarkers = {};
-
-function cleanupVideoFeed(){
-  document.querySelectorAll('#videoFeedContainer video').forEach(v => {
-    try {
-      v.pause();
-      v.removeAttribute('src');
-      v.load();
-    } catch(e){}
-  });
-  if(videoFeedObserver){
-    try{ videoFeedObserver.disconnect(); }catch(e){}
-    videoFeedObserver = null;
+  if(fbDb){
+    const sid = [currentUid, peerId].sort().join('_');
+    chatSessionsRef = fbDb.ref('chat_sessions/' + sid + '/messages');
+    chatSessionsRef.on('child_added', snap=>{
+      const msg = snap.val();
+      if(!msg) return;
+      if(msg.from === currentUid) return;
+      appendChatMessage(msg.text, 'received');
+    });
+    fbDb.ref('chat_requests/' + req.id).remove().catch(()=>{});
+  } else {
+    const sid = [currentUid, peerId].sort().join('_');
+    setInterval(()=>{
+      try{
+        const all = JSON.parse(localStorage.getItem('iraqChatMessages_' + sid) || '[]');
+        all.filter(m=>m.from === peerId).forEach(m=>{
+          if(!m._seen){
+            appendChatMessage(m.text, 'received');
+            m._seen = true;
+          }
+        });
+        localStorage.setItem('iraqChatMessages_' + sid, JSON.stringify(all));
+      }catch(e){}
+    }, 1500);
   }
-  const c = $('videoFeedContainer');
-  if(c) c.innerHTML = '';
-  currentFeedVideos = [];
+
+  $('chatHeaderName').textContent = peerName;
+  $('chatHeaderAvatar').textContent = chatActivePeer.avatar;
+  $('chatMessages').innerHTML = '';
+  $('chatWindow').classList.add('open');
+  toast('✅ تم قبول الدردشة');
 }
 
-$('watchVideoBtn').addEventListener('click', async () => {
-  if(!chatDb) { toast('⚠️ قاعدة البيانات غير مهيأة'); return; }
-  cleanupVideoFeed();
-  toast('⏳ جاري تحميل الفيديوهات...', 3000);
+function appendChatMessage(text, type){
+  const box = $('chatMessages');
+  const div = document.createElement('div');
+  div.className = 'chat-msg ' + type;
+  const time = new Date().toLocaleTimeString('ar-EG', {hour:'2-digit', minute:'2-digit'});
+  div.innerHTML = `${escapeHtml(text)}<span class="msg-time">${time}</span>`;
+  box.appendChild(div);
+  box.scrollTop = box.scrollHeight;
+}
 
-  try {
-    const snapshot = await chatDb.ref('videos').orderByChild('timestamp').limitToLast(50).once('value');
-    const data = snapshot.val();
-    if(!data) {
-      toast('📭 لا توجد فيديوهات منشورة بعد');
+function escapeHtml(s){
+  return String(s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+$('closeChatBtn').addEventListener('click', ()=>{
+  $('chatWindow').classList.remove('open');
+});
+$('chatSendBtn').addEventListener('click', sendChatMessage);
+$('chatInput').addEventListener('keydown', e=>{
+  if(e.key === 'Enter') sendChatMessage();
+});
+
+function sendChatMessage(){
+  const input = $('chatInput');
+  const text = input.value.trim();
+  if(!text || !chatActivePeer) return;
+  input.value = '';
+
+  if(fbDb && chatSessionsRef){
+    chatSessionsRef.push({ from: currentUid, text, ts: Date.now() }).catch(err=>console.warn(err));
+  } else {
+    const sid = [currentUid, chatActivePeer.uid].sort().join('_');
+    try{
+      const all = JSON.parse(localStorage.getItem('iraqChatMessages_' + sid) || '[]');
+      all.push({ from: currentUid, text, ts: Date.now(), _seen: true });
+      localStorage.setItem('iraqChatMessages_' + sid, JSON.stringify(all));
+    }catch(e){}
+  }
+  appendChatMessage(text, 'sent');
+}
+
+/* =========================================================
+   MAP INIT
+   ========================================================= */
+
+async function initMap(){
+  progress(10, 'جاري تهيئة المحرك ثلاثي الأبعاد...');
+  const style = await buildMapStyle();
+
+  progress(30, 'جاري إنشاء الخريطة...');
+
+  map = new maplibregl.Map({
+    container: 'map',
+    style,
+    center: [44.0, 33.2],
+    zoom: 5.8,
+    pitch: 0,
+    bearing: 0,
+    maxPitch: 85,
+    minZoom: 4,
+    maxZoom: 18,
+    attributionControl: false,
+    antialias: true
+  });
+  map.addControl(new maplibregl.AttributionControl({ compact: true }), 'bottom-right');
+  map.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), 'top-right');
+
+  map.on('load', async ()=>{
+    mapLoaded = true;
+    progress(50, 'جاري تلوين الخريطة النيون...');
+    try{ applyFullVividTheme(); }catch(e){}
+
+    map.on('zoom', ()=>{
+      const z = map.getZoom();
+      const bucket = z >= 14 ? 1 : 0;
+      if(bucket !== lastBldZoomBucket){
+        lastBldZoomBucket = bucket;
+        if(map.getLayer('vivid-buildings')){
+          map.setLayoutProperty('vivid-buildings', 'visibility', (bucket && terrainOn && buildingsActive) ? 'visible' : 'none');
+        }
+      }
+    });
+
+    progress(60, 'جاري تحميل محافظات العراق من OpenStreetMap...');
+    setStatus('<b>متصل</b>');
+
+    try{
+      const data = await loadProvincesFromOSM();
+      progress(80, 'جاري تحليل بيانات المحافظات...');
+      await ensureOSMToGeoJSON();
+      let gj = window.osmtogeojson(data, {flatProperties:true});
+      if(gj && typeof gj.then === 'function') gj = await gj;
+      PROVINCES = buildProvinces(gj);
+    }catch(err){
+      console.warn('OSM load failed:', err);
+      PROVINCES = buildProvinces(null);
+      toast('⚠️ تعذر الاتصال بـ OSM، تم استخدام بيانات محلية');
+    }
+
+    progress(92, 'جاري إنشاء الفروع الذهنية...');
+    addProvinceLayers();
+
+    progress(100, 'اكتمل التحميل!');
+    setTimeout(hideLoading, 500);
+
+    setTimeout(()=>{
+      map.easeTo({ pitch: 55, bearing: -8, duration: 2000 });
+    }, 800);
+  });
+
+  map.on('error', e=>{
+    console.warn('Map error:', e && e.error);
+  });
+}
+
+/* =========================================================
+   BOOT
+   ========================================================= */
+
+try{
+  initMap();
+}catch(err){
+  console.error('Boot failed:', err);
+  progress(0, 'حدث خطأ أثناء التهيئة');
+  toast('❌ تعذر تحميل الخريطة');
+  setTimeout(hideLoading, 1500);
+}
+
+window.addEventListener('load', ()=>{
+  setTimeout(()=>{
+    const side = $('sideList');
+    if(side && side.classList.contains('hidden')) side.classList.remove('hidden');
+    $('toggleList').classList.add('on');
+  }, 1200);
+});
+
+window.addEventListener('beforeunload', ()=>{
+  if(chatMyMarker) chatMyMarker.remove();
+  if(userMarker) userMarker.remove();
+  if(destinationMarker) destinationMarker.remove();
+  if(aircraftTimer) clearInterval(aircraftTimer);
+  if(firebaseReady && fbDb && currentUid && chatActive){
+    try{ fbDb.ref('chat_users/' + currentUid).remove(); }catch(e){}
+  }
+});
+
+</script>
+
+<!-- ============================================================
+     ✅ إضافة: منطق شاشة تسجيل الدخول عبر Google
+     يعمل بالتوافق مع Firebase Compat الموجود في التطبيق
+     ============================================================ -->
+<script id="loginLogicScript">
+(function(){
+  'use strict';
+
+  const loginScreen   = document.getElementById('loginScreen');
+  const googleBtn     = document.getElementById('googleLoginBtn');
+  const guestBtn      = document.getElementById('guestLoginBtn');
+  const statusEl      = document.getElementById('loginStatus');
+
+  let loginDone = false;
+
+  /* ---------------------------------------------------
+     إنهاء تسجيل الدخول: إخفاء الشاشة + إضافة شريحة المستخدم
+     --------------------------------------------------- */
+  function finishLogin(user, asGuest){
+    if(loginDone) return;
+    loginDone = true;
+    window.currentUser = user || null;
+
+    // حفظ الجلسة محلياً
+    try{
+      if(user && !asGuest){
+        localStorage.setItem('iraqUser', JSON.stringify({
+          uid: user.uid,
+          displayName: user.displayName || '',
+          email: user.email || '',
+          photoURL: user.photoURL || ''
+        }));
+        localStorage.removeItem('iraqGuest');
+      } else if(asGuest){
+        localStorage.setItem('iraqGuest', '1');
+      }
+    }catch(e){}
+
+    // إظهار شريحة المستخدم في الشريط العلوي
+    try{ showUserChip(user, asGuest); }catch(e){}
+
+    // إخفاء شاشة الدخول
+    loginScreen.classList.add('hide');
+    setTimeout(()=>{
+      loginScreen.style.display = 'none';
+    }, 600);
+
+    // رسالة ترحيب
+    if(typeof toast === 'function'){
+      try{
+        if(user && !asGuest){
+          toast('👋 أهلاً بك ' + (user.displayName || 'عزيزي المستخدم'));
+        } else {
+          toast('👋 مرحباً بك كضيف');
+        }
+      }catch(e){}
+    }
+  }
+
+  /* ---------------------------------------------------
+     إنشاء شريحة المستخدم (اسم + صورة + زر خروج)
+     --------------------------------------------------- */
+  function showUserChip(user, asGuest){
+    if(document.getElementById('userChip')) return;
+
+    const chip = document.createElement('div');
+    chip.id = 'userChip';
+
+    const name = asGuest
+      ? 'ضيف'
+      : (user?.displayName || (user?.email ? user.email.split('@')[0] : 'مستخدم'));
+
+    let avatarHtml;
+    if(!asGuest && user?.photoURL){
+      avatarHtml = `<img src="${user.photoURL}" alt="">`;
+    } else if(asGuest){
+      avatarHtml = '👤';
+    } else {
+      avatarHtml = (name.charAt(0) || '؟').toUpperCase();
+    }
+
+    chip.innerHTML = `
+      <div class="chip-avatar">${avatarHtml}</div>
+      <span class="chip-name">${escapeChip(name)}</span>
+      <button class="chip-logout" id="logoutBtn" title="تسجيل الخروج">⎋</button>
+    `;
+
+    document.body.appendChild(chip);
+
+    document.getElementById('logoutBtn').addEventListener('click', ()=>{
+      try{
+        localStorage.removeItem('iraqUser');
+        localStorage.removeItem('iraqGuest');
+      }catch(e){}
+      if(window.firebase && typeof firebase.auth === 'function'){
+        try{ firebase.auth().signOut(); }catch(e){}
+      }
+      location.reload();
+    });
+  }
+
+  function escapeChip(s){
+    return String(s).replace(/[&<>"']/g, c=>({
+      '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+    }[c]));
+  }
+
+  /* ---------------------------------------------------
+     زر الدخول كضيف
+     --------------------------------------------------- */
+  guestBtn.addEventListener('click', ()=>{
+    statusEl.textContent = '';
+    finishLogin(null, true);
+  });
+
+  /* ---------------------------------------------------
+     زر تسجيل الدخول عبر Google
+     --------------------------------------------------- */
+  googleBtn.addEventListener('click', async ()=>{
+    // تحقق من تهيئة Firebase
+    let configured = false;
+    try{
+      configured = (typeof isFirebaseConfigured === 'function') && isFirebaseConfigured();
+    }catch(e){ configured = false; }
+
+    if(!configured || !window.firebase){
+      statusEl.innerHTML = '⚠️ Firebase غير مهيأ حالياً.<br>يمكنك استخدام «الدخول كضيف» للبدء فوراً.';
       return;
     }
 
-    currentFeedVideos = Object.keys(data).map(id => ({ id, ...data[id] })).reverse();
+    googleBtn.disabled = true;
+    statusEl.textContent = 'جارٍ فتح حسابات Google...';
 
-    const container = $('videoFeedContainer');
+    try{
+      const provider = new firebase.auth.GoogleAuthProvider();
+      provider.setCustomParameters({ prompt: 'select_account' });
 
-    currentFeedVideos.forEach(v => {
-      const div = document.createElement('div');
-      div.className = 'video-item';
-      div.dataset.id = v.id;
+      // على الأجهزة المحمولة قد يكون التحويل أفضل
+      const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
 
-      const isLiked = v.likes && v.likes[currentUser?.uid];
-      const likesCount = v.likes ? Object.keys(v.likes).length : 0;
-
-      div.innerHTML = `
-        <video src="${v.videoUrl}" loop playsinline preload="metadata"></video>
-        <div class="video-overlay">
-          ${v.lat && v.lng ? `<button class="video-location-btn" onclick="goToVideoLocation(${v.lat}, ${v.lng})">📍 عرض الموقع</button>` : ''}
-          <div class="video-user-info">
-            <div class="avatar">${v.userAvatar || '👤'}</div>
-            <div class="name">${escapeHtml(v.userName || 'مستخدم')}</div>
-          </div>
-          <div class="video-title">${escapeHtml(v.title || 'بدون عنوان')}</div>
-          <div class="video-desc">${escapeHtml(v.description || '')}</div>
-          <div class="video-actions">
-            <button class="video-action-btn ${isLiked ? 'liked' : ''}" onclick="toggleLike('${v.id}', this)">
-              ❤️ <span>${likesCount}</span>
-            </button>
-            <button class="video-action-btn">💬 تعليق</button>
-            <button class="video-action-btn">↗️ مشاركة</button>
-          </div>
-        </div>
-      `;
-      container.appendChild(div);
-    });
-
-    $('videoFeedModal').classList.add('open');
-    setupVideoObserver();
-
-  } catch(e) {
-    console.error(e);
-    toast('❌ فشل تحميل الفيديوهات');
-  }
-});
-
-$('closeVideoFeed').addEventListener('click', () => {
-  $('videoFeedModal').classList.remove('open');
-  cleanupVideoFeed();
-});
-
-function setupVideoObserver() {
-  if(videoFeedObserver){
-    try{ videoFeedObserver.disconnect(); }catch(e){}
-    videoFeedObserver = null;
-  }
-  videoFeedObserver = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      const video = entry.target.querySelector('video');
-      if(!video) return;
-      if(entry.isIntersecting) {
-        video.play().catch(() => {});
+      if(isMobile){
+        await firebase.auth().signInWithRedirect(provider);
+        return; // ستُعالَج النتيجة عبر getRedirectResult
       } else {
-        video.pause();
+        const result = await firebase.auth().signInWithPopup(provider);
+        if(result && result.user){
+          statusEl.textContent = 'أهلاً بك ' + (result.user.displayName || '');
+          finishLogin(result.user, false);
+        }
       }
-    });
-  }, { threshold: 0.6 });
-
-  document.querySelectorAll('.video-item').forEach(item => {
-    videoFeedObserver.observe(item);
+    }catch(err){
+      console.warn('[Google Login] error:', err);
+      let msg = 'تعذر تسجيل الدخول.';
+      if(err && err.code === 'auth/popup-closed-by-user'){
+        msg = 'أُغلقت النافذة قبل إكمال الدخول.';
+      } else if(err && err.code === 'auth/popup-blocked'){
+        msg = 'المتصفح منع النافذة المنبثقة. اسمح بها ثم حاول مجدداً.';
+      } else if(err && err.code === 'auth/unauthorized-domain'){
+        msg = 'النطاق غير مصرح به في Firebase Console.';
+      } else if(err && err.message){
+        msg += ' ' + err.message;
+      }
+      statusEl.textContent = msg;
+      googleBtn.disabled = false;
+    }
   });
-}
 
-window.toggleLike = async (videoId, btn) => {
-  if(!chatDb || !currentUser) return;
-  const likeRef = chatDb.ref(`videos/${videoId}/likes/${currentUser.uid}`);
-  const snap = await likeRef.once('value');
-  const span = btn.querySelector('span');
-  let count = parseInt(span.textContent) || 0;
+  /* ---------------------------------------------------
+     استعادة الجلسة تلقائياً
+     --------------------------------------------------- */
 
-  if(snap.exists()) {
-    await likeRef.remove();
-    btn.classList.remove('liked');
-    span.textContent = Math.max(0, count - 1);
-  } else {
-    await likeRef.set(true);
-    btn.classList.add('liked');
-    span.textContent = count + 1;
-  }
-};
+  // 1) إذا كان Firebase مهيأ: نستمع لحالة المصادقة
+  let firebaseConfigured = false;
+  try{
+    firebaseConfigured = (typeof isFirebaseConfigured === 'function') && isFirebaseConfigured();
+  }catch(e){ firebaseConfigured = false; }
 
-window.goToVideoLocation = (lat, lng) => {
-  $('videoFeedModal').classList.remove('open');
-  cleanupVideoFeed();
-  map.flyTo({ center: [lng, lat], zoom: 15, pitch: 60, duration: 2000 });
-  toast('📍 تم الانتقال لموقع الفيديو');
-};
-
-$('publishVideoBtn').addEventListener('click', () => {
-  $('publishModal').classList.add('open');
-});
-
-$('closePublishBtn').addEventListener('click', () => {
-  $('publishModal').classList.remove('open');
-  resetPublishForm();
-});
-
-$('videoFileInput').addEventListener('change', (e) => {
-  const file = e.target.files[0];
-  if(file) {
-    const url = URL.createObjectURL(file);
-    $('videoPreviewContainer').innerHTML = `<video src="${url}" controls></video>`;
-  }
-});
-
-$('pickLocationBtn').addEventListener('click', () => {
-  window.isPickingVideoLocation = true;
-  map.getCanvas().style.cursor = 'crosshair';
-  $('publishModal').classList.remove('open');
-  toast('📍 اضغط على الخريطة لتحديد الموقع', 5000);
-});
-
-$('publishForm').addEventListener('submit', async (e) => {
-  e.preventDefault();
-  if(!chatDb || !chatStorage || !currentUser) { toast('⚠️ غير مهيأ'); return; }
-
-  const file = $('videoFileInput').files[0];
-  const title = $('videoTitleInput').value.trim();
-  const desc = $('videoDescInput').value.trim();
-  const loc = window.videoLocation;
-
-  if(!file) { toast('⚠️ اختر فيديو أولاً'); return; }
-
-  const btn = $('publishSubmitBtn');
-  const progressBar = $('uploadProgress');
-  const progressInner = progressBar.querySelector('div');
-
-  btn.disabled = true;
-  btn.innerHTML = '⏳ جاري الرفع...';
-  progressBar.style.display = 'block';
-  progressInner.style.width = '0%';
-
-  try {
-    const videoRef = chatStorage.ref(`videos/${currentUser.uid}/${Date.now()}_${file.name}`);
-    const uploadTask = videoRef.put(file);
-
-    uploadTask.on('state_changed',
-      (snapshot) => {
-        const p = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-        progressInner.style.width = p + '%';
-      },
-      (error) => { throw error; },
-      async () => {
-        const downloadURL = await uploadTask.snapshot.ref.getDownloadURL();
-
-        const newVideo = {
-          uid: currentUser.uid,
-          userName: currentUser.name,
-          userAvatar: currentUser.avatar,
-          title: title || 'بدون عنوان',
-          description: desc,
-          videoUrl: downloadURL,
-          lat: loc ? loc.lat : null,
-          lng: loc ? loc.lng : null,
-          timestamp: firebase.database.ServerValue.TIMESTAMP
-        };
-
-        await chatDb.ref('videos').push(newVideo);
-
-        toast('✅ تم نشر الفيديو بنجاح!', 4000);
-        $('publishModal').classList.remove('open');
-        resetPublishForm();
-
-        btn.disabled = false;
-        btn.innerHTML = 'نشر الفيديو 🚀';
-        progressBar.style.display = 'none';
-      }
-    );
-  } catch(err) {
-    console.error(err);
-    toast('❌ فشل نشر الفيديو: ' + err.message);
-    btn.disabled = false;
-    btn.innerHTML = 'نشر الفيديو 🚀';
-    progressBar.style.display = 'none';
-  }
-});
-
-function resetPublishForm() {
-  $('publishForm').reset();
-  $('videoPreviewContainer').innerHTML = `
-    <div class="preview-placeholder">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M15 10l4.55-2.27a1 1 0 011.45.89v6.76a1 1 0 01-1.45.89L15 14M4 6h11a2 2 0 012 2v8a2 2 0 01-2 2H4a2 2 0 01-2-2V8a2 2 0 012-2z"/></svg>
-      <span>معاينة الفيديو ستظهر هنا</span>
-    </div>`;
-  $('selectedLocationText').textContent = 'لم يتم تحديد موقع';
-  $('selectedLocationText').style.color = 'var(--chat-glow)';
-  if(window.tempVideoMarker) { window.tempVideoMarker.remove(); window.tempVideoMarker = null; }
-  window.videoLocation = null;
-}
-
-function listenToVideos() {
-  if(!chatDb) return;
-  chatDb.ref('videos').on('value', (snapshot) => {
-    const data = snapshot.val() || {};
-
-    Object.keys(mapVideoMarkers).forEach(id => {
-      try { mapVideoMarkers[id].remove(); } catch(e){}
-      delete mapVideoMarkers[id];
-    });
-
-    Object.keys(data).forEach(id => {
-      const v = data[id];
-      if(v.lat == null || v.lng == null) return;
-
-      const el = document.createElement('div');
-      el.className = 'video-map-marker';
-      el.innerHTML = '📹';
-      el.title = v.title;
-
-      el.addEventListener('click', (e) => {
-        e.stopPropagation();
-        showSingleVideo({ ...v, id });
+  if(firebaseConfigured && window.firebase && typeof firebase.auth === 'function'){
+    try{
+      // معالجة نتيجة التحويل (redirect) إن وُجدت
+      firebase.auth().getRedirectResult().then(result=>{
+        if(result && result.user && !loginDone){
+          finishLogin(result.user, false);
+        }
+      }).catch(err=>{
+        console.warn('[getRedirectResult]', err);
       });
 
-      const marker = new maplibregl.Marker({ element: el })
-        .setLngLat([v.lng, v.lat])
-        .addTo(map);
+      // مراقبة حالة المصادقة
+      firebase.auth().onAuthStateChanged(fbUser=>{
+        if(loginDone) return;
+        if(fbUser && !fbUser.isAnonymous){
+          finishLogin(fbUser, false);
+        }
+      });
+    }catch(e){
+      console.warn('[Firebase auth restore]', e);
+    }
 
-      mapVideoMarkers[id] = marker;
-    });
+    // ملاحظة: المستخدم المجهول (anonymous) لا يُعتبر مسجلاً،
+    // لذلك شاشة الدخول تبقى ظاهرة حتى يضغط المستخدم تسجيل أو ضيف.
+  } else {
+    // 2) إذا لم يكن Firebase مهيأً: نستخدم الكاش المحلي فقط
+    try{
+      const cachedUser = localStorage.getItem('iraqUser');
+      const isGuest    = localStorage.getItem('iraqGuest') === '1';
+
+      if(cachedUser){
+        const u = JSON.parse(cachedUser);
+        if(u && u.uid){
+          setTimeout(()=>{ if(!loginDone) finishLogin(u, false); }, 400);
+        }
+      } else if(isGuest){
+        setTimeout(()=>{ if(!loginDone) finishLogin(null, true); }, 400);
+      }
+    }catch(e){}
+  }
+
+  /* ---------------------------------------------------
+     اختصارات لوحة المفاتيح
+     --------------------------------------------------- */
+  document.addEventListener('keydown', (e)=>{
+    if(loginDone) return;
+    if(e.key === 'Escape'){
+      // Escape = دخول كضيف (اختصار سريع)
+      finishLogin(null, true);
+    } else if(e.key === 'Enter'){
+      // Enter = محاولة الدخول عبر Google
+      googleBtn.click();
+    }
   });
-}
 
-function showSingleVideo(v) {
-  cleanupVideoFeed();
-
-  const container = $('videoFeedContainer');
-  const div = document.createElement('div');
-  div.className = 'video-item';
-  div.dataset.id = v.id;
-
-  const isLiked = v.likes && v.likes[currentUser?.uid];
-  const likesCount = v.likes ? Object.keys(v.likes).length : 0;
-
-  div.innerHTML = `
-    <video src="${v.videoUrl}" loop playsinline autoplay></video>
-    <div class="video-overlay">
-      <button class="video-location-btn" onclick="document.getElementById('closeVideoFeed').click()">✕ إغلاق</button>
-      <div class="video-user-info">
-        <div class="avatar">${v.userAvatar || '👤'}</div>
-        <div class="name">${escapeHtml(v.userName || 'مستخدم')}</div>
-      </div>
-      <div class="video-title">${escapeHtml(v.title || 'بدون عنوان')}</div>
-      <div class="video-desc">${escapeHtml(v.description || '')}</div>
-      <div class="video-actions">
-        <button class="video-action-btn ${isLiked ? 'liked' : ''}" onclick="toggleLike('${v.id}', this)">
-          ❤️ <span>${likesCount}</span>
-        </button>
-      </div>
-    </div>
-  `;
-
-  container.appendChild(div);
-  $('videoFeedModal').classList.add('open');
-}
-
-/* بدء التطبيق */
-if(document.readyState === 'loading'){
-  document.addEventListener('DOMContentLoaded', initMap);
-} else {
-  initMap();
-}
+})();
 </script>
 </body>
 </html>
