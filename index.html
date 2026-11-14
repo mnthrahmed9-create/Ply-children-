@@ -1,0 +1,2645 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>IRAQ MIND MAP 3D — REAL DATA + LIVE CHAT</title>
+
+<link href="https://unpkg.com/maplibre-gl@5.6.2/dist/maplibre-gl.css" rel="stylesheet">
+<script src="https://unpkg.com/maplibre-gl@5.6.2/dist/maplibre-gl.js"></script>
+<script src="https://unpkg.com/@mapbox/mapbox-gl-rtl-text@0.3.0/mapbox-gl-rtl-text.js"></script>
+
+<!-- Firebase SDK (compat) -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
+<style>
+/* ===== الأنماط الأصلية (بدون تغيير) ===== */
+:root{
+  --bg:#02040a; --panel:rgba(8,14,32,0.92); --line:#4a2dff; --accent:#00f5ff;
+  --hotpink:#ff006e; --lime:#06ffa5; --gold:#ffe600; --purple:#b537f2; --ok:#00ffa3;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;margin:0;overflow:hidden;background:var(--bg);color:#f0fbff;font-family:"Segoe UI",Tahoma,Arial,sans-serif;}
+#map{position:absolute;inset:0}
+
+#loading{position:absolute;inset:0;z-index:60;display:flex;flex-direction:column;align-items:center;justify-content:center;background:radial-gradient(circle at 50% 40%,#150036,#020410 65%);text-align:center;padding:24px;transition:opacity .5s;}
+#loading h1{margin:0 0 6px;font-size:28px;letter-spacing:4px;background:linear-gradient(90deg,#00f5ff,#ff006e,#ffe600,#06ffa5);-webkit-background-clip:text;background-clip:text;color:transparent;font-weight:800;filter:drop-shadow(0 0 20px #ff006e99);}
+#loading .sub{font-size:13px;color:#b8d9ff;margin-bottom:22px}
+#loading .ring{width:70px;height:70px;border-radius:50%;border:3px solid transparent;border-top-color:#00f5ff;border-right-color:#ff006e;border-bottom-color:#ffe600;animation:spin 1.2s linear infinite;margin-bottom:22px;box-shadow:0 0 30px #00f5ff66;}
+@keyframes spin{to{transform:rotate(360deg)}}
+#bar{width:min(340px,80vw);height:6px;border-radius:6px;background:#10082a;overflow:hidden;margin-top:6px;border:1px solid #4a2dff55;}
+#bar > i{display:block;height:100%;width:0%;background:linear-gradient(90deg,#00f5ff,#ff006e,#ffe600,#06ffa5);background-size:300% 100%;animation:shimmer 2s linear infinite;transition:width .4s ease;box-shadow:0 0 20px #00f5ffaa;}
+@keyframes shimmer{to{background-position:300% 0}}
+#loadText{font-size:13px;color:#b8d9ff;margin:14px 0 0;line-height:1.9;max-width:420px}
+
+#header{position:absolute;top:12px;left:12px;right:12px;z-index:20;display:flex;justify-content:space-between;align-items:flex-start;gap:10px;pointer-events:none;}
+.logo,.status{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:10px 14px;font-size:11px;line-height:1.7;backdrop-filter:blur(16px);pointer-events:auto;box-shadow:0 8px 40px #4a2dff55, 0 0 0 1px #4a2dff33 inset;}
+.logo strong{font-size:15px;letter-spacing:2px;font-weight:800;background:linear-gradient(90deg,#00f5ff,#ff006e,#ffe600);-webkit-background-clip:text;background-clip:text;color:transparent;}
+.logo small{color:#8fb8e8;font-size:10px}
+.status{display:flex;align-items:center;gap:8px;font-size:11px;color:#d9ecff;white-space:nowrap;}
+.status b{color:var(--lime);font-weight:700;text-shadow:0 0 12px var(--lime)}
+.dotlive{width:9px;height:9px;border-radius:50%;background:var(--lime);box-shadow:0 0 12px var(--lime),0 0 24px var(--lime);animation:blink 1.6s infinite;display:inline-block;}
+@keyframes blink{50%{opacity:.2;transform:scale(.8)}}
+
+button{font-family:inherit}
+.tool{padding:11px 15px;color:#fff;font-size:12px;cursor:pointer;font-weight:600;background:linear-gradient(135deg,rgba(20,10,50,.92),rgba(10,30,60,.92));border:1px solid #4a2dff;border-radius:11px;backdrop-filter:blur(12px);transition:.18s;white-space:nowrap;box-shadow:0 4px 20px #4a2dff44;flex-shrink:0;}
+.tool:hover{background:linear-gradient(135deg,#4a2dff,#b537f2);border-color:#00f5ff;color:#fff;transform:translateY(-1px);box-shadow:0 6px 30px #b537f288;}
+.tool.on{background:linear-gradient(135deg,#00f5ff,#06ffa5);border-color:#00f5ff;color:#021018;font-weight:800;box-shadow:0 0 24px #00f5ff88;}
+#myLocation.on{background:linear-gradient(135deg,#ffe600,#ff006e);border-color:#ffe600;color:#021018;box-shadow:0 0 24px #ffe60088;animation:pulseBtn 2s infinite;}
+@keyframes pulseBtn{0%,100%{box-shadow:0 0 24px #ffe60088;}50%{box-shadow:0 0 40px #ffe600cc;}}
+
+#panel{position:absolute;z-index:25;right:12px;top:74px;bottom:12px;width:min(350px,86vw);background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:16px;overflow-y:auto;display:none;box-shadow:0 20px 70px #000c, 0 0 0 1px #4a2dff44 inset;backdrop-filter:blur(18px);animation:slideIn .35s ease;}
+@keyframes slideIn{from{opacity:0;transform:translateX(-14px)}to{opacity:1;transform:none}}
+#panel::-webkit-scrollbar{width:7px}
+#panel::-webkit-scrollbar-thumb{background:linear-gradient(180deg,#00f5ff,#ff006e);border-radius:4px}
+#panel h2{margin:0 0 4px;font-size:21px;font-weight:800;background:linear-gradient(90deg,#00f5ff,#ffe600,#ff006e);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 0 12px #00f5ff77);}
+#panel .enName{font-size:11px;color:#8fb8e8;margin:0 0 14px;letter-spacing:1px;font-weight:600}
+#panel h3{font-size:12px;margin:20px 0 10px;letter-spacing:.6px;font-weight:700;color:#ffe600;padding-bottom:7px;border-bottom:1px solid #4a2dff66;text-shadow:0 0 12px #ffe60066;}
+#panel p{font-size:12.5px;line-height:1.9;color:#d9ecff;margin:0 0 8px}
+
+.statGrid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:4px}
+.stat{background:linear-gradient(135deg,rgba(74,45,255,.15),rgba(181,55,242,.15));border:1px solid #4a2dff77;border-radius:12px;padding:10px 11px;position:relative;overflow:hidden;}
+.stat::before{content:'';position:absolute;top:0;right:0;width:3px;height:100%;background:linear-gradient(180deg,#00f5ff,#ff006e);box-shadow:0 0 12px #00f5ff;}
+.stat span{display:block;font-size:10px;color:#a8b8e8;margin-bottom:4px;font-weight:600}
+.stat b{font-size:15px;color:#fff;font-weight:800;letter-spacing:.3px}
+.stat b em{font-size:10px;color:#a8b8e8;font-style:normal;font-weight:600}
+
+#branches{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+#branches button{width:100%;padding:11px 8px;font-size:11.5px;font-weight:600;border:1px solid #4a2dff88;border-radius:11px;background:linear-gradient(135deg,rgba(74,45,255,.2),rgba(181,55,242,.15));color:#e8f4ff;cursor:pointer;transition:.16s;text-align:center;}
+#branches button:hover{background:linear-gradient(135deg,#4a2dff,#b537f2);border-color:#00f5ff;color:#fff;box-shadow:0 0 20px #b537f288;transform:translateY(-1px);}
+#branches button.active{background:linear-gradient(135deg,#ffe600,#ff006e);border-color:#ffe600;color:#021018;font-weight:800;box-shadow:0 0 24px #ffe60088;}
+
+.panelActions{display:flex;gap:8px;margin-top:20px;flex-wrap:wrap}
+.panelActions button{flex:1;min-width:110px;padding:12px;border-radius:12px;cursor:pointer;font-size:12px;font-weight:700;border:1px solid #4a2dff;background:linear-gradient(135deg,#1a1060,#2a1580);color:#fff;transition:.16s;box-shadow:0 4px 16px #4a2dff44;}
+.panelActions button:hover{background:linear-gradient(135deg,#4a2dff,#b537f2);border-color:#00f5ff;box-shadow:0 0 24px #b537f288;transform:translateY(-1px);}
+.panelActions button.danger{border-color:#ff006e;background:linear-gradient(135deg,#5a0030,#8a0040);color:#ffb0d0;}
+.panelActions button.danger:hover{background:linear-gradient(135deg,#ff006e,#b537f2);color:#fff;box-shadow:0 0 24px #ff006e88;}
+
+#close{position:absolute;left:12px;top:12px;width:32px;height:32px;background:linear-gradient(135deg,#4a2dff,#b537f2);color:#fff;border:0;border-radius:10px;cursor:pointer;font-size:15px;font-weight:800;transition:.16s;box-shadow:0 4px 16px #4a2dff66;}
+#close:hover{background:linear-gradient(135deg,#ff006e,#b537f2);transform:rotate(90deg);box-shadow:0 0 24px #ff006e88;}
+
+#sideList{position:absolute;z-index:22;left:12px;top:74px;bottom:12px;width:min(260px,80vw);background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:13px;display:flex;flex-direction:column;box-shadow:0 20px 70px #000c, 0 0 0 1px #4a2dff44 inset;backdrop-filter:blur(18px);transition:transform .3s ease,opacity .3s ease;}
+#sideList.hidden{transform:translateX(-115%);opacity:0;pointer-events:none}
+#sideList h4{margin:2px 0 11px;font-size:12px;font-weight:700;letter-spacing:.5px;display:flex;justify-content:space-between;align-items:center;color:#ffe600;text-shadow:0 0 10px #ffe60077;}
+#search{width:100%;padding:10px 12px;margin-bottom:10px;background:rgba(20,10,50,.8);border:1px solid #4a2dff88;border-radius:11px;color:#fff;font-size:12px;font-family:inherit;outline:none;transition:.16s;}
+#search:focus{border-color:#00f5ff;box-shadow:0 0 0 3px #00f5ff33,0 0 20px #00f5ff66}
+#search::placeholder{color:#7a8fc0}
+#provList{overflow-y:auto;flex:1;padding-left:2px}
+#provList::-webkit-scrollbar{width:6px}
+#provList::-webkit-scrollbar-thumb{background:linear-gradient(180deg,#00f5ff,#b537f2);border-radius:4px}
+.provItem{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:11px;cursor:pointer;font-size:12.5px;color:#d9ecff;transition:.15s;border:1px solid transparent;font-weight:500;}
+.provItem:hover{background:linear-gradient(90deg,rgba(74,45,255,.25),rgba(181,55,242,.15));border-color:#4a2dff;}
+.provItem.active{background:linear-gradient(90deg,rgba(0,245,255,.3),rgba(255,0,110,.2));border-color:#00f5ff;color:#fff;font-weight:700;box-shadow:0 0 16px #00f5ff55;}
+.provItem .swatch{width:12px;height:12px;border-radius:4px;flex-shrink:0;box-shadow:0 0 12px currentColor,0 0 6px currentColor inset;}
+.provItem .txt{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+#tools{position:absolute;bottom:15px;left:12px;z-index:23;display:flex;flex-wrap:wrap;gap:8px;max-width:min(560px,65vw);}
+
+.node{width:0;height:0;cursor:pointer;z-index:2}
+.node .dot{position:absolute;left:-8px;top:-8px;width:16px;height:16px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#ffffff,#00f5ff 45%,#ff006e);border:2px solid #fff;box-shadow:0 0 12px #00f5ff,0 0 26px #ff006e,0 0 40px #00f5ff88;animation:pulse 2.4s infinite;transition:.2s;}
+.node:hover .dot{transform:scale(1.5);background:radial-gradient(circle at 35% 35%,#fff,#ffe600 45%,#ff006e);box-shadow:0 0 20px #ffe600,0 0 40px #ff006e;}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 #00f5ff99,0 0 12px #00f5ff,0 0 26px #ff006e}55%{box-shadow:0 0 0 12px #00f5ff00,0 0 24px #00f5ff,0 0 40px #ff006e}}
+.node-label{position:absolute;left:50%;bottom:15px;transform:translateX(-50%);background:rgba(10,4,30,.94);border:1px solid #4a2dff;border-radius:9px;padding:4px 10px;color:#fff;white-space:nowrap;font-size:11px;font-weight:600;pointer-events:none;box-shadow:0 4px 16px #4a2dff88,0 0 16px #00f5ff44;transition:.18s;}
+.node:hover .node-label{background:linear-gradient(90deg,#ff006e,#b537f2);border-color:#ffe600;color:#fff;box-shadow:0 0 20px #ffe600aa;}
+
+.user-marker{width:0;height:0;z-index:10}
+.user-dot{position:absolute;left:-9px;top:-9px;width:18px;height:18px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#ffffff,#00f5ff 60%);border:2px solid #fff;box-shadow:0 0 20px #00f5ff,0 0 40px #00f5ff;}
+.user-pulse{position:absolute;left:-25px;top:-25px;width:50px;height:50px;border-radius:50%;background:rgba(0,245,255,0.2);border:2px solid #00f5ff;animation:userPulse 2s infinite ease-out;}
+@keyframes userPulse{0%{transform:scale(.3);opacity:1}100%{transform:scale(2.5);opacity:0}}
+
+#toast{position:absolute;z-index:70;bottom:80px;right:50%;transform:translateX(50%) translateY(20px);background:linear-gradient(135deg,rgba(74,45,255,.95),rgba(181,55,242,.9));border:1px solid #00f5ff;border-radius:13px;padding:12px 20px;font-size:13px;color:#fff;font-weight:600;opacity:0;pointer-events:none;transition:.3s;box-shadow:0 10px 44px #4a2dff88,0 0 24px #00f5ff88;max-width:88vw;text-align:center;}
+#toast.show{opacity:1;transform:translateX(50%) translateY(0)}
+
+@media(max-width:720px){
+  #sideList{width:min(250px,74vw);top:120px}
+  #panel{width:min(330px,92vw);top:120px}
+  #tools{max-width:calc(100vw - 24px);bottom:78px;flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:4px;}
+  #tools::-webkit-scrollbar{height:4px}
+  #tools::-webkit-scrollbar-thumb{background:#4a2dff;border-radius:2px}
+  .tool{padding:9px 12px;font-size:11px}
+  #header{top:8px;left:8px;right:8px}
+  .logo{padding:8px 11px}
+  .logo strong{font-size:12px}
+  .status{font-size:10px;padding:8px 11px}
+}
+
+/* =========================================================
+   ✦ أنماط نظام الدردشة الجديد (Neon 3D)
+   ========================================================= */
+:root{
+  --chat-bg: rgba(6, 12, 30, 0.94);
+  --chat-border: rgba(0, 245, 255, 0.45);
+  --chat-glow: #00f5ff;
+  --chat-purple: #b537f2;
+  --chat-pink: #ff006e;
+  --chat-gold: #ffe600;
+}
+
+/* زر طلب الدردشة في الشريط السفلي */
+#chatRequestBtn {
+  background: linear-gradient(135deg, rgba(0, 245, 255, 0.25), rgba(181, 55, 242, 0.25));
+  border-color: var(--chat-glow);
+  box-shadow: 0 0 28px rgba(0, 245, 255, 0.45), 0 0 60px rgba(0, 245, 255, 0.15);
+  animation: chatBtnPulse 3s infinite;
+}
+@keyframes chatBtnPulse {
+  0%, 100% { box-shadow: 0 0 28px rgba(0, 245, 255, 0.45), 0 0 60px rgba(0, 245, 255, 0.15); }
+  50% { box-shadow: 0 0 44px rgba(0, 245, 255, 0.75), 0 0 80px rgba(0, 245, 255, 0.3); }
+}
+#chatRequestBtn.active {
+  background: linear-gradient(135deg, var(--chat-glow), var(--chat-purple));
+  color: #021018;
+  font-weight: 800;
+}
+
+/* علامة المستخدم على الخريطة (Chat User Marker) */
+.chat-user-marker {
+  width: 0;
+  height: 0;
+  z-index: 15;
+  cursor: pointer;
+}
+.chat-user-marker .cu-avatar {
+  position: absolute;
+  left: -18px;
+  top: -18px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 2.5px solid var(--chat-glow);
+  box-shadow: 0 0 20px var(--chat-glow), 0 0 40px rgba(0, 245, 255, 0.4);
+  background: #0a0320;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.chat-user-marker .cu-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.chat-user-marker:hover .cu-avatar {
+  transform: scale(1.15);
+  box-shadow: 0 0 30px var(--chat-glow), 0 0 60px rgba(0, 245, 255, 0.6);
+}
+.chat-user-marker .cu-plus {
+  position: absolute;
+  right: -6px;
+  bottom: -6px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--chat-gold), var(--chat-pink));
+  border: 1.5px solid #fff;
+  color: #021018;
+  font-size: 12px;
+  font-weight: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 14px var(--chat-gold);
+  animation: plusBlink 2s infinite;
+  pointer-events: none;
+}
+@keyframes plusBlink {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.2); opacity: 0.85; }
+}
+
+/* فقاعة طلب الدردشة فوق المستخدم */
+.chat-request-bubble {
+  position: absolute;
+  left: 50%;
+  bottom: 38px;
+  transform: translateX(-50%);
+  background: linear-gradient(135deg, rgba(255, 0, 110, 0.95), rgba(181, 55, 242, 0.9));
+  border: 1px solid var(--chat-glow);
+  border-radius: 14px;
+  padding: 6px 12px;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+  pointer-events: none;
+  box-shadow: 0 0 24px rgba(255, 0, 110, 0.6), 0 0 48px rgba(0, 245, 255, 0.25);
+  animation: bubbleFloat 2.5s ease-in-out infinite;
+  z-index: 20;
+}
+.chat-request-bubble::after {
+  content: '';
+  position: absolute;
+  bottom: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-top: 7px solid var(--chat-pink);
+  filter: drop-shadow(0 0 6px var(--chat-pink));
+}
+@keyframes bubbleFloat {
+  0%, 100% { transform: translateX(-50%) translateY(0); }
+  50% { transform: translateX(-50%) translateY(-6px); }
+}
+
+/* إشعار الطلبات الجديدة أسفل الشاشة */
+#chatRequestNotification {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%) translateY(120px);
+  z-index: 80;
+  background: var(--chat-bg);
+  border: 1px solid var(--chat-glow);
+  border-radius: 18px;
+  padding: 12px 20px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8), 0 0 40px rgba(0, 245, 255, 0.35);
+  backdrop-filter: blur(18px);
+  cursor: pointer;
+  transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s;
+  opacity: 0;
+  pointer-events: none;
+  min-width: 280px;
+  max-width: 92vw;
+}
+#chatRequestNotification.visible {
+  transform: translateX(-50%) translateY(0);
+  opacity: 1;
+  pointer-events: auto;
+}
+#chatRequestNotification .notif-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--chat-glow), var(--chat-purple));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  box-shadow: 0 0 24px rgba(0, 245, 255, 0.5);
+  flex-shrink: 0;
+}
+#chatRequestNotification .notif-text {
+  flex: 1;
+  text-align: right;
+}
+#chatRequestNotification .notif-text strong {
+  display: block;
+  font-size: 13px;
+  color: #fff;
+  margin-bottom: 2px;
+}
+#chatRequestNotification .notif-text span {
+  font-size: 11px;
+  color: #8fb8e8;
+}
+#chatRequestNotification .notif-count {
+  background: linear-gradient(135deg, var(--chat-pink), var(--chat-purple));
+  color: #fff;
+  font-size: 12px;
+  font-weight: 800;
+  min-width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 16px rgba(255, 0, 110, 0.6);
+  animation: countPulse 1.5s infinite;
+}
+@keyframes countPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.15); }
+}
+
+/* نافذة قبول/رفض الطلب */
+#chatRequestModal {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  background: rgba(2, 4, 10, 0.7);
+  backdrop-filter: blur(8px);
+  padding: 20px;
+}
+#chatRequestModal.open {
+  display: flex;
+  animation: fadeIn 0.25s ease;
+}
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+#chatRequestModal .modal-card {
+  background: var(--chat-bg);
+  border: 1px solid var(--chat-glow);
+  border-radius: 24px;
+  padding: 28px 24px;
+  width: min(380px, 92vw);
+  text-align: center;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.9), 0 0 60px rgba(0, 245, 255, 0.3);
+  animation: modalPop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+@keyframes modalPop { from { transform: scale(0.85); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+#chatRequestModal .modal-avatar {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  border: 3px solid var(--chat-glow);
+  box-shadow: 0 0 30px rgba(0, 245, 255, 0.5);
+  margin: 0 auto 14px;
+  overflow: hidden;
+  background: #0a0320;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 36px;
+}
+#chatRequestModal .modal-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+#chatRequestModal h3 {
+  margin: 0 0 6px;
+  font-size: 18px;
+  color: #fff;
+}
+#chatRequestModal p {
+  font-size: 13px;
+  color: #b8d9ff;
+  margin: 0 0 22px;
+}
+#chatRequestModal .modal-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+#chatRequestModal .modal-actions button {
+  flex: 1;
+  padding: 13px 18px;
+  border-radius: 14px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: 0.18s;
+}
+#chatRequestModal .modal-actions .accept {
+  background: linear-gradient(135deg, var(--chat-glow), #06ffa5);
+  color: #021018;
+  border-color: var(--chat-glow);
+  box-shadow: 0 0 24px rgba(0, 245, 255, 0.5);
+}
+#chatRequestModal .modal-actions .accept:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 36px rgba(0, 245, 255, 0.8);
+}
+#chatRequestModal .modal-actions .reject {
+  background: linear-gradient(135deg, #5a0030, #8a0040);
+  color: #ffb0d0;
+  border-color: var(--chat-pink);
+}
+#chatRequestModal .modal-actions .reject:hover {
+  background: linear-gradient(135deg, var(--chat-pink), var(--chat-purple));
+  color: #fff;
+  box-shadow: 0 0 24px rgba(255, 0, 110, 0.6);
+}
+
+/* نافذة المحادثة المباشرة */
+#chatWindow {
+  position: fixed;
+  bottom: 0;
+  right: 0;
+  left: 0;
+  top: 0;
+  z-index: 95;
+  display: none;
+  align-items: flex-end;
+  justify-content: center;
+  background: rgba(2, 4, 10, 0.6);
+  backdrop-filter: blur(6px);
+}
+#chatWindow.open {
+  display: flex;
+}
+#chatWindow .chat-container {
+  width: min(480px, 100vw);
+  height: min(85vh, 700px);
+  background: var(--chat-bg);
+  border: 1px solid var(--chat-glow);
+  border-radius: 24px 24px 0 0;
+  box-shadow: 0 -10px 60px rgba(0, 0, 0, 0.9), 0 0 50px rgba(0, 245, 255, 0.25);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: slideUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+@keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+#chatWindow .chat-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 18px;
+  background: linear-gradient(135deg, rgba(74, 45, 255, 0.2), rgba(181, 55, 242, 0.2));
+  border-bottom: 1px solid rgba(0, 245, 255, 0.3);
+  flex-shrink: 0;
+}
+#chatWindow .chat-header .ch-avatar {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  border: 2px solid var(--chat-glow);
+  box-shadow: 0 0 16px rgba(0, 245, 255, 0.5);
+  overflow: hidden;
+  background: #0a0320;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  flex-shrink: 0;
+}
+#chatWindow .chat-header .ch-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+#chatWindow .chat-header .ch-info {
+  flex: 1;
+  text-align: right;
+}
+#chatWindow .chat-header .ch-info strong {
+  display: block;
+  font-size: 14px;
+  color: #fff;
+}
+#chatWindow .chat-header .ch-info span {
+  font-size: 11px;
+  color: var(--lime);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+#chatWindow .chat-header .ch-info span::before {
+  content: '';
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--lime);
+  box-shadow: 0 0 10px var(--lime);
+}
+#chatWindow .chat-header .ch-close {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #fff;
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: 0.18s;
+}
+#chatWindow .chat-header .ch-close:hover {
+  background: rgba(255, 0, 110, 0.3);
+  border-color: var(--chat-pink);
+}
+#chatMessages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  scroll-behavior: smooth;
+}
+#chatMessages::-webkit-scrollbar {
+  width: 5px;
+}
+#chatMessages::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, var(--chat-glow), var(--chat-purple));
+  border-radius: 4px;
+}
+.chat-msg {
+  max-width: 80%;
+  padding: 10px 14px;
+  border-radius: 16px;
+  font-size: 13px;
+  line-height: 1.6;
+  word-break: break-word;
+  animation: msgIn 0.25s ease;
+}
+@keyframes msgIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+.chat-msg.sent {
+  align-self: flex-start; /* RTL: sent appears on left visually? Actually in RTL, flex-start is right; keep simple */
+  background: linear-gradient(135deg, rgba(0, 245, 255, 0.25), rgba(181, 55, 242, 0.25));
+  border: 1px solid rgba(0, 245, 255, 0.4);
+  color: #fff;
+  border-bottom-right-radius: 4px;
+}
+.chat-msg.received {
+  align-self: flex-end;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #e8f4ff;
+  border-bottom-left-radius: 4px;
+}
+.chat-msg .msg-time {
+  display: block;
+  font-size: 9px;
+  color: #8fb8e8;
+  margin-top: 4px;
+  text-align: left;
+}
+#chatInputArea {
+  display: flex;
+  gap: 10px;
+  padding: 12px 16px;
+  border-top: 1px solid rgba(0, 245, 255, 0.25);
+  background: rgba(10, 3, 32, 0.8);
+  flex-shrink: 0;
+}
+#chatInput {
+  flex: 1;
+  padding: 12px 16px;
+  border-radius: 14px;
+  border: 1px solid rgba(0, 245, 255, 0.4);
+  background: rgba(20, 10, 50, 0.8);
+  color: #fff;
+  font-size: 13px;
+  font-family: inherit;
+  outline: none;
+  transition: 0.18s;
+}
+#chatInput:focus {
+  border-color: var(--chat-glow);
+  box-shadow: 0 0 0 3px rgba(0, 245, 255, 0.2), 0 0 24px rgba(0, 245, 255, 0.3);
+}
+#chatSendBtn {
+  padding: 12px 20px;
+  border-radius: 14px;
+  border: 1px solid var(--chat-glow);
+  background: linear-gradient(135deg, var(--chat-glow), var(--chat-purple));
+  color: #021018;
+  font-weight: 800;
+  font-size: 13px;
+  cursor: pointer;
+  transition: 0.18s;
+  box-shadow: 0 0 20px rgba(0, 245, 255, 0.4);
+}
+#chatSendBtn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 0 30px rgba(0, 245, 255, 0.7);
+}
+#chatSendBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* إشعارات صغيرة داخل الدردشة (اختياري) */
+.chat-system-msg {
+  text-align: center;
+  font-size: 10px;
+  color: #8fb8e8;
+  padding: 6px;
+}
+
+@media (max-width: 480px) {
+  #chatWindow .chat-container {
+    height: 92vh;
+    border-radius: 18px 18px 0 0;
+  }
+  #chatRequestNotification {
+    min-width: auto;
+    width: calc(100vw - 32px);
+  }
+}
+</style>
+</head>
+<body>
+
+<div id="map"></div>
+
+<div id="loading">
+  <div class="ring"></div>
+  <h1>IRAQ MIND MAP 3D</h1>
+  <div class="sub">الخريطة الذهنية الجغرافية للعراق</div>
+  <div id="bar"><i></i></div>
+  <p id="loadText">جاري تهيئة المحرك ثلاثي الأبعاد...</p>
+</div>
+
+<div id="header">
+  <div class="logo">
+    <strong>IRAQ MIND MAP 3D</strong><br>
+    <small>الخريطة الذهنية الجغرافية</small>
+  </div>
+  <div class="status">
+    <span class="dotlive"></span>
+    <span id="status">جاري التحميل...</span>
+  </div>
+</div>
+
+<div id="sideList">
+  <h4>
+    <span>محافظات العراق</span>
+    <span id="provCount" style="color:#7a8fc0;font-size:10px">—</span>
+  </h4>
+  <input id="search" type="text" placeholder="🔍 ابحث عن محافظة...">
+  <div id="provList"></div>
+</div>
+
+<div id="panel">
+  <button id="close" title="إغلاق">✕</button>
+  <h2 id="provinceName">المحافظة</h2>
+  <p class="enName" id="provinceEn"></p>
+  <p id="provinceInfo">معلومات المحافظة</p>
+  <div class="statGrid" id="statGrid"></div>
+  <h3>✦ الفروع الذهنية</h3>
+  <div id="branches"></div>
+  <h3>✦ المعلومات الإدارية</h3>
+  <div id="adminInfo"></div>
+  <div class="panelActions">
+    <button id="zoomProvince">تكبير المحافظة</button>
+    <button id="showAll">عرض العراق كاملاً</button>
+    <button id="clearBranch" class="danger">مسح الفروع</button>
+  </div>
+</div>
+
+<div id="tools">
+  <button class="tool" id="reset">🏠 إعادة العرض</button>
+  <button class="tool on" id="terrain">⛰️ تضاريس 3D</button>
+  <button class="tool on" id="labels">🏷️ الأسماء</button>
+  <button class="tool" id="myLocation">📍 موقعي</button>
+  <button class="tool" id="toggleList">📋 القائمة</button>
+  <button class="tool" id="loadBuildings">🏗️ المباني</button>
+  <button class="tool" id="loadRoads">🛣️ الطرق</button>
+  <button class="tool" id="loadAirportsBtn">✈️ المطارات</button>
+  <button class="tool" id="toggleAircraft">🛩️ الطائرات</button>
+  <button class="tool" id="toggleTraffic">🚦 السرعات</button>
+  <button class="tool" id="pickDest">🎯 وجهة</button>
+  <button class="tool" id="clearRoute">❌ مسح المسار</button>
+  <!-- ✦ زر طلب الدردشة الجديد -->
+  <button class="tool" id="chatRequestBtn" title="طلب دردشة">💬 طلب دردشة</button>
+</div>
+
+<div id="toast"></div>
+
+<!-- =========================================================
+     ✦ عناصر نظام الدردشة
+     ========================================================= -->
+
+<!-- إشعار الطلبات الجديدة -->
+<div id="chatRequestNotification">
+  <div class="notif-icon">💬</div>
+  <div class="notif-text">
+    <strong>شخص يريد دردشة</strong>
+    <span id="notifSub">لديك طلب دردشة جديد</span>
+  </div>
+  <div class="notif-count" id="notifCount">0</div>
+</div>
+
+<!-- نافذة قبول / رفض الطلب -->
+<div id="chatRequestModal">
+  <div class="modal-card">
+    <div class="modal-avatar" id="reqAvatar">👤</div>
+    <h3 id="reqName">مستخدم</h3>
+    <p>يريد التحدث معك عبر الدردشة</p>
+    <div class="modal-actions">
+      <button class="accept" id="acceptChatBtn">✅ قبول</button>
+      <button class="reject" id="rejectChatBtn">❌ رفض</button>
+    </div>
+  </div>
+</div>
+
+<!-- نافذة المحادثة المباشرة -->
+<div id="chatWindow">
+  <div class="chat-container">
+    <div class="chat-header">
+      <div class="ch-avatar" id="chatHeaderAvatar">👤</div>
+      <div class="ch-info">
+        <strong id="chatHeaderName">المستخدم</strong>
+        <span>متصل الآن</span>
+      </div>
+      <button class="ch-close" id="closeChatBtn">✕</button>
+    </div>
+    <div id="chatMessages"></div>
+    <div id="chatInputArea">
+      <input type="text" id="chatInput" placeholder="اكتب رسالتك..." autocomplete="off">
+      <button id="chatSendBtn">إرسال</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* =========================================================
+   IRAQ MIND MAP 3D — REAL DATA EDITION (Complete)
+   ========================================================= */
+
+const PROVINCE_META = [
+ {ar:'بغداد',    en:'Baghdad',        cap:'بغداد',     area:4555,   pop:8126000, c:[44.366,33.315], note:'العاصمة الاتحادية ومركز الثقل السياسي والاقتصادي في العراق.'},
+ {ar:'البصرة',   en:'Basra',          cap:'البصرة',    area:19070,  pop:3000000, c:[47.783,30.508], note:'الميناء الرئيسي وقلب العراق الاقتصادي البحري.'},
+ {ar:'نينوى',    en:'Nineveh',        cap:'الموصل',    area:37323,  pop:3800000, c:[43.118,36.335], note:'أكبر المحافظات سكاناً في شمال العراق وموطن آثار نينوى.'},
+ {ar:'أربيل',    en:'Erbil',          cap:'أربيل',     area:15074,  pop:1900000, c:[44.009,36.191], note:'عاصمة إقليم كردستان وأقدم المدن المأهولة تاريخياً.'},
+ {ar:'النجف',    en:'Najaf',          cap:'النجف',     area:28824,  pop:1500000, c:[44.333,32.000], note:'مركز ديني عالمي وموطن مرقد الإمام علي ووادي السلام.'},
+ {ar:'كربلاء',   en:'Karbala',        cap:'كربلاء',    area:5034,   pop:1200000, c:[44.024,32.616], note:'مدينة الإمام الحسين ومحطة زيارة عالمية كبرى.'},
+ {ar:'بابل',     en:'Babylon',        cap:'الحلة',     area:5603,   pop:2000000, c:[44.433,32.483], note:'موطن حضارة بابل وآثارها المدرجة عالمياً.'},
+ {ar:'الأنبار',  en:'Anbar',          cap:'الرمادي',   area:138501, pop:1700000, c:[43.300,33.425], note:'أكبر محافظات العراق مساحةً وتشكل ثلث البلاد تقريباً.'},
+ {ar:'ديالى',    en:'Diyala',         cap:'بعقوبة',    area:17685,  pop:1600000, c:[44.643,33.745], note:'بوابة العراق الشرقية وسلة حمضيات البلاد.'},
+ {ar:'ذي قار',   en:'Dhi Qar',        cap:'الناصرية',  area:12900,  pop:2200000, c:[46.257,31.043], note:'موطن حضارة أور السومرية والزقورة الشهيرة.'},
+ {ar:'ميسان',    en:'Maysan',         cap:'العمارة',   area:16072,  pop:1100000, c:[47.144,31.835], note:'أرض الأهوار والمسطحات المائية الجنوبية.'},
+ {ar:'المثنى',   en:'Muthanna',       cap:'السماوة',   area:51740,  pop:800000,  c:[45.280,31.311], note:'محافظة صحراوية واسعة على الحدود الجنوبية.'},
+ {ar:'القادسية', en:'Qadisiyyah',     cap:'الديوانية', area:8153,   pop:1300000, c:[44.925,31.992], note:'سلة الحبوب في الفرات الأوسط.'},
+ {ar:'واسط',     en:'Wasit',          cap:'الكوت',     area:17153,  pop:1400000, c:[45.818,32.512], note:'تحتضن سد الكوت وأراضي زراعية خصبة.'},
+ {ar:'صلاح الدين',en:'Saladin',       cap:'تكريت',     area:24751,  pop:1600000, c:[43.678,34.607], note:'محافظة تاريخية على ضفاف دجلة وسط العراق.'},
+ {ar:'كركوك',    en:'Kirkuk',         cap:'كركوك',     area:9679,   pop:1600000, c:[44.392,35.468], note:'مدينة النفط والتعدد القومي في شمال العراق.'},
+ {ar:'دهوك',     en:'Duhok',          cap:'دهوك',      area:6553,   pop:1300000, c:[42.988,36.867], note:'محافظة جبلية خلابة على الحدود الشمالية.'},
+ {ar:'السليمانية',en:'Sulaymaniyah',  cap:'السليمانية',area:17023,  pop:2000000, c:[45.436,35.561], note:'مركز ثقافي كردي وموطن جبال حمرين وأزمر.'}
+];
+
+const COLORS = [
+  '#FF006E','#FB5607','#FFBE0B','#8338EC','#3A86FF','#06FFA5',
+  '#FF4D6D','#00F5D4','#F15BB5','#9B5DE5','#FEE440','#00BBF9',
+  '#FB8500','#E63946','#2EC4B6','#FF9F1C','#7209B7','#00F5D4'
+];
+
+function norm(s){
+  return String(s||'')
+    .replace(/[أإآٱ]/g,'ا').replace(/[ىئ]/g,'ي').replace(/ؤ/g,'و')
+    .replace(/ة/g,'ه').replace(/[\u064B-\u0652\u0640]/g,'')
+    .replace(/^ال/,'').replace(/[\s\-_]+/g,'').trim().toLowerCase();
+}
+
+const META_INDEX = new Map();
+PROVINCE_META.forEach(m=>{
+  META_INDEX.set(norm(m.ar), m);
+  META_INDEX.set(norm(m.en), m);
+});
+function lookupMeta(name){ return META_INDEX.get(norm(name)) || null; }
+
+let PROVINCES = [];
+let selectedIdx = null;
+let hoveredIdx  = null;
+let terrainOn   = true;
+let labelsOn    = true;
+let osmtogeojsonReady = false;
+let mapLoaded   = false;
+let osmLoaded   = false;
+let map;
+let userMarker = null;
+let userLocation = null;
+
+let buildingsActive  = false;
+let roadsActive      = false;
+let trafficMode      = false;
+let airportsLoaded   = false;
+let aircraftTimer    = null;
+let destPicking      = false;
+let destinationMarker = null;
+let routeSources     = [];
+let provinceHandlersRegistered = false;
+let lastBldZoomBucket = -1;
+
+const IRAQ_BOUNDS = [[38.70,29.00],[48.70,37.40]];
+
+const $ = id => document.getElementById(id);
+const bar = document.querySelector('#bar > i');
+
+function progress(p, txt){
+  if(bar) bar.style.width = Math.min(100,p) + '%';
+  const el = $('loadText');
+  if(el && txt) el.textContent = txt;
+}
+function setStatus(html){
+  const el = $('status');
+  if(el) el.innerHTML = '<span class="dotlive"></span>' + html;
+}
+let toastTimer = null;
+function toast(msg, ms){
+  const t = $('toast');
+  if(!t) return;
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>t.classList.remove('show'), ms||3200);
+}
+function fmtNum(n){
+  if(n === null || n === undefined) return '—';
+  return Number(n).toLocaleString('en-US');
+}
+
+let loadingHidden = false;
+function hideLoading(){
+  if(loadingHidden) return;
+  loadingHidden = true;
+  const l = $('loading');
+  if(!l) return;
+  l.style.opacity = '0';
+  setTimeout(()=>{ l.style.display = 'none'; }, 550);
+}
+function withTimeout(promise, ms){
+  return Promise.race([
+    promise,
+    new Promise((_, r)=> setTimeout(()=>r(new Error('timeout')), ms))
+  ]);
+}
+async function fetchWithTimeout(url, ms){
+  const ctrl = new AbortController();
+  const timer = setTimeout(()=>ctrl.abort(), ms);
+  try{
+    const res = await fetch(url, { signal: ctrl.signal });
+    clearTimeout(timer);
+    return res;
+  } catch(e){
+    clearTimeout(timer);
+    throw e;
+  }
+}
+
+function createFallbackStyle(){
+  return {
+    version: 8,
+    glyphs: 'https://tiles.openfreemap.org/fonts/{fontstack}/{range}.pbf',
+    sources: {
+      'osm-carto': {
+        type: 'raster',
+        tiles: [
+          'https://a.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}@2x.png',
+          'https://b.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}@2x.png',
+          'https://c.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}@2x.png'
+        ],
+        tileSize: 512,
+        maxzoom: 19,
+        attribution: '© OpenStreetMap © CARTO'
+      },
+      'iraq-dem': {
+        type: 'raster-dem',
+        url: 'https://demotiles.maplibre.org/terrain-tiles/tiles.json',
+        tileSize: 256
+      }
+    },
+    layers: [
+      { id:'bg', type:'background', paint:{ 'background-color':'#0a0320' } },
+      { id:'osm-carto-layer', type:'raster', source:'osm-carto', paint:{ 'raster-opacity':0.9 } }
+    ]
+  };
+}
+
+async function buildMapStyle(){
+  let style = null;
+  const candidates = [
+    'https://tiles.openfreemap.org/styles/dark',
+    'https://tiles.openfreemap.org/styles/liberty'
+  ];
+  for(const url of candidates){
+    try{
+      const res = await fetchWithTimeout(url, 3500);
+      if(res.ok){
+        const s = await res.json();
+        if(s && s.version === 8 && Array.isArray(s.layers)){ style = s; break; }
+      }
+    }catch(e){}
+  }
+  if(!style) style = createFallbackStyle();
+
+  if(!style.glyphs) style.glyphs = 'https://tiles.openfreemap.org/fonts/{fontstack}/{range}.pbf';
+  if(!style.sources) style.sources = {};
+  if(!style.sources['iraq-dem']){
+    style.sources['iraq-dem'] = {
+      type: 'raster-dem',
+      url: 'https://demotiles.maplibre.org/terrain-tiles/tiles.json',
+      tileSize: 256
+    };
+  }
+  return style;
+}
+
+function applyVividTheme(){
+  if(!map) return;
+  const style = map.getStyle();
+  if(!style || !style.layers) return;
+
+  style.layers.forEach(layer => {
+    const id = layer.id;
+    const srcLayer = layer['source-layer'] || '';
+    const type = layer.type;
+
+    try{
+      if(type === 'background'){ map.setPaintProperty(id, 'background-color', '#0a0320'); return; }
+      if(!srcLayer) return;
+
+      if(srcLayer === 'water'){
+        if(type === 'fill'){ map.setPaintProperty(id, 'fill-color', '#00d9ff'); map.setPaintProperty(id, 'fill-opacity', 0.9); }
+        else if(type === 'fill-extrusion'){ map.setPaintProperty(id, 'fill-extrusion-color', '#00d9ff'); }
+        else if(type === 'line'){ map.setPaintProperty(id, 'line-color', '#00d9ff'); }
+        return;
+      }
+      if(srcLayer === 'waterway' && type === 'line'){ map.setPaintProperty(id, 'line-color', '#00f5ff'); return; }
+      if(srcLayer === 'building' && type === 'fill'){
+        map.setPaintProperty(id, 'fill-color', '#ff006e');
+        map.setPaintProperty(id, 'fill-opacity', 0.85);
+        map.setPaintProperty(id, 'fill-outline-color', '#ffe600');
+        return;
+      }
+      if((srcLayer === 'landcover' || srcLayer === 'landuse' || srcLayer === 'park') && type === 'fill'){
+        map.setPaintProperty(id, 'fill-color', '#06ffa5');
+        map.setPaintProperty(id, 'fill-opacity', 0.5);
+        return;
+      }
+      if(srcLayer === 'transportation'){
+        let color = '#b537f2';
+        if(/motorway/i.test(id)) color = /casing|outline/i.test(id) ? '#8a0050' : /tunnel/i.test(id) ? '#a8004a' : '#ff006e';
+        else if(/trunk/i.test(id)) color = /casing|outline/i.test(id) ? '#8a3000' : '#fb5607';
+        else if(/primary/i.test(id)) color = /casing|outline/i.test(id) ? '#8a7000' : '#ffe600';
+        else if(/secondary/i.test(id)) color = '#00f5ff';
+        else if(/tertiary/i.test(id)) color = '#06ffa5';
+        else if(/minor|residential|service|pedestrian/i.test(id)) color = '#b537f2';
+        else if(/rail|transit/i.test(id)) color = '#ff8ec7';
+        if(type === 'line'){
+          map.setPaintProperty(id, 'line-color', color);
+          map.setPaintProperty(id, 'line-opacity', 0.92);
+        } else if(type === 'fill'){ map.setPaintProperty(id, 'fill-color', color); }
+        return;
+      }
+      if(srcLayer === 'boundary' && type === 'line'){
+        map.setPaintProperty(id, 'line-color', '#ffe600');
+        map.setPaintProperty(id, 'line-opacity', 0.85);
+        return;
+      }
+      if(srcLayer === 'poi' || srcLayer === 'aerodrome_label'){
+        if(type === 'symbol'){
+          try{ map.setPaintProperty(id, 'icon-color', '#ff2ec4'); }catch(e){}
+          try{ map.setPaintProperty(id, 'icon-halo-color', '#1a0045'); }catch(e){}
+          try{ map.setPaintProperty(id, 'text-color', '#ffffff'); }catch(e){}
+          try{ map.setPaintProperty(id, 'text-halo-color', '#1a0045'); }catch(e){}
+          try{ map.setPaintProperty(id, 'text-halo-width', 1.5); }catch(e){}
+        }
+        return;
+      }
+      if(srcLayer === 'place' && type === 'symbol'){
+        try{ map.setPaintProperty(id, 'text-color', '#ffffff'); }catch(e){}
+        try{ map.setPaintProperty(id, 'text-halo-color', '#0a0320'); }catch(e){}
+        try{ map.setPaintProperty(id, 'text-halo-width', 1.8); }catch(e){}
+        return;
+      }
+      if(type === 'symbol'){
+        try{ map.setPaintProperty(id, 'text-color', '#ffffff'); }catch(e){}
+        try{ map.setPaintProperty(id, 'text-halo-color', '#0a0320'); }catch(e){}
+        try{ map.setPaintProperty(id, 'icon-color', '#ff2ec4'); }catch(e){}
+      }
+    }catch(err){}
+  });
+}
+
+function addVividBuildings(){
+  if(!map) return;
+  const style = map.getStyle();
+  if(!style || !style.layers) return;
+  if(map.getLayer('vivid-buildings')) return;
+
+  let buildingSrc = null;
+  style.layers.forEach(l=>{
+    if(l['source-layer'] === 'building' && l.source) buildingSrc = l.source;
+  });
+  if(!buildingSrc) return;
+
+  const firstSymbol = style.layers.find(l => l.type === 'symbol');
+  const beforeId = firstSymbol ? firstSymbol.id : undefined;
+
+  const layer = {
+    id:'vivid-buildings', type:'fill-extrusion',
+    source:buildingSrc, 'source-layer':'building', minzoom:13.5,
+    paint:{
+      'fill-extrusion-color':[
+        'interpolate',['linear'],['coalesce',['get','render_height'],['get','height'],0],
+        0,   '#8338EC', 15,  '#b537f2', 40,  '#ff006e', 80,  '#fb5607', 150, '#ffe600'
+      ],
+      'fill-extrusion-height':['coalesce',['get','render_height'],['get','height'],8],
+      'fill-extrusion-base':0,
+      'fill-extrusion-opacity':0.9,
+      'fill-extrusion-vertical-gradient':true
+    }
+  };
+  try{
+    if(beforeId) map.addLayer(layer, beforeId);
+    else map.addLayer(layer);
+  }catch(err){}
+}
+function applyFullVividTheme(){
+  try{ applyVividTheme(); }catch(e){}
+  try{ addVividBuildings(); }catch(e){}
+}
+function addLayerSafe(layer, beforeId){
+  try{
+    if(beforeId && map.getLayer(beforeId)) map.addLayer(layer, beforeId);
+    else map.addLayer(layer);
+  }catch(e){
+    try{ map.addLayer(layer); }catch(e2){ console.warn(e2); }
+  }
+}
+
+/* =========================================================
+   OSM / Overpass
+   ========================================================= */
+function ensureOSMToGeoJSON(){
+  if(osmtogeojsonReady) return Promise.resolve();
+  return new Promise((resolve,reject)=>{
+    if(window.osmtogeojson){ osmtogeojsonReady = true; return resolve(); }
+    const s = document.createElement('script');
+    s.src = 'https://cdn.jsdelivr.net/npm/osmtogeojson@3.0.0/osmtogeojson.js';
+    s.onload = ()=>{ osmtogeojsonReady = true; resolve(); };
+    s.onerror = ()=> reject(new Error('فشل تحميل osmtogeojson'));
+    document.head.appendChild(s);
+  });
+}
+
+const OVERPASS_SERVERS = [
+  'https://overpass-api.de/api/interpreter',
+  'https://overpass.kumi.systems/api/interpreter',
+  'https://overpass.private.coffee/api/interpreter'
+];
+
+const OVERPASS_QUERY = `[out:json][timeout:25];
+area["ISO3166-1"="IQ"]["admin_level"="2"]->.a;
+relation["boundary"="administrative"]["admin_level"="4"](area.a);
+out body geom;`;
+
+async function fetchOverpass(query, server, timeoutMs){
+  const ctrl = new AbortController();
+  const timer = setTimeout(()=>ctrl.abort(), timeoutMs);
+  try{
+    const res = await fetch(server, {
+      method:'POST',
+      headers:{'Content-Type':'application/x-www-form-urlencoded'},
+      body:'data=' + encodeURIComponent(query),
+      signal: ctrl.signal
+    });
+    clearTimeout(timer);
+    if(!res.ok) throw new Error('HTTP ' + res.status);
+    return await res.json();
+  } catch(err){
+    clearTimeout(timer); throw err;
+  }
+}
+async function fetchOverpassDynamic(query, timeoutMs = 15000){
+  for(const server of OVERPASS_SERVERS){
+    try{
+      const data = await fetchOverpass(query, server, timeoutMs);
+      if(data && Array.isArray(data.elements) && data.elements.length) return data;
+    } catch(err){}
+  }
+  return null;
+}
+async function loadProvincesFromOSM(){
+  let lastErr = null;
+  for(let si=0; si<OVERPASS_SERVERS.length; si++){
+    try{
+      const data = await fetchOverpass(OVERPASS_QUERY, OVERPASS_SERVERS[si], 8000);
+      if(data && Array.isArray(data.elements) && data.elements.length) return data;
+      lastErr = new Error('empty');
+    } catch(err){ lastErr = err; }
+  }
+  throw lastErr || new Error('تعذر الاتصال بـ Overpass');
+}
+
+function bboxOf(geometry){
+  let minX=180,minY=90,maxX=-180,maxY=-90;
+  (function walk(c){
+    if(typeof c[0] === 'number'){
+      if(c[0]<minX) minX=c[0]; if(c[0]>maxX) maxX=c[0];
+      if(c[1]<minY) minY=c[1]; if(c[1]>maxY) maxY=c[1];
+    } else { for(let i=0;i<c.length;i++) walk(c[i]); }
+  })(geometry.coordinates);
+  return [minX,minY,maxX,maxY];
+}
+
+function buildProvinces(geojson){
+  const list = [];
+  const features = (geojson && geojson.features) || [];
+  features.forEach((f, i)=>{
+    if(!f.geometry) return;
+    const t = f.geometry.type;
+    if(t !== 'Polygon' && t !== 'MultiPolygon') return;
+
+    const tags = (f.properties && f.properties.tags) || {};
+    const rawName = tags['name:ar'] || tags.name || tags['name:en'] || ('محافظة ' + (i+1));
+    const meta = lookupMeta(rawName) || lookupMeta(tags['name:en']) || lookupMeta(tags.name) || null;
+
+    const bb = bboxOf(f.geometry);
+    const bboxCenter = [(bb[0]+bb[2])/2, (bb[1]+bb[3])/2];
+
+    let osmId = null;
+    if(f.properties && f.properties.id != null) osmId = f.properties.id;
+    else if(f.id != null) osmId = f.id;
+
+    list.push({
+      idx: list.length, name: meta ? meta.ar : rawName,
+      nameEn: tags['name:en'] || (meta ? meta.en : '') || '',
+      color: COLORS[list.length % COLORS.length],
+      center: meta ? meta.c : bboxCenter, bbox: bb,
+      cap: meta ? meta.cap : '', area: meta ? meta.area : null,
+      pop: meta ? meta.pop : null, note: meta ? meta.note : '',
+      geometry: f.geometry, osmId: osmId
+    });
+  });
+  if(!list.length){
+    PROVINCE_META.forEach((m,i)=>{
+      list.push({
+        idx:i, name:m.ar, nameEn:m.en, color: COLORS[i % COLORS.length],
+        center:m.c, bbox:[m.c[0]-0.25, m.c[1]-0.25, m.c[0]+0.25, m.c[1]+0.25],
+        cap:m.cap, area:m.area, pop:m.pop, note:m.note, geometry:null, osmId:null
+      });
+    });
+  }
+  return list;
+}
+
+function clearMapData(){
+  PROVINCES.forEach(p=>{ if(p.marker){ try{ p.marker.remove(); }catch(e){} } });
+  ['province-border','province-glow','province-glow2','province-3d'].forEach(id=>{
+    try{ if(map.getLayer(id)) map.removeLayer(id); }catch(e){}
+  });
+  try{ if(map.getSource('provinces')) map.removeSource('provinces'); }catch(e){}
+  const list = $('provList'); if(list) list.innerHTML = '';
+  selectedIdx = null; hoveredIdx = null;
+}
+
+function addProvinceLayers(){
+  const withGeom = PROVINCES.filter(p=>p.geometry);
+
+  if(withGeom.length){
+    const fc = {
+      type:'FeatureCollection',
+      features: withGeom.map(p=>({
+        type:'Feature', id: p.idx, geometry: p.geometry,
+        properties:{ idx: p.idx, name: p.name, color: p.color }
+      }))
+    };
+    map.addSource('provinces', { type:'geojson', data:fc });
+
+    map.addLayer({
+      id:'province-3d', type:'fill-extrusion', source:'provinces',
+      paint:{
+        'fill-extrusion-color':[
+          'case',
+          ['boolean',['feature-state','selected'],false], '#FFFFFF',
+          ['boolean',['feature-state','hover'],false],    '#FFE600',
+          ['get','color']
+        ],
+        'fill-extrusion-height':[
+          'case',
+          ['boolean',['feature-state','selected'],false], 3400,
+          ['boolean',['feature-state','hover'],false],    2600,
+          1700
+        ],
+        'fill-extrusion-base':0, 'fill-extrusion-opacity':0.78,
+        'fill-extrusion-vertical-gradient':true
+      }
+    });
+    map.addLayer({
+      id:'province-glow2', type:'line', source:'provinces',
+      layout:{ 'line-join':'round', 'line-cap':'round' },
+      paint:{ 'line-color':['get','color'], 'line-width':16, 'line-opacity':0.28, 'line-blur':14 }
+    });
+    map.addLayer({
+      id:'province-glow', type:'line', source:'provinces',
+      layout:{ 'line-join':'round', 'line-cap':'round' },
+      paint:{ 'line-color':['get','color'], 'line-width':8, 'line-opacity':0.55, 'line-blur':5 }
+    });
+    map.addLayer({
+      id:'province-border', type:'line', source:'provinces',
+      layout:{ 'line-join':'round', 'line-cap':'round' },
+      paint:{
+        'line-color':[
+          'case',
+          ['boolean',['feature-state','selected'],false], '#FFE600',
+          ['boolean',['feature-state','hover'],false],    '#FFFFFF',
+          '#E8F4FF'
+        ],
+        'line-width':[
+          'case',
+          ['boolean',['feature-state','selected'],false], 4,
+          ['boolean',['feature-state','hover'],false],    3.5,
+          2.2
+        ],
+        'line-opacity':1
+      }
+    });
+  }
+
+  if(!provinceHandlersRegistered){
+    map.on('mousemove','province-3d', e=>{
+      if(destPicking) return;
+      if(!e.features || !e.features.length) return;
+      map.getCanvas().style.cursor = 'pointer';
+      const id = e.features[0].id;
+      if(hoveredIdx === id) return;
+      if(hoveredIdx !== null){
+        try{ map.setFeatureState({source:'provinces', id:hoveredIdx}, {hover:false}); }catch(err){}
+      }
+      hoveredIdx = id;
+      try{ map.setFeatureState({source:'provinces', id:hoveredIdx}, {hover:true}); }catch(err){}
+    });
+    map.on('mouseleave','province-3d', ()=>{
+      if(destPicking) return;
+      map.getCanvas().style.cursor = '';
+      if(hoveredIdx !== null){
+        try{ map.setFeatureState({source:'provinces', id:hoveredIdx}, {hover:false}); }catch(err){}
+        hoveredIdx = null;
+      }
+    });
+    map.on('click','province-3d', e=>{
+      if(destPicking) return;
+      if(!e.features || !e.features.length) return;
+      selectProvince(e.features[0].id);
+    });
+    map.on('click', e=>{
+      if(destPicking) return;
+      if(!map.getLayer('province-3d')) return;
+      const hits = map.queryRenderedFeatures(e.point, { layers:['province-3d'] });
+      if(!hits.length) deselectProvince();
+    });
+    provinceHandlersRegistered = true;
+  }
+
+  PROVINCES.forEach(p=>createNode(p));
+  renderProvinceList();
+}
+
+function createNode(p){
+  const el = document.createElement('div');
+  el.className = 'node';
+  const dot = document.createElement('span');
+  dot.className = 'dot';
+  dot.style.background = `radial-gradient(circle at 35% 35%, #fff, ${p.color} 45%, #ff006e)`;
+  dot.style.boxShadow = `0 0 12px ${p.color}, 0 0 26px #ff006e, 0 0 40px ${p.color}88`;
+  el.appendChild(dot);
+  const lbl = document.createElement('span');
+  lbl.className = 'node-label';
+  lbl.textContent = p.name;
+  lbl.style.borderColor = p.color;
+  lbl.style.boxShadow = `0 4px 16px ${p.color}88, 0 0 16px ${p.color}44`;
+  el.appendChild(lbl);
+  el.addEventListener('click', ev=>{ ev.stopPropagation(); ev.preventDefault(); selectProvince(p.idx); });
+  const marker = new maplibregl.Marker({element:el, anchor:'center'}).setLngLat(p.center).addTo(map);
+  p.marker = marker; p.labelEl = lbl;
+  if(!labelsOn) lbl.style.display = 'none';
+}
+
+function renderProvinceList(){
+  const box = $('provList'); if(!box) return;
+  box.innerHTML = '';
+  PROVINCES.slice().sort((a,b)=>a.name.localeCompare(b.name,'ar')).forEach(p=>{
+    const row = document.createElement('div');
+    row.className = 'provItem'; row.dataset.idx = p.idx;
+    const sw = document.createElement('span');
+    sw.className = 'swatch';
+    sw.style.background = `linear-gradient(135deg, ${p.color}, #ff006e)`;
+    sw.style.color = p.color;
+    const tx = document.createElement('span');
+    tx.className = 'txt'; tx.textContent = p.name;
+    row.appendChild(sw); row.appendChild(tx);
+    row.addEventListener('click', ()=>selectProvince(p.idx));
+    box.appendChild(row);
+  });
+  const cnt = $('provCount');
+  if(cnt) cnt.textContent = PROVINCES.length + ' محافظة';
+}
+
+function syncActiveItem(idx){
+  document.querySelectorAll('.provItem').forEach(el=>{
+    el.classList.toggle('active', Number(el.dataset.idx) === idx);
+  });
+  const active = document.querySelector('.provItem.active');
+  if(active) active.scrollIntoView({block:'nearest', behavior:'smooth'});
+}
+
+const searchInput = $('search');
+if(searchInput){
+  searchInput.addEventListener('input', e=>{
+    const q = norm(e.target.value);
+    document.querySelectorAll('.provItem').forEach(el=>{
+      const p = PROVINCES.find(x=>x.idx === Number(el.dataset.idx));
+      if(!p) return;
+      const hit = !q || norm(p.name).includes(q) || norm(p.nameEn).includes(q);
+      el.style.display = hit ? 'flex' : 'none';
+    });
+  });
+}
+
+function deselectProvince(){
+  if(selectedIdx === null) return;
+  try{ map.setFeatureState({source:'provinces', id:selectedIdx}, {selected:false}); }catch(e){}
+  selectedIdx = null; syncActiveItem(-1);
+}
+
+function selectProvince(idx){
+  const p = PROVINCES.find(x=>x.idx === idx);
+  if(!p) return;
+  if(selectedIdx !== null){
+    try{ map.setFeatureState({source:'provinces', id:selectedIdx}, {selected:false}); }catch(e){}
+  }
+  selectedIdx = idx;
+  if(p.geometry){
+    try{ map.setFeatureState({source:'provinces', id:idx}, {selected:true}); }catch(e){}
+  }
+  syncActiveItem(idx);
+  clearBranch(true);
+
+  const pn = $('provinceName'); if(pn) pn.textContent = p.name;
+  const pe = $('provinceEn'); if(pe) pe.textContent = p.nameEn ? p.nameEn.toUpperCase() : '';
+  const pi = $('provinceInfo'); if(pi) pi.textContent = p.note || 'محافظة من محافظات العراق.';
+
+  const grid = $('statGrid');
+  if(grid){
+    grid.innerHTML = '';
+    const stats = [
+      ['المركز', p.cap || '—', ''],
+      ['المساحة', p.area ? fmtNum(p.area) : '—', 'كم²'],
+      ['السكان', p.pop ? fmtNum(p.pop) : '—', 'نسمة'],
+      ['الكثافة', (p.area && p.pop) ? fmtNum(Math.round(p.pop/p.area)) : '—', 'ن/كم²']
+    ];
+    stats.forEach(([label,val,unit])=>{
+      const d = document.createElement('div');
+      d.className = 'stat';
+      d.innerHTML = '<span>'+label+'</span><b>'+val+(unit ? ' <em>'+unit+'</em>' : '')+'</b>';
+      grid.appendChild(d);
+    });
+  }
+
+  const box = $('branches');
+  if(box){
+    box.innerHTML = '';
+    BRANCHES.forEach(b=>{
+      const btn = document.createElement('button');
+      btn.textContent = b.icon + ' ' + b.label;
+      btn.dataset.key = b.key;
+      btn.addEventListener('click', ()=>runBranch(b, btn));
+      box.appendChild(btn);
+    });
+  }
+
+  const admin = $('adminInfo');
+  if(admin){
+    admin.innerHTML = '';
+    [
+      ['الاسم العربي', p.name], ['الاسم الإنجليزي', p.nameEn || '—'],
+      ['المركز الإداري', p.cap || '—'], ['معرّف OSM', p.osmId != null ? p.osmId : 'غير متوفر'],
+      ['المصدر', p.geometry ? 'OpenStreetMap' : 'بيانات محلية']
+    ].forEach(([k,v])=>{
+      const el = document.createElement('p');
+      el.textContent = k + ': ' + v;
+      admin.appendChild(el);
+    });
+  }
+
+  const panel = $('panel');
+  if(panel) panel.style.display = 'block';
+
+  if(p.bbox){
+    map.fitBounds([[p.bbox[0],p.bbox[1]],[p.bbox[2],p.bbox[3]]], {
+      padding:{top:90,bottom:90,left:60,right:360}, pitch:58, bearing:-6, duration:1400, maxZoom:9.5
+    });
+  } else {
+    map.flyTo({center:p.center, zoom:8, pitch:60, duration:1200});
+  }
+}
+
+const BRANCHES = [
+  {key:'cities',   label:'المدن',    icon:'🏙', q:'node["place"~"city|town"]'},
+  {key:'districts',label:'الأقضية',  icon:'🗂', q:'relation["boundary"="administrative"]["admin_level"~"6|7"]'},
+  {key:'roads',    label:'الطرق',    icon:'🛣', q:'way["highway"~"motorway|trunk|primary"]'},
+  {key:'water',    label:'المياه',   icon:'💧', q:'way["waterway"~"river|canal"]'},
+  {key:'tourism',  label:'المعالم',  icon:'🏛', q:'node["tourism"~"attraction|museum|monument"]'},
+  {key:'airports', label:'المطارات', icon:'✈', q:'node["aeroway"="aerodrome"]'}
+];
+
+function clearBranch(silent){
+  ['branch-fill','branch-line','branch-point'].forEach(id=>{
+    try{ if(map.getLayer(id)) map.removeLayer(id); }catch(e){}
+  });
+  try{ if(map.getSource('branch')) map.removeSource('branch'); }catch(e){}
+  document.querySelectorAll('#branches button').forEach(b=>b.classList.remove('active'));
+  if(!silent) toast('✨ تم مسح الفروع');
+}
+
+async function runBranch(branch, btn){
+  if(selectedIdx === null) return;
+  const p = PROVINCES.find(x=>x.idx === selectedIdx);
+  if(!p) return;
+  if(p.osmId === null || p.osmId === undefined){
+    toast('⚠️ لا تتوفر بيانات OSM لهذه المحافظة'); return;
+  }
+  if(btn.classList.contains('active')){ clearBranch(); return; }
+
+  clearBranch(true);
+  btn.classList.add('active');
+  toast('⏳ جاري جلب ' + branch.label + '...', 8000);
+
+  const areaId = 3600000000 + Number(p.osmId);
+  const query = '[out:json][timeout:45];\n' + 'area(' + areaId + ')->.a;\n' + branch.q + '(area.a);\n' + 'out geom 900;';
+  const data = await fetchOverpassDynamic(query, 30000);
+
+  if(!data || !data.elements || !data.elements.length){
+    btn.classList.remove('active'); toast('❌ لم يتم العثور على بيانات'); return;
+  }
+
+  try{
+    await ensureOSMToGeoJSON();
+    let gj = window.osmtogeojson(data, {flatProperties:true});
+    if(gj && typeof gj.then === 'function') gj = await gj;
+    const feats = (gj.features || []).filter(f=>f.geometry);
+    if(!feats.length) throw new Error('empty');
+
+    map.addSource('branch', { type:'geojson', data:{ type:'FeatureCollection', features:feats } });
+    map.addLayer({
+      id:'branch-fill', type:'fill', source:'branch',
+      paint:{ 'fill-color':['case', ['==',['geometry-type'],'Polygon'], '#FF006E', '#00F5FF'], 'fill-opacity':0.22, 'fill-outline-color':'#FFE600' }
+    });
+    map.addLayer({
+      id:'branch-line', type:'line', source:'branch',
+      paint:{ 'line-color':['case', ['==',['geometry-type'],'LineString'], '#00F5FF', '#FFE600'], 'line-width':2.5, 'line-opacity':0.95, 'line-blur':0.5 }
+    });
+    map.addLayer({
+      id:'branch-point', type:'circle', source:'branch',
+      paint:{ 'circle-radius':5.5, 'circle-color':['case', ['==',['geometry-type'],'Point'], '#FFE600', '#FF006E'], 'circle-stroke-width':1.8, 'circle-stroke-color':'#ffffff', 'circle-opacity':0.98 }
+    });
+    toast('✨ ' + branch.label + ': ' + feats.length + ' عنصر');
+  } catch(err){
+    btn.classList.remove('active'); toast('❌ تعذر عرض البيانات');
+  }
+}
+
+/* =========================================================
+   🏗️ المباني
+   ========================================================= */
+async function loadBuildingsForViewport(silent){
+  if(!map || !mapLoaded) return false;
+  if(map.getZoom() < 15){
+    if(!silent) toast('⚠️ قرّب الخريطة أكثر (zoom ≥ 15) لتحميل المباني');
+    return false;
+  }
+  const b = map.getBounds();
+  const bbox = `${b.getSouth()},${b.getWest()},${b.getNorth()},${b.getEast()}`;
+  const query = `[out:json][timeout:20];
+(
+  way["building"](${bbox});
+  relation["building"](${bbox});
+);
+out geom 800;`;
+
+  if(!silent) toast('🏗️ جاري تحميل المباني من OSM...', 8000);
+  const data = await fetchOverpassDynamic(query, 15000);
+  if(!data || !data.elements?.length){
+    if(!silent) toast('❌ لا توجد مباني في هذه المنطقة');
+    return false;
+  }
+
+  try{
+    await ensureOSMToGeoJSON();
+    let gj = window.osmtogeojson(data, { flatProperties: false });
+    if(gj && typeof gj.then === 'function') gj = await gj;
+    const feats = (gj.features || []).filter(f => f.geometry);
+    if(!feats.length) return false;
+
+    feats.forEach(f => {
+      const tags = (f.properties && f.properties.tags) || f.properties || {};
+      const h = parseFloat(tags.height) ||
+                parseFloat(tags['building:height']) ||
+                (parseFloat(tags['building:levels']) || 0) * 3.2 ||
+                6;
+      f.properties = f.properties || {};
+      f.properties._h = Math.max(h, 3);
+      const type = String(tags.building || 'yes').toLowerCase();
+      if (/residential|house|apartments|dormitory/.test(type)) f.properties._color = '#B8B8C8';
+      else if (/commercial|retail|office|industrial/.test(type)) f.properties._color = '#FFE0A0';
+      else if (/school|university|hospital|government|mosque|church/.test(type)) f.properties._color = '#A0D8FF';
+      else f.properties._color = '#C0C0C0';
+    });
+
+    if(map.getSource('real-buildings')){
+      map.getSource('real-buildings').setData({ type: 'FeatureCollection', features: feats });
+    } else {
+      map.addSource('real-buildings', { type: 'geojson', data: { type: 'FeatureCollection', features: feats } });
+      const firstSymbol = map.getStyle().layers.find(l => l.type === 'symbol');
+      addLayerSafe({
+        id: 'real-buildings-3d',
+        type: 'fill-extrusion',
+        source: 'real-buildings',
+        paint: {
+          'fill-extrusion-color': ['get', '_color'],
+          'fill-extrusion-height': ['get', '_h'],
+          'fill-extrusion-base': 0,
+          'fill-extrusion-opacity': 0.92,
+          'fill-extrusion-vertical-gradient': true
+        }
+      }, firstSymbol ? firstSymbol.id : undefined);
+    }
+    if(!silent) toast(`🏗️ تم تحميل ${feats.length} مبنى ثلاثي الأبعاد`);
+    return true;
+  } catch (e){ console.warn(e); return false; }
+}
+
+function clearBuildings(){
+  try{ if(map.getLayer('real-buildings-3d')) map.removeLayer('real-buildings-3d'); }catch(e){}
+  try{ if(map.getSource('real-buildings')) map.removeSource('real-buildings'); }catch(e){}
+}
+
+/* =========================================================
+   🛣️ الطرق
+   ========================================================= */
+const ROAD_TYPE_COLOR = [
+  'match', ['get', 'highway'],
+  'motorway', '#FF006E', 'motorway_link', '#FF006E',
+  'trunk', '#FB5607', 'trunk_link', '#FB5607',
+  'primary', '#FFE600', 'primary_link', '#FFE600',
+  'secondary', '#00F5FF', 'secondary_link', '#00F5FF',
+  'tertiary', '#06FFA5', 'tertiary_link', '#06FFA5',
+  'residential', '#B537F2',
+  'living_street', '#9B5DE5',
+  'service', '#8A8AA0',
+  'footway', '#8B8B8B', 'path', '#8B8B8B', 'pedestrian', '#FF9F1C',
+  'steps', '#8B8B8B', 'cycleway', '#8B8B8B',
+  '#B537F2'
+];
+
+const ROAD_TYPE_WIDTH = [
+  'match', ['get', 'highway'],
+  'motorway', 5, 'motorway_link', 3,
+  'trunk', 4, 'trunk_link', 3,
+  'primary', 3.5, 'primary_link', 2.5,
+  'secondary', 3, 'secondary_link', 2,
+  'tertiary', 2.5, 'tertiary_link', 1.8,
+  'residential', 2,
+  'living_street', 1.8,
+  'service', 1.5,
+  'footway', 1.2, 'path', 1.2, 'pedestrian', 1.5,
+  'steps', 1, 'cycleway', 1.2,
+  1.5
+];
+
+async function loadRoadsForViewport(silent){
+  if(!map || !mapLoaded) return false;
+  if(map.getZoom() < 13){
+    if(!silent) toast('⚠️ قرّب الخريطة أكثر (zoom ≥ 13) لتحميل الطرق');
+    return false;
+  }
+  const b = map.getBounds();
+  const bbox = `${b.getSouth()},${b.getWest()},${b.getNorth()},${b.getEast()}`;
+  const query = `[out:json][timeout:25];
+(
+  way["highway"~"motorway|motorway_link|trunk|trunk_link|primary|primary_link|secondary|secondary_link|tertiary|tertiary_link|residential|living_street|service|footway|pedestrian|path|steps|cycleway"](${bbox});
+  way["bridge"="yes"](${bbox});
+  way["tunnel"="yes"](${bbox});
+);
+out geom 2000;`;
+
+  if(!silent) toast('🛣️ جاري تحميل الطرق من OSM...', 8000);
+  const data = await fetchOverpassDynamic(query, 15000);
+  if(!data || !data.elements?.length){
+    if(!silent) toast('❌ لا توجد طرق في هذه المنطقة');
+    return false;
+  }
+
+  try{
+    await ensureOSMToGeoJSON();
+    let gj = window.osmtogeojson(data, { flatProperties: true });
+    if(gj && typeof gj.then === 'function') gj = await gj;
+    const feats = (gj.features || []).filter(f => f.geometry && (f.geometry.type === 'LineString' || f.geometry.type === 'MultiLineString'));
+    if(!feats.length) return false;
+
+    feats.forEach(f => {
+      const tags = f.properties || {};
+      if(tags.maxspeed){
+        const m = String(tags.maxspeed).match(/(\d+)/);
+        f.properties._speed = m ? parseInt(m[1], 10) : null;
+      } else {
+        f.properties._speed = null;
+      }
+    });
+
+    if(map.getSource('real-roads')){
+      map.getSource('real-roads').setData({ type: 'FeatureCollection', features: feats });
+    } else {
+      map.addSource('real-roads', { type: 'geojson', data: { type: 'FeatureCollection', features: feats } });
+      const firstSymbol = map.getStyle().layers.find(l => l.type === 'symbol');
+      const beforeId = firstSymbol ? firstSymbol.id : undefined;
+
+      addLayerSafe({
+        id: 'real-tunnels', type: 'line', source: 'real-roads',
+        filter: ['==', ['get', 'tunnel'], 'yes'],
+        paint: { 'line-color': '#00F5FF', 'line-width': 2, 'line-dasharray': [2, 2], 'line-opacity': 0.85 }
+      }, beforeId);
+      addLayerSafe({
+        id: 'real-roads-line', type: 'line', source: 'real-roads',
+        paint: { 'line-color': ROAD_TYPE_COLOR, 'line-width': ROAD_TYPE_WIDTH, 'line-opacity': 0.95 }
+      }, beforeId);
+      addLayerSafe({
+        id: 'real-bridges', type: 'line', source: 'real-roads',
+        filter: ['==', ['get', 'bridge'], 'yes'],
+        paint: { 'line-color': '#FFE600', 'line-width': 3.5, 'line-opacity': 0.95 }
+      }, beforeId);
+    }
+    if(!silent) toast(`🛣️ تم تحميل ${feats.length} مقطع طرق`);
+    return true;
+  } catch (e){ console.warn(e); return false; }
+}
+
+function clearRoads(){
+  ['real-roads-line','real-bridges','real-tunnels'].forEach(id=>{
+    try{ if(map.getLayer(id)) map.removeLayer(id); }catch(e){}
+  });
+  try{ if(map.getSource('real-roads')) map.removeSource('real-roads'); }catch(e){}
+}
+
+/* =========================================================
+   ✈️ المطارات
+   ========================================================= */
+async function loadAirports(){
+  if(!map || !mapLoaded || airportsLoaded) return false;
+  toast('✈️ جاري تحميل المطارات...', 8000);
+  const query = `[out:json][timeout:30];
+area["ISO3166-1"="IQ"]["admin_level"="2"]->.a;
+(
+  node["aeroway"="aerodrome"](area.a);
+  way["aeroway"="aerodrome"](area.a);
+  way["aeroway"="runway"](area.a);
+  way["aeroway"="taxiway"](area.a);
+  node["aeroway"="helipad"](area.a);
+);
+out geom;`;
+
+  const data = await fetchOverpassDynamic(query, 30000);
+  if(!data || !data.elements?.length){ toast('❌ لا تتوفر بيانات مطارات'); return false; }
+
+  try{
+    await ensureOSMToGeoJSON();
+    let gj = window.osmtogeojson(data, { flatProperties: true });
+    if(gj && typeof gj.then === 'function') gj = await gj;
+    const feats = (gj.features || []).filter(f => f.geometry);
+    if(!feats.length) return false;
+
+    ['airports-runways','airports-taxiways','airports-points','airports-labels'].forEach(id=>{
+      try{ if(map.getLayer(id)) map.removeLayer(id); }catch(e){}
+    });
+    try{ if(map.getSource('airports')) map.removeSource('airports'); }catch(e){}
+
+    map.addSource('airports', { type: 'geojson', data: { type: 'FeatureCollection', features: feats } });
+    map.addLayer({
+      id: 'airports-taxiways', type: 'line', source: 'airports',
+      filter: ['==', ['get', 'aeroway'], 'taxiway'],
+      paint: { 'line-color': '#FFE600', 'line-width': 2, 'line-opacity': 0.8 }
+    });
+    map.addLayer({
+      id: 'airports-runways', type: 'line', source: 'airports',
+      filter: ['==', ['get', 'aeroway'], 'runway'],
+      paint: { 'line-color': '#FFFFFF', 'line-width': 5, 'line-opacity': 0.95 }
+    });
+    map.addLayer({
+      id: 'airports-points', type: 'circle', source: 'airports',
+      filter: ['any', ['==', ['get', 'aeroway'], 'aerodrome'], ['==', ['get', 'aeroway'], 'helipad']],
+      paint: {
+        'circle-radius': 8, 'circle-color': '#FF006E',
+        'circle-stroke-width': 2, 'circle-stroke-color': '#FFFFFF', 'circle-opacity': 0.95
+      }
+    });
+    map.addLayer({
+      id: 'airports-labels', type: 'symbol', source: 'airports', minzoom: 6,
+      filter: ['==', ['get', 'aeroway'], 'aerodrome'],
+      layout: {
+        'text-field': ['coalesce', ['get', 'name:ar'], ['get', 'name'], ['get', 'name:en'], 'مطار'],
+        'text-font': ['Noto Sans Regular'],
+        'text-size': 11,
+        'text-offset': [0, -1.8],
+        'text-anchor': 'bottom'
+      },
+      paint: { 'text-color': '#FFFFFF', 'text-halo-color': '#0a0320', 'text-halo-width': 1.5 }
+    });
+    airportsLoaded = true;
+    toast(`✈️ تم تحميل ${feats.length} مطاراً/مدرجاً`);
+    return true;
+  } catch (e){ console.warn(e); toast('❌ تعذر تحميل المطارات'); return false; }
+}
+
+/* =========================================================
+   🛩️ الطائرات الحية
+   ========================================================= */
+function ensureAircraftIcon(){
+  if(!map || map.hasImage('aircraft-icon')) return;
+  try{
+    const c = document.createElement('canvas');
+    c.width = 32; c.height = 32;
+    const ctx = c.getContext('2d');
+    ctx.fillStyle = '#00F5FF';
+    ctx.strokeStyle = '#FFFFFF';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(16, 2);
+    ctx.lineTo(20, 12);
+    ctx.lineTo(30, 14);
+    ctx.lineTo(30, 18);
+    ctx.lineTo(20, 16);
+    ctx.lineTo(20, 26);
+    ctx.lineTo(24, 30);
+    ctx.lineTo(12, 30);
+    ctx.lineTo(12, 26);
+    ctx.lineTo(12, 16);
+    ctx.lineTo(2, 18);
+    ctx.lineTo(2, 14);
+    ctx.lineTo(12, 12);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+    const imgData = ctx.getImageData(0, 0, 32, 32);
+    map.addImage('aircraft-icon', imgData);
+  } catch(e){ console.warn('icon error', e); }
+}
+
+async function fetchLiveAircraft(){
+  if(!map || !mapLoaded) return;
+  const b = map.getBounds();
+  const url = `https://opensky-network.org/api/states/all?lamin=${b.getSouth()}&lomin=${b.getWest()}&lamax=${b.getNorth()}&lomax=${b.getEast()}`;
+  try{
+    const res = await fetch(url);
+    if(!res.ok) return;
+    const json = await res.json();
+    const features = (json.states || []).map(s => ({
+      type: 'Feature',
+      geometry: { type: 'Point', coordinates: [s[5], s[6]] },
+      properties: {
+        callsign: (s[1] || '').trim() || '—',
+        altitude: (s[7] !== null && s[7] !== undefined) ? s[7] : ((s[13] !== null && s[13] !== undefined) ? s[13] : 0),
+        velocity: (s[9] !== null && s[9] !== undefined) ? s[9] : 0,
+        heading: (s[10] !== null && s[10] !== undefined) ? s[10] : 0,
+        country: s[2] || ''
+      }
+    })).filter(f => f.geometry.coordinates[0] != null && f.geometry.coordinates[1] != null);
+
+    if(map.getSource('live-aircraft')){
+      map.getSource('live-aircraft').setData({ type: 'FeatureCollection', features });
+    } else {
+      ensureAircraftIcon();
+      map.addSource('live-aircraft', { type: 'geojson', data: { type: 'FeatureCollection', features } });
+      map.addLayer({
+        id: 'live-aircraft-icons', type: 'symbol', source: 'live-aircraft',
+        layout: {
+          'icon-image': 'aircraft-icon', 'icon-size': 0.85,
+          'icon-rotate': ['coalesce', ['get', 'heading'], 0],
+          'icon-allow-overlap': true, 'icon-ignore-placement': true
+        }
+      });
+      map.addLayer({
+        id: 'live-aircraft-labels', type: 'symbol', source: 'live-aircraft',
+        layout: {
+          'text-field': ['get', 'callsign'],
+          'text-font': ['Noto Sans Regular'],
+          'text-size': 9, 'text-offset': [0, 1.4], 'text-anchor': 'top'
+        },
+        paint: { 'text-color': '#FFFFFF', 'text-halo-color': '#0a0320', 'text-halo-width': 1 }
+      });
+    }
+  } catch (e){ /* تجاهل */ }
+}
+
+function startAircraftTracking(){
+  if(aircraftTimer) return;
+  ensureAircraftIcon();
+  fetchLiveAircraft();
+  aircraftTimer = setInterval(fetchLiveAircraft, 15000);
+}
+function stopAircraftTracking(){
+  clearInterval(aircraftTimer);
+  aircraftTimer = null;
+  try{ if(map.getLayer('live-aircraft-icons')) map.removeLayer('live-aircraft-icons'); }catch(e){}
+  try{ if(map.getLayer('live-aircraft-labels')) map.removeLayer('live-aircraft-labels'); }catch(e){}
+  try{ if(map.getSource('live-aircraft')) map.removeSource('live-aircraft'); }catch(e){}
+}
+
+/* =========================================================
+   🚦 السرعات
+   ========================================================= */
+function toggleTrafficMode(){
+  if(!map || !map.getLayer('real-roads-line')){
+    toast('⚠️ حمّل الطرق أولاً (🛣️)');
+    return;
+  }
+  trafficMode = !trafficMode;
+  if(trafficMode){
+    map.setPaintProperty('real-roads-line', 'line-color', [
+      'case',
+      ['>=', ['coalesce', ['get', '_speed'], 0], 80], '#06FFA5',
+      ['>=', ['coalesce', ['get', '_speed'], 0], 50], '#FFE600',
+      ['>',  ['coalesce', ['get', '_speed'], 0], 0],  '#FF006E',
+      '#5A5A78'
+    ]);
+    map.setPaintProperty('real-roads-line', 'line-width', 4);
+    toast('🚦 السرعات: أخضر ≥80، أصفر 50-79، أحمر <50، رمادي غير معروف');
+  } else {
+    map.setPaintProperty('real-roads-line', 'line-color', ROAD_TYPE_COLOR);
+    map.setPaintProperty('real-roads-line', 'line-width', ROAD_TYPE_WIDTH);
+    toast('🛣️ ألوان الطرق حسب النوع');
+  }
+  $('toggleTraffic').classList.toggle('on', trafficMode);
+}
+
+/* =========================================================
+   🧭 OSRM
+   ========================================================= */
+function clearRoute(){
+  routeSources.forEach(id => {
+    try{ if(map.getLayer(id + '-line')) map.removeLayer(id + '-line'); }catch(e){}
+    try{ if(map.getSource(id)) map.removeSource(id); }catch(e){}
+  });
+  routeSources = [];
+  if(destinationMarker){ try{ destinationMarker.remove(); }catch(e){} destinationMarker = null; }
+}
+
+async function routeToDestination(destLng, destLat){
+  if(!userLocation){
+    toast('⚠️ اضغط 📍 موقعي أولاً لتحديد نقطة البداية');
+    return;
+  }
+  const [uLng, uLat] = userLocation;
+  const url = `https://router.project-osrm.org/route/v1/driving/${uLng},${uLat};${destLng},${destLat}?overview=full&geometries=geojson&alternatives=true&steps=false`;
+  toast('🧭 جاري حساب المسار عبر OSRM...', 6000);
+  try{
+    const res = await fetch(url);
+    if(!res.ok) throw new Error('OSRM ' + res.status);
+    const json = await res.json();
+    if(!json.routes || !json.routes.length){ toast('❌ تعذر حساب المسار'); return; }
+
+    clearRoute();
+    const main = json.routes[0];
+    map.addSource('route-main', {
+      type: 'geojson',
+      data: { type: 'Feature', geometry: main.geometry, properties: {} }
+    });
+    map.addLayer({
+      id: 'route-main-line', type: 'line', source: 'route-main',
+      layout: { 'line-join': 'round', 'line-cap': 'round' },
+      paint: { 'line-color': '#00F5FF', 'line-width': 7, 'line-opacity': 0.95, 'line-blur': 1 }
+    });
+    routeSources.push('route-main');
+
+    json.routes.slice(1).forEach((r, i) => {
+      const id = `route-alt-${i}`;
+      map.addSource(id, {
+        type: 'geojson',
+        data: { type: 'Feature', geometry: r.geometry, properties: {} }
+      });
+      map.addLayer({
+        id: `${id}-line`, type: 'line', source: id,
+        layout: { 'line-join': 'round', 'line-cap': 'round' },
+        paint: { 'line-color': '#FFE600', 'line-width': 4, 'line-opacity': 0.65, 'line-dasharray': [2, 2] }
+      });
+      routeSources.push(id);
+    });
+
+    const el = document.createElement('div');
+    el.style.cssText = 'width:20px;height:20px;background:#FF006E;border:3px solid #fff;border-radius:50% 50% 50% 0;transform:rotate(-45deg);box-shadow:0 0 24px #FF006E;';
+    destinationMarker = new maplibregl.Marker({ element: el, anchor: 'bottom' })
+      .setLngLat([destLng, destLat]).addTo(map);
+
+    const km = (main.distance / 1000).toFixed(1);
+    const min = Math.round(main.duration / 60);
+    const altCount = json.routes.length - 1;
+    toast(`✨ الأسرع: ${km} كم — ${min} دقيقة${altCount > 0 ? ' (' + altCount + ' بديل)' : ''}`, 5000);
+
+    const coords = main.geometry.coordinates;
+    const lngs = coords.map(c => c[0]), lats = coords.map(c => c[1]);
+    map.fitBounds(
+      [[Math.min(...lngs), Math.min(...lats)], [Math.max(...lngs), Math.max(...lats)]],
+      { padding: { top: 100, bottom: 100, left: 80, right: 80 }, pitch: 55, duration: 1400 }
+    );
+  } catch(e){
+    console.warn(e);
+    toast('❌ تعذر الاتصال بخدمة OSRM');
+  }
+}
+
+/* =========================================================
+   تعديل ارتفاع المحافظات عند التقريب
+   ========================================================= */
+function updateProvinceExtrusionForZoom(){
+  if(!map || !map.getLayer('province-3d')) return;
+  const z = map.getZoom();
+  const bucket = Math.floor(z);
+  if(bucket === lastBldZoomBucket) return;
+  lastBldZoomBucket = bucket;
+
+  let h = 1700, op = 0.78;
+  if(buildingsActive && z > 11){
+    const t = Math.min(1, (z - 11) / 4);
+    h = 1700 * Math.max(0.01, 1 - t * 0.99);
+    op = 0.78 * Math.max(0.15, 1 - t * 0.85);
+  }
+  try{
+    map.setPaintProperty('province-3d', 'fill-extrusion-height', [
+      'case',
+      ['boolean', ['feature-state', 'selected'], false], h * 2,
+      ['boolean', ['feature-state', 'hover'], false], h * 1.5,
+      h
+    ]);
+    map.setPaintProperty('province-3d', 'fill-extrusion-opacity', op);
+  } catch(e){}
+}
+
+/* =========================================================
+   ربط الأزرار (الأصلية)
+   ========================================================= */
+$('close').addEventListener('click', ()=>{
+  $('panel').style.display = 'none'; deselectProvince();
+});
+$('zoomProvince').addEventListener('click', ()=>{
+  if(selectedIdx === null) return;
+  const p = PROVINCES.find(x=>x.idx === selectedIdx);
+  if(!p) return;
+  if(p.bbox){
+    map.fitBounds([[p.bbox[0],p.bbox[1]],[p.bbox[2],p.bbox[3]]], { padding:80, pitch:70, duration:1300, maxZoom:11 });
+  } else { map.flyTo({center:p.center, zoom:10, pitch:70, duration:1200}); }
+});
+$('showAll').addEventListener('click', ()=>{
+  $('panel').style.display = 'none'; deselectProvince();
+  map.fitBounds(IRAQ_BOUNDS, {padding:40, pitch:45, bearing:0, duration:1500});
+});
+$('reset').addEventListener('click', ()=>{
+  deselectProvince();
+  map.fitBounds(IRAQ_BOUNDS, {padding:40, pitch:52, bearing:-8, duration:1600});
+});
+$('terrain').addEventListener('click', function(){
+  terrainOn = !terrainOn;
+  this.classList.toggle('on', terrainOn);
+  try{
+    if(map.getSource('iraq-dem')){
+      map.setTerrain(terrainOn ? {source:'iraq-dem', exaggeration:1.35} : null);
+    }
+  }catch(e){}
+  toast(terrainOn ? '⛰️ التضاريس مفعّلة' : '🗺️ عرض مسطح');
+});
+$('labels').addEventListener('click', function(){
+  labelsOn = !labelsOn;
+  this.classList.toggle('on', labelsOn);
+  PROVINCES.forEach(p=>{ if(p.labelEl) p.labelEl.style.display = labelsOn ? '' : 'none'; });
+});
+$('toggleList').addEventListener('click', function(){
+  $('sideList').classList.toggle('hidden');
+  this.classList.toggle('on', !$('sideList').classList.contains('hidden'));
+});
+$('clearBranch').addEventListener('click', ()=>clearBranch());
+
+$('loadBuildings').addEventListener('click', async function(){
+  if(!map || !mapLoaded) return;
+  if(buildingsActive){
+    clearBuildings();
+    buildingsActive = false;
+    lastBldZoomBucket = -1;
+    updateProvinceExtrusionForZoom();
+    this.classList.remove('on');
+    toast('🗑️ تم مسح المباني');
+    return;
+  }
+  if(map.getZoom() < 15){
+    toast('⚠️ قرّب الخريطة أكثر (zoom ≥ 15) لتحميل المباني');
+    return;
+  }
+  buildingsActive = true;
+  lastBldZoomBucket = -1;
+  updateProvinceExtrusionForZoom();
+  this.classList.add('on');
+  const ok = await loadBuildingsForViewport();
+  if(!ok && !map.getSource('real-buildings')){
+    this.classList.remove('on');
+    buildingsActive = false;
+    lastBldZoomBucket = -1;
+    updateProvinceExtrusionForZoom();
+  }
+});
+
+$('loadRoads').addEventListener('click', async function(){
+  if(!map || !mapLoaded) return;
+  if(roadsActive){
+    clearRoads();
+    roadsActive = false;
+    if(trafficMode){ trafficMode = false; $('toggleTraffic').classList.remove('on'); }
+    this.classList.remove('on');
+    toast('🗑️ تم مسح الطرق');
+    return;
+  }
+  if(map.getZoom() < 13){
+    toast('⚠️ قرّب الخريطة أكثر (zoom ≥ 13) لتحميل الطرق');
+    return;
+  }
+  roadsActive = true;
+  this.classList.add('on');
+  const ok = await loadRoadsForViewport();
+  if(!ok && !map.getSource('real-roads')){
+    this.classList.remove('on');
+    roadsActive = false;
+  }
+});
+
+$('loadAirportsBtn').addEventListener('click', async function(){
+  if(!map || !mapLoaded) return;
+  if(airportsLoaded){
+    ['airports-runways','airports-taxiways','airports-points','airports-labels'].forEach(id=>{
+      try{ if(map.getLayer(id)) map.removeLayer(id); }catch(e){}
+    });
+    try{ if(map.getSource('airports')) map.removeSource('airports'); }catch(e){}
+    airportsLoaded = false;
+    this.classList.remove('on');
+    toast('🗑️ تم مسح المطارات');
+    return;
+  }
+  this.classList.add('on');
+  const ok = await loadAirports();
+  if(!ok && !map.getSource('airports')) this.classList.remove('on');
+});
+
+$('toggleAircraft').addEventListener('click', function(){
+  if(!map || !mapLoaded){ toast('⚠️ انتظر تحميل الخريطة'); return; }
+  if(aircraftTimer){
+    stopAircraftTracking();
+    this.classList.remove('on');
+    toast('🛩️ تم إيقاف تتبع الطائرات');
+  } else {
+    startAircraftTracking();
+    this.classList.add('on');
+    toast('🛩️ تتبع الطائرات مباشر (OpenSky)');
+  }
+});
+
+$('toggleTraffic').addEventListener('click', toggleTrafficMode);
+
+$('pickDest').addEventListener('click', function(){
+  if(!map || !mapLoaded) return;
+  if(destPicking){
+    destPicking = false;
+    this.classList.remove('on');
+    map.getCanvas().style.cursor = '';
+    toast('❌ تم إلغاء اختيار الوجهة');
+    return;
+  }
+  destPicking = true;
+  this.classList.add('on');
+  map.getCanvas().style.cursor = 'crosshair';
+  toast('🎯 اضغط على الخريطة لاختيار الوجهة');
+});
+
+$('clearRoute').addEventListener('click', function(){
+  if(!map) return;
+  clearRoute();
+  if(destPicking){ destPicking = false; $('pickDest').classList.remove('on'); }
+  map.getCanvas().style.cursor = '';
+  toast('❌ تم مسح المسار');
+});
+
+$('myLocation').addEventListener('click', function(){
+  if(!map || !mapLoaded) return;
+  if(!navigator.geolocation){ toast('⚠️ المتصفح لا يدعم تحديد الموقع'); return; }
+  this.classList.add('on');
+  toast('🛰️ جاري تحديد موقعك...');
+  navigator.geolocation.getCurrentPosition(
+    (pos) => {
+      const lng = pos.coords.longitude;
+      const lat = pos.coords.latitude;
+      userLocation = [lng, lat];
+      if(userMarker){ try{ userMarker.remove(); }catch(e){} }
+      const el = document.createElement('div');
+      el.className = 'user-marker';
+      el.innerHTML = '<div class="user-pulse"></div><div class="user-dot"></div>';
+      userMarker = new maplibregl.Marker({element: el, anchor: 'center'}).setLngLat([lng, lat]).addTo(map);
+      map.flyTo({center: [lng, lat], zoom: 14, pitch: 60, duration: 1500});
+      toast('📍 تم تحديد موقعك — اضغط 🎯 وجهة للتنقل');
+    },
+    (err) => {
+      this.classList.remove('on');
+      toast('❌ تعذر تحديد الموقع: ' + (err.message || ''));
+    },
+    { enableHighAccuracy: true, timeout: 12000 }
+  );
+});
+
+/* =========================================================
+   🗺️ تهيئة الخريطة
+   ========================================================= */
+async function initMap(){
+  try{
+    progress(8, 'جاري تحميل ستايل الخريطة...');
+    const style = await buildMapStyle();
+    progress(20, 'تهيئة محرك الخريطة...');
+
+    map = new maplibregl.Map({
+      container: 'map',
+      style: style,
+      center: [43.7, 33.3],
+      zoom: 6,
+      pitch: 52,
+      bearing: -8,
+      maxZoom: 18,
+      minZoom: 4,
+      antialias: true
+    });
+
+    map.on('error', (e) => console.warn('map error:', e && e.error ? e.error.message : e));
+
+    map.on('click', (e) => {
+      if(!destPicking) return;
+      const { lng, lat } = e.lngLat;
+      destPicking = false;
+      $('pickDest').classList.remove('on');
+      map.getCanvas().style.cursor = '';
+      routeToDestination(lng, lat);
+    });
+
+    map.on('moveend', () => {
+      updateProvinceExtrusionForZoom();
+    });
+
+    progress(30, 'انتظار تحميل الطبقات...');
+
+    await new Promise((resolve) => {
+      let done = false;
+      const finish = () => { if(!done){ done = true; resolve(); } };
+      map.on('load', finish);
+      map.on('error', finish);
+      setTimeout(finish, 12000);
+    });
+
+    mapLoaded = true;
+    progress(40, 'تهيئة التضاريس ثلاثية الأبعاد...');
+
+    try{
+      if(map.getSource('iraq-dem')){
+        map.setTerrain({source: 'iraq-dem', exaggeration: 1.35});
+      }
+    }catch(e){ console.warn('terrain:', e); }
+
+    try{ applyFullVividTheme(); }catch(e){}
+
+    progress(55, 'تحميل محافظات العراق من OSM...');
+    setStatus('جاري تحميل المحافظات...');
+
+    let loaded = false;
+    try{
+      const data = await loadProvincesFromOSM();
+      progress(72, 'معالجة البيانات الجغرافية...');
+      await ensureOSMToGeoJSON();
+      let gj = window.osmtogeojson(data, {flatProperties: true});
+      if(gj && typeof gj.then === 'function') gj = await gj;
+      PROVINCES = buildProvinces(gj);
+      progress(86, 'رسم الحدود ثلاثية الأبعاد...');
+      addProvinceLayers();
+      loaded = true;
+      setStatus('الخريطة جاهزة — ' + PROVINCES.length + ' محافظة');
+    }catch(e){
+      console.warn('OSM provinces failed:', e);
+    }
+
+    if(!loaded){
+      progress(86, 'استخدام البيانات المحلية...');
+      PROVINCES = buildProvinces({features: []});
+      addProvinceLayers();
+      setStatus('جاهز (بيانات محلية)');
+    }
+
+    progress(100, 'جاهز للاستكشاف!');
+    setTimeout(() => hideLoading(), 500);
+
+    map.fitBounds(IRAQ_BOUNDS, {padding: 40, pitch: 45, bearing: 0, duration: 1500});
+
+    /* ✦ تهيئة نظام الدردشة بعد جاهزية الخريطة */
+    initChatSystem();
+
+  }catch(err){
+    console.error('init failed:', err);
+    progress(100, 'حدث خطأ — حاول التحديث');
+    setTimeout(() => hideLoading(), 500);
+  }
+}
+
+/* =========================================================
+   ✦✦✦ نظام الدردشة الاجتماعي (Neon 3D Live Chat) ✦✦✦
+   ========================================================= */
+
+/* ---------- إعدادات Firebase (استبدلها بإعدادات مشروعك) ---------- */
+const firebaseConfig = {
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_PROJECT.firebaseapp.com",
+  databaseURL: "https://YOUR_PROJECT-default-rtdb.firebaseio.com",
+  projectId: "YOUR_PROJECT",
+  storageBucket: "YOUR_PROJECT.appspot.com",
+  messagingSenderId: "YOUR_SENDER_ID",
+  appId: "YOUR_APP_ID"
+};
+/* 
+   ⚠️ مهم: أنشئ مشروع Firebase، فعّل Authentication (Anonymous)،
+   وفعّل Realtime Database بقواعد مناسبة. استبدل القيم أعلاه.
+*/
+
+let chatAuth = null;
+let chatDb = null;
+let currentUser = null;          // { uid, name, avatar, lat, lng }
+let chatMarkers = {};            // uid -> { marker, bubbleEl, plusEl }
+let activeChatPartner = null;    // { uid, name, avatar }
+let currentChatId = null;        // معرف المحادثة (مرتب أبجدياً بين UID)
+let pendingRequests = [];        // طلبات واردة
+let requestListener = null;
+let chatMessagesListener = null;
+let usersListener = null;
+let requestPickingMode = false;  // وضع "طلب دردشة": النقر على مستخدم لإرسال طلب
+let newRequestsCount = 0;
+
+/* أسماء وصور رمزية عشوائية */
+const ARABIC_NAMES = ['علي','حسين','فاطمة','زينب','محمد','نور','يوسف','مريم','عمر','سارة','كرار','رقية','أحمد','هدى','مصطفى','بنين'];
+const AVATAR_EMOJIS = ['🧑‍🚀','🧕','👨‍💻','👩‍🔬','🧑‍🎨','👨‍🍳','👩‍🚒','🧑‍🌾','👨‍⚕️','👩‍🏫','🧑‍🎤','👩‍💻'];
+
+function randomChoice(arr){ return arr[Math.floor(Math.random() * arr.length)]; }
+function randomAvatar(){ return randomChoice(AVATAR_EMOJIS); }
+function randomName(){ return randomChoice(ARABIC_NAMES) + ' ' + Math.floor(Math.random()*900+100); }
+
+/* تهيئة Firebase والمستخدم المجهول */
+async function initChatSystem(){
+  if(!firebaseConfig.apiKey || firebaseConfig.apiKey === 'YOUR_API_KEY'){
+    console.warn('⚠️ لم يتم تكوين Firebase. نظام الدردشة معطل حتى تضع إعداداتك.');
+    toast('⚠️ نظام الدردشة يحتاج إعداد Firebase (راجع الكود)', 6000);
+    return;
+  }
+  try{
+    firebase.initializeApp(firebaseConfig);
+    chatAuth = firebase.auth();
+    chatDb = firebase.database();
+
+    /* مصادقة مجهولة */
+    const cred = await chatAuth.signInAnonymously();
+    const uid = cred.user.uid;
+
+    /* جلب أو إنشاء ملف المستخدم */
+    const userRef = chatDb.ref('users/' + uid);
+    const snap = await userRef.once('value');
+    let profile = snap.val();
+    if(!profile){
+      profile = {
+        name: randomName(),
+        avatar: randomAvatar(),
+        createdAt: firebase.database.ServerValue.TIMESTAMP
+      };
+      await userRef.set(profile);
+    }
+    currentUser = {
+      uid: uid,
+      name: profile.name,
+      avatar: profile.avatar,
+      lat: null,
+      lng: null
+    };
+
+    /* تعيين الحضور: متصل الآن + onDisconnect */
+    const presenceRef = chatDb.ref('users/' + uid + '/online');
+    await presenceRef.set(true);
+    presenceRef.onDisconnect().set(false);
+    /* عند قطع الاتصال، يمكن أيضاً تعيين lastSeen */
+    userRef.child('lastSeen').onDisconnect().set(firebase.database.ServerValue.TIMESTAMP);
+
+    /* تحديث الموقع الجغرافي إذا توفر */
+    if(navigator.geolocation){
+      navigator.geolocation.getCurrentPosition(async (pos)=>{
+        const lat = pos.coords.latitude;
+        const lng = pos.coords.longitude;
+        currentUser.lat = lat; currentUser.lng = lng;
+        await userRef.update({ lat, lng, lastLocationUpdate: firebase.database.ServerValue.TIMESTAMP });
+      }, ()=>{}, { enableHighAccuracy: true, timeout: 10000 });
+    }
+
+    /* الاستماع إلى المستخدمين الآخرين المتصلين */
+    listenToChatUsers();
+
+    /* الاستماع إلى طلبات الدردشة الواردة */
+    listenToChatRequests();
+
+    toast('💬 نظام الدردشة جاهز — اضغط 💬 طلب دردشة', 4000);
+
+  } catch(err){
+    console.error('Chat init error:', err);
+    toast('❌ تعذر تهيئة الدردشة: ' + (err.message || ''), 5000);
+  }
+}
+
+/* ---------- عرض المستخدمين على الخريطة ---------- */
+function listenToChatUsers(){
+  if(!chatDb) return;
+  const usersRef = chatDb.ref('users');
+  usersListener = usersRef.on('value', (snapshot)=>{
+    const users = snapshot.val() || {};
+    Object.keys(users).forEach(uid => {
+      if(uid === currentUser.uid) return; // لا نعرض أنفسنا
+      const u = users[uid];
+      if(!u.online) {
+        removeChatMarker(uid);
+        return;
+      }
+      if(u.lat == null || u.lng == null) return;
+      updateChatMarker(uid, u);
+    });
+    // إزالة علامات المستخدمين الذين لم يعودوا موجودين
+    Object.keys(chatMarkers).forEach(uid => {
+      if(!users[uid] || !users[uid].online) removeChatMarker(uid);
+    });
+  });
+}
+
+function updateChatMarker(uid, userData){
+  const pos = [userData.lng, userData.lat];
+  if(chatMarkers[uid]){
+    chatMarkers[uid].marker.setLngLat(pos);
+    // تحديث الفقاعة إذا كان هناك طلب معلق
+    updateRequestBubbleForUser(uid, userData);
+    return;
+  }
+
+  const el = document.createElement('div');
+  el.className = 'chat-user-marker';
+  el.dataset.uid = uid;
+
+  const avatarDiv = document.createElement('div');
+  avatarDiv.className = 'cu-avatar';
+  avatarDiv.innerHTML = userData.avatar || '👤';
+
+  const plus = document.createElement('div');
+  plus.className = 'cu-plus';
+  plus.textContent = '+';
+  plus.style.display = 'none'; // يظهر فقط عند وجود طلب
+
+  el.appendChild(avatarDiv);
+  el.appendChild(plus);
+
+  // فقاعة طلب (مخفية افتراضياً)
+  const bubble = document.createElement('div');
+  bubble.className = 'chat-request-bubble';
+  bubble.style.display = 'none';
+  el.appendChild(bubble);
+
+  /* النقر على المستخدم */
+  el.addEventListener('click', (ev)=>{
+    ev.stopPropagation();
+    if(requestPickingMode){
+      sendChatRequestTo(uid);
+    } else {
+      // عرض خيار بدء دردشة أو معلومات
+      toast(`👤 ${userData.name} — متصل الآن`, 2500);
+    }
+  });
+
+  const marker = new maplibregl.Marker({ element: el, anchor: 'center' })
+    .setLngLat(pos)
+    .addTo(map);
+
+  chatMarkers[uid] = { marker, bubbleEl: bubble, plusEl: plus, userData };
+
+  updateRequestBubbleForUser(uid, userData);
+}
+
+function removeChatMarker(uid){
+  if(chatMarkers[uid]){
+    try{ chatMarkers[uid].marker.remove(); }catch(e){}
+    delete chatMarkers[uid];
+  }
+}
+
+/* تحديث فقاعة الطلب وعلامة + لمستخدم معين */
+function updateRequestBubbleForUser(uid, userData){
+  const entry = chatMarkers[uid];
+  if(!entry) return;
+  const hasPending = pendingRequests.some(r => r.from === uid && r.status === 'pending');
+  if(hasPending){
+    entry.bubbleEl.textContent = `${userData.name || 'مستخدم'} يريد دردشة`;
+    entry.bubbleEl.style.display = 'block';
+    entry.plusEl.style.display = 'flex';
+  } else {
+    entry.bubbleEl.style.display = 'none';
+    entry.plusEl.style.display = 'none';
+  }
+}
+
+/* ---------- طلب دردشة ---------- */
+function sendChatRequestTo(targetUid){
+  if(!chatDb || !currentUser) return;
+  if(targetUid === currentUser.uid) return;
+
+  const requestRef = chatDb.ref('chatRequests').push();
+  requestRef.set({
+    from: currentUser.uid,
+    fromName: currentUser.name,
+    fromAvatar: currentUser.avatar,
+    to: targetUid,
+    status: 'pending',
+    timestamp: firebase.database.ServerValue.TIMESTAMP
+  }).then(()=>{
+    toast('📨 تم إرسال طلب الدردشة', 3000);
+    exitRequestPickingMode();
+  }).catch(err=>{
+    toast('❌ فشل إرسال الطلب: ' + (err.message||''), 4000);
+  });
+}
+
+/* الاستماع إلى طلبات الدردشة الواردة */
+function listenToChatRequests(){
+  if(!chatDb || !currentUser) return;
+  const reqRef = chatDb.ref('chatRequests').orderByChild('to').equalTo(currentUser.uid);
+  requestListener = reqRef.on('value', (snapshot)=>{
+    const data = snapshot.val() || {};
+    pendingRequests = Object.keys(data).map(id => ({ id, ...data[id] }))
+      .filter(r => r.status === 'pending');
+
+    newRequestsCount = pendingRequests.length;
+    updateNotificationUI();
+
+    // تحديث فقاعات المستخدمين
+    Object.keys(chatMarkers).forEach(uid => {
+      const entry = chatMarkers[uid];
+      if(!entry) return;
+      updateRequestBubbleForUser(uid, entry.userData);
+    });
+  });
+}
+
+function updateNotificationUI(){
+  const notif = $('chatRequestNotification');
+  const countEl = $('notifCount');
+  const subEl = $('notifSub');
+  if(!notif) return;
+  if(pendingRequests.length > 0){
+    notif.classList.add('visible');
+    countEl.textContent = pendingRequests.length;
+    subEl.textContent = pendingRequests.length === 1
+      ? pendingRequests[0].fromName + ' يريد دردشة'
+      : `${pendingRequests.length} أشخاص يريدون دردشة`;
+  } else {
+    notif.classList.remove('visible');
+  }
+}
+
+/* عند النقر على الإشعار: فتح نافذة القبول */
+function openRequestModalForFirst(){
+  if(!pendingRequests.length) return;
+  const req = pendingRequests[0];
+  $('reqName').textContent = req.fromName || 'مستخدم';
+  $('reqAvatar').innerHTML = req.fromAvatar || '👤';
+  $('chatRequestModal').classList.add('open');
+  $('chatRequestModal').dataset.reqId = req.id;
+}
+
+/* قبول الطلب */
+async function acceptChatRequest(reqId){
+  if(!chatDb || !currentUser) return;
+  const reqRef = chatDb.ref('chatRequests/' + reqId);
+  const snap = await reqRef.once('value');
+  const req = snap.val();
+  if(!req) return;
+
+  await reqRef.update({ status: 'accepted', acceptedAt: firebase.database.ServerValue.TIMESTAMP });
+  $('chatRequestModal').classList.remove('open');
+
+  const partnerUid = req.from;
+  const partnerName = req.fromName;
+  const partnerAvatar = req.fromAvatar;
+
+  openChatWindow(partnerUid, partnerName, partnerAvatar);
+}
+
+/* رفض الطلب */
+async function rejectChatRequest(reqId){
+  if(!chatDb) return;
+  await chatDb.ref('chatRequests/' + reqId).update({ status: 'rejected', rejectedAt: firebase.database.ServerValue.TIMESTAMP });
+  $('chatRequestModal').classList.remove('open');
+  toast('❌ تم رفض الطلب', 2500);
+}
+
+/* فتح نافذة المحادثة */
+function openChatWindow(partnerUid, partnerName, partnerAvatar){
+  activeChatPartner = { uid: partnerUid, name: partnerName, avatar: partnerAvatar };
+  currentChatId = [currentUser.uid, partnerUid].sort().join('_');
+
+  $('chatHeaderName').textContent = partnerName || 'مستخدم';
+  $('chatHeaderAvatar').innerHTML = partnerAvatar || '👤';
+  $('chatMessages').innerHTML = '';
+  $('chatWindow').classList.add('open');
+
+  // إزالة مستمع الرسائل القديم
+  if(chatMessagesListener){
+    chatDb.ref('chats/' + currentChatId + '/messages').off('value', chatMessagesListener);
+    chatMessagesListener = null;
+  }
+
+  // الاستماع إلى الرسائل
+  const msgsRef = chatDb.ref('chats/' + currentChatId + '/messages').orderByChild('timestamp');
+  chatMessagesListener = msgsRef.on('value', (snapshot)=>{
+    const data = snapshot.val() || {};
+    const msgBox = $('chatMessages');
+    msgBox.innerHTML = '';
+    Object.keys(data).forEach(mid => {
+      const m = data[mid];
+      const div = document.createElement('div');
+      div.className = 'chat-msg ' + (m.sender === currentUser.uid ? 'sent' : 'received');
+      const time = m.timestamp ? new Date(m.timestamp).toLocaleTimeString('ar-IQ', {hour:'2-digit', minute:'2-digit'}) : '';
+      div.innerHTML = `${escapeHtml(m.text)}<span class="msg-time">${time}</span>`;
+      msgBox.appendChild(div);
+    });
+    msgBox.scrollTop = msgBox.scrollHeight;
+  });
+}
+
+function escapeHtml(text){
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+/* إغلاق نافذة المحادثة */
+function closeChatWindow(){
+  $('chatWindow').classList.remove('open');
+  if(chatMessagesListener && chatDb){
+    chatDb.ref('chats/' + currentChatId + '/messages').off('value', chatMessagesListener);
+    chatMessagesListener = null;
+  }
+  activeChatPartner = null;
+  currentChatId = null;
+}
+
+/* إرسال رسالة */
+function sendChatMessage(){
+  if(!chatDb || !currentUser || !activeChatPartner || !currentChatId) return;
+  const input = $('chatInput');
+  const text = input.value.trim();
+  if(!text) return;
+  input.value = '';
+  chatDb.ref('chats/' + currentChatId + '/messages').push({
+    sender: currentUser.uid,
+    text: text,
+    timestamp: firebase.database.ServerValue.TIMESTAMP
+  });
+}
+
+/* وضع اختيار مستخدم لطلب الدردشة */
+function enterRequestPickingMode(){
+  if(!map) return;
+  requestPickingMode = true;
+  $('chatRequestBtn').classList.add('active');
+  map.getCanvas().style.cursor = 'crosshair';
+  toast('🎯 اضغط على مستخدم آخر على الخريطة لإرسال طلب دردشة', 4000);
+}
+function exitRequestPickingMode(){
+  requestPickingMode = false;
+  $('chatRequestBtn').classList.remove('active');
+  if(!destPicking) map.getCanvas().style.cursor = '';
+}
+
+/* ربط أزرار الدردشة */
+$('chatRequestBtn').addEventListener('click', function(){
+  if(!currentUser){ toast('⚠️ نظام الدردشة غير مهيأ'); return; }
+  if(requestPickingMode){
+    exitRequestPickingMode();
+    toast('❌ تم إلغاء وضع طلب الدردشة', 2500);
+  } else {
+    enterRequestPickingMode();
+  }
+});
+
+$('chatRequestNotification').addEventListener('click', ()=>{
+  if(pendingRequests.length) openRequestModalForFirst();
+});
+
+$('acceptChatBtn').addEventListener('click', ()=>{
+  const reqId = $('chatRequestModal').dataset.reqId;
+  if(reqId) acceptChatRequest(reqId);
+});
+$('rejectChatBtn').addEventListener('click', ()=>{
+  const reqId = $('chatRequestModal').dataset.reqId;
+  if(reqId) rejectChatRequest(reqId);
+});
+$('closeChatBtn').addEventListener('click', closeChatWindow);
+$('chatSendBtn').addEventListener('click', sendChatMessage);
+$('chatInput').addEventListener('keydown', (e)=>{
+  if(e.key === 'Enter') sendChatMessage();
+});
+
+/* عند إغلاق النافذة، أغلق المحادثة */
+window.addEventListener('beforeunload', ()=>{
+  if(chatDb && currentUser){
+    chatDb.ref('users/' + currentUser.uid + '/online').set(false);
+  }
+});
+
+/* بدء التطبيق */
+if(document.readyState === 'loading'){
+  document.addEventListener('DOMContentLoaded', initMap);
+} else {
+  initMap();
+}
+</script>
+</body>
+</html>
