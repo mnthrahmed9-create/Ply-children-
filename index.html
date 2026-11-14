@@ -3,19 +3,16 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>IRAQ MIND MAP 3D — REAL DATA + LIVE CHAT</title>
+<title>IRAQ MIND MAP 3D — REAL DATA + LIVE CHAT (Supabase)</title>
 
 <link href="https://unpkg.com/maplibre-gl@5.6.2/dist/maplibre-gl.css" rel="stylesheet">
 <script src="https://unpkg.com/maplibre-gl@5.6.2/dist/maplibre-gl.js"></script>
 <script src="https://unpkg.com/@mapbox/mapbox-gl-rtl-text@0.3.0/mapbox-gl-rtl-text.js"></script>
 
-<!-- Firebase SDK (compat) -->
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<!-- Supabase SDK -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
-/* ===== الأنماط الأصلية (بدون تغيير) ===== */
 :root{
   --bg:#02040a; --panel:rgba(8,14,32,0.92); --line:#4a2dff; --accent:#00f5ff;
   --hotpink:#ff006e; --lime:#06ffa5; --gold:#ffe600; --purple:#b537f2; --ok:#00ffa3;
@@ -125,9 +122,7 @@ button{font-family:inherit}
   .status{font-size:10px;padding:8px 11px}
 }
 
-/* =========================================================
-   ✦ أنماط نظام الدردشة الجديد (Neon 3D)
-   ========================================================= */
+/* ===== أنماط الدردشة ===== */
 :root{
   --chat-bg: rgba(6, 12, 30, 0.94);
   --chat-border: rgba(0, 245, 255, 0.45);
@@ -137,7 +132,6 @@ button{font-family:inherit}
   --chat-gold: #ffe600;
 }
 
-/* زر طلب الدردشة في الشريط السفلي */
 #chatRequestBtn {
   background: linear-gradient(135deg, rgba(0, 245, 255, 0.25), rgba(181, 55, 242, 0.25));
   border-color: var(--chat-glow);
@@ -154,471 +148,220 @@ button{font-family:inherit}
   font-weight: 800;
 }
 
-/* علامة المستخدم على الخريطة (Chat User Marker) */
-.chat-user-marker {
-  width: 0;
-  height: 0;
-  z-index: 15;
-  cursor: pointer;
-}
+.chat-user-marker { width:0; height:0; z-index:15; cursor:pointer; }
 .chat-user-marker .cu-avatar {
-  position: absolute;
-  left: -18px;
-  top: -18px;
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  border: 2.5px solid var(--chat-glow);
-  box-shadow: 0 0 20px var(--chat-glow), 0 0 40px rgba(0, 245, 255, 0.4);
-  background: #0a0320;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 18px;
-  overflow: hidden;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-.chat-user-marker .cu-avatar img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+  position:absolute; left:-18px; top:-18px; width:36px; height:36px;
+  border-radius:50%; border:2.5px solid var(--chat-glow);
+  box-shadow:0 0 20px var(--chat-glow), 0 0 40px rgba(0,245,255,0.4);
+  background:#0a0320; display:flex; align-items:center; justify-content:center;
+  font-size:18px; overflow:hidden; transition:transform .2s ease, box-shadow .2s ease;
 }
 .chat-user-marker:hover .cu-avatar {
-  transform: scale(1.15);
-  box-shadow: 0 0 30px var(--chat-glow), 0 0 60px rgba(0, 245, 255, 0.6);
+  transform:scale(1.15);
+  box-shadow:0 0 30px var(--chat-glow), 0 0 60px rgba(0,245,255,0.6);
 }
 .chat-user-marker .cu-plus {
-  position: absolute;
-  right: -6px;
-  bottom: -6px;
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, var(--chat-gold), var(--chat-pink));
-  border: 1.5px solid #fff;
-  color: #021018;
-  font-size: 12px;
-  font-weight: 900;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 0 14px var(--chat-gold);
-  animation: plusBlink 2s infinite;
-  pointer-events: none;
+  position:absolute; right:-6px; bottom:-6px; width:16px; height:16px;
+  border-radius:50%;
+  background:linear-gradient(135deg, var(--chat-gold), var(--chat-pink));
+  border:1.5px solid #fff; color:#021018; font-size:12px; font-weight:900;
+  display:flex; align-items:center; justify-content:center;
+  box-shadow:0 0 14px var(--chat-gold);
+  animation:plusBlink 2s infinite; pointer-events:none;
 }
 @keyframes plusBlink {
-  0%, 100% { transform: scale(1); opacity: 1; }
-  50% { transform: scale(1.2); opacity: 0.85; }
+  0%,100% { transform:scale(1); opacity:1; }
+  50% { transform:scale(1.2); opacity:.85; }
 }
 
-/* فقاعة طلب الدردشة فوق المستخدم */
 .chat-request-bubble {
-  position: absolute;
-  left: 50%;
-  bottom: 38px;
-  transform: translateX(-50%);
-  background: linear-gradient(135deg, rgba(255, 0, 110, 0.95), rgba(181, 55, 242, 0.9));
-  border: 1px solid var(--chat-glow);
-  border-radius: 14px;
-  padding: 6px 12px;
-  color: #fff;
-  font-size: 11px;
-  font-weight: 700;
-  white-space: nowrap;
-  pointer-events: none;
-  box-shadow: 0 0 24px rgba(255, 0, 110, 0.6), 0 0 48px rgba(0, 245, 255, 0.25);
-  animation: bubbleFloat 2.5s ease-in-out infinite;
-  z-index: 20;
+  position:absolute; left:50%; bottom:38px; transform:translateX(-50%);
+  background:linear-gradient(135deg, rgba(255,0,110,.95), rgba(181,55,242,.9));
+  border:1px solid var(--chat-glow); border-radius:14px; padding:6px 12px;
+  color:#fff; font-size:11px; font-weight:700; white-space:nowrap;
+  pointer-events:none;
+  box-shadow:0 0 24px rgba(255,0,110,.6), 0 0 48px rgba(0,245,255,.25);
+  animation:bubbleFloat 2.5s ease-in-out infinite; z-index:20;
 }
 .chat-request-bubble::after {
-  content: '';
-  position: absolute;
-  bottom: -6px;
-  left: 50%;
-  transform: translateX(-50%);
-  border-left: 6px solid transparent;
-  border-right: 6px solid transparent;
-  border-top: 7px solid var(--chat-pink);
-  filter: drop-shadow(0 0 6px var(--chat-pink));
+  content:''; position:absolute; bottom:-6px; left:50%; transform:translateX(-50%);
+  border-left:6px solid transparent; border-right:6px solid transparent;
+  border-top:7px solid var(--chat-pink); filter:drop-shadow(0 0 6px var(--chat-pink));
 }
 @keyframes bubbleFloat {
-  0%, 100% { transform: translateX(-50%) translateY(0); }
-  50% { transform: translateX(-50%) translateY(-6px); }
+  0%,100% { transform:translateX(-50%) translateY(0); }
+  50% { transform:translateX(-50%) translateY(-6px); }
 }
 
-/* إشعار الطلبات الجديدة أسفل الشاشة */
 #chatRequestNotification {
-  position: fixed;
-  bottom: 20px;
-  left: 50%;
-  transform: translateX(-50%) translateY(120px);
-  z-index: 80;
-  background: var(--chat-bg);
-  border: 1px solid var(--chat-glow);
-  border-radius: 18px;
-  padding: 12px 20px;
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8), 0 0 40px rgba(0, 245, 255, 0.35);
-  backdrop-filter: blur(18px);
-  cursor: pointer;
-  transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s;
-  opacity: 0;
-  pointer-events: none;
-  min-width: 280px;
-  max-width: 92vw;
+  position:fixed; bottom:20px; left:50%;
+  transform:translateX(-50%) translateY(120px);
+  z-index:80; background:var(--chat-bg); border:1px solid var(--chat-glow);
+  border-radius:18px; padding:12px 20px; display:flex; align-items:center; gap:14px;
+  box-shadow:0 20px 60px rgba(0,0,0,.8), 0 0 40px rgba(0,245,255,.35);
+  backdrop-filter:blur(18px); cursor:pointer;
+  transition:transform .35s cubic-bezier(.34,1.56,.64,1), opacity .3s;
+  opacity:0; pointer-events:none; min-width:280px; max-width:92vw;
 }
 #chatRequestNotification.visible {
-  transform: translateX(-50%) translateY(0);
-  opacity: 1;
-  pointer-events: auto;
+  transform:translateX(-50%) translateY(0); opacity:1; pointer-events:auto;
 }
 #chatRequestNotification .notif-icon {
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, var(--chat-glow), var(--chat-purple));
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 22px;
-  box-shadow: 0 0 24px rgba(0, 245, 255, 0.5);
-  flex-shrink: 0;
+  width:44px; height:44px; border-radius:50%;
+  background:linear-gradient(135deg, var(--chat-glow), var(--chat-purple));
+  display:flex; align-items:center; justify-content:center; font-size:22px;
+  box-shadow:0 0 24px rgba(0,245,255,.5); flex-shrink:0;
 }
-#chatRequestNotification .notif-text {
-  flex: 1;
-  text-align: right;
-}
-#chatRequestNotification .notif-text strong {
-  display: block;
-  font-size: 13px;
-  color: #fff;
-  margin-bottom: 2px;
-}
-#chatRequestNotification .notif-text span {
-  font-size: 11px;
-  color: #8fb8e8;
-}
+#chatRequestNotification .notif-text { flex:1; text-align:right; }
+#chatRequestNotification .notif-text strong { display:block; font-size:13px; color:#fff; margin-bottom:2px; }
+#chatRequestNotification .notif-text span { font-size:11px; color:#8fb8e8; }
 #chatRequestNotification .notif-count {
-  background: linear-gradient(135deg, var(--chat-pink), var(--chat-purple));
-  color: #fff;
-  font-size: 12px;
-  font-weight: 800;
-  min-width: 26px;
-  height: 26px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 0 16px rgba(255, 0, 110, 0.6);
-  animation: countPulse 1.5s infinite;
+  background:linear-gradient(135deg, var(--chat-pink), var(--chat-purple));
+  color:#fff; font-size:12px; font-weight:800; min-width:26px; height:26px;
+  border-radius:50%; display:flex; align-items:center; justify-content:center;
+  box-shadow:0 0 16px rgba(255,0,110,.6); animation:countPulse 1.5s infinite;
 }
-@keyframes countPulse {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.15); }
-}
+@keyframes countPulse { 0%,100% { transform:scale(1); } 50% { transform:scale(1.15); } }
 
-/* نافذة قبول/رفض الطلب */
 #chatRequestModal {
-  position: fixed;
-  inset: 0;
-  z-index: 90;
-  display: none;
-  align-items: center;
-  justify-content: center;
-  background: rgba(2, 4, 10, 0.7);
-  backdrop-filter: blur(8px);
-  padding: 20px;
+  position:fixed; inset:0; z-index:90; display:none;
+  align-items:center; justify-content:center;
+  background:rgba(2,4,10,.7); backdrop-filter:blur(8px); padding:20px;
 }
-#chatRequestModal.open {
-  display: flex;
-  animation: fadeIn 0.25s ease;
-}
-@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+#chatRequestModal.open { display:flex; animation:fadeIn .25s ease; }
+@keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
 #chatRequestModal .modal-card {
-  background: var(--chat-bg);
-  border: 1px solid var(--chat-glow);
-  border-radius: 24px;
-  padding: 28px 24px;
-  width: min(380px, 92vw);
-  text-align: center;
-  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.9), 0 0 60px rgba(0, 245, 255, 0.3);
-  animation: modalPop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  background:var(--chat-bg); border:1px solid var(--chat-glow);
+  border-radius:24px; padding:28px 24px; width:min(380px,92vw);
+  text-align:center;
+  box-shadow:0 30px 80px rgba(0,0,0,.9), 0 0 60px rgba(0,245,255,.3);
+  animation:modalPop .3s cubic-bezier(.34,1.56,.64,1);
 }
-@keyframes modalPop { from { transform: scale(0.85); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+@keyframes modalPop { from { transform:scale(.85); opacity:0; } to { transform:scale(1); opacity:1; } }
 #chatRequestModal .modal-avatar {
-  width: 72px;
-  height: 72px;
-  border-radius: 50%;
-  border: 3px solid var(--chat-glow);
-  box-shadow: 0 0 30px rgba(0, 245, 255, 0.5);
-  margin: 0 auto 14px;
-  overflow: hidden;
-  background: #0a0320;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 36px;
+  width:72px; height:72px; border-radius:50%; border:3px solid var(--chat-glow);
+  box-shadow:0 0 30px rgba(0,245,255,.5); margin:0 auto 14px; overflow:hidden;
+  background:#0a0320; display:flex; align-items:center; justify-content:center; font-size:36px;
 }
-#chatRequestModal .modal-avatar img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-#chatRequestModal h3 {
-  margin: 0 0 6px;
-  font-size: 18px;
-  color: #fff;
-}
-#chatRequestModal p {
-  font-size: 13px;
-  color: #b8d9ff;
-  margin: 0 0 22px;
-}
-#chatRequestModal .modal-actions {
-  display: flex;
-  gap: 12px;
-  justify-content: center;
-}
+#chatRequestModal h3 { margin:0 0 6px; font-size:18px; color:#fff; }
+#chatRequestModal p { font-size:13px; color:#b8d9ff; margin:0 0 22px; }
+#chatRequestModal .modal-actions { display:flex; gap:12px; justify-content:center; }
 #chatRequestModal .modal-actions button {
-  flex: 1;
-  padding: 13px 18px;
-  border-radius: 14px;
-  font-size: 14px;
-  font-weight: 700;
-  cursor: pointer;
-  border: 1px solid transparent;
-  transition: 0.18s;
+  flex:1; padding:13px 18px; border-radius:14px; font-size:14px; font-weight:700;
+  cursor:pointer; border:1px solid transparent; transition:.18s;
 }
 #chatRequestModal .modal-actions .accept {
-  background: linear-gradient(135deg, var(--chat-glow), #06ffa5);
-  color: #021018;
-  border-color: var(--chat-glow);
-  box-shadow: 0 0 24px rgba(0, 245, 255, 0.5);
+  background:linear-gradient(135deg, var(--chat-glow), #06ffa5);
+  color:#021018; border-color:var(--chat-glow);
+  box-shadow:0 0 24px rgba(0,245,255,.5);
 }
 #chatRequestModal .modal-actions .accept:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 0 36px rgba(0, 245, 255, 0.8);
+  transform:translateY(-2px); box-shadow:0 0 36px rgba(0,245,255,.8);
 }
 #chatRequestModal .modal-actions .reject {
-  background: linear-gradient(135deg, #5a0030, #8a0040);
-  color: #ffb0d0;
-  border-color: var(--chat-pink);
+  background:linear-gradient(135deg, #5a0030, #8a0040);
+  color:#ffb0d0; border-color:var(--chat-pink);
 }
 #chatRequestModal .modal-actions .reject:hover {
-  background: linear-gradient(135deg, var(--chat-pink), var(--chat-purple));
-  color: #fff;
-  box-shadow: 0 0 24px rgba(255, 0, 110, 0.6);
+  background:linear-gradient(135deg, var(--chat-pink), var(--chat-purple));
+  color:#fff; box-shadow:0 0 24px rgba(255,0,110,.6);
 }
 
-/* نافذة المحادثة المباشرة */
 #chatWindow {
-  position: fixed;
-  bottom: 0;
-  right: 0;
-  left: 0;
-  top: 0;
-  z-index: 95;
-  display: none;
-  align-items: flex-end;
-  justify-content: center;
-  background: rgba(2, 4, 10, 0.6);
-  backdrop-filter: blur(6px);
+  position:fixed; inset:0; z-index:95; display:none;
+  align-items:flex-end; justify-content:center;
+  background:rgba(2,4,10,.6); backdrop-filter:blur(6px);
 }
-#chatWindow.open {
-  display: flex;
-}
+#chatWindow.open { display:flex; }
 #chatWindow .chat-container {
-  width: min(480px, 100vw);
-  height: min(85vh, 700px);
-  background: var(--chat-bg);
-  border: 1px solid var(--chat-glow);
-  border-radius: 24px 24px 0 0;
-  box-shadow: 0 -10px 60px rgba(0, 0, 0, 0.9), 0 0 50px rgba(0, 245, 255, 0.25);
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  animation: slideUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  width:min(480px, 100vw); height:min(85vh, 700px);
+  background:var(--chat-bg); border:1px solid var(--chat-glow);
+  border-radius:24px 24px 0 0;
+  box-shadow:0 -10px 60px rgba(0,0,0,.9), 0 0 50px rgba(0,245,255,.25);
+  display:flex; flex-direction:column; overflow:hidden;
+  animation:slideUp .3s cubic-bezier(.34,1.56,.64,1);
 }
-@keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+@keyframes slideUp { from { transform:translateY(100%); } to { transform:translateY(0); } }
 #chatWindow .chat-header {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 14px 18px;
-  background: linear-gradient(135deg, rgba(74, 45, 255, 0.2), rgba(181, 55, 242, 0.2));
-  border-bottom: 1px solid rgba(0, 245, 255, 0.3);
-  flex-shrink: 0;
+  display:flex; align-items:center; gap:12px; padding:14px 18px;
+  background:linear-gradient(135deg, rgba(74,45,255,.2), rgba(181,55,242,.2));
+  border-bottom:1px solid rgba(0,245,255,.3); flex-shrink:0;
 }
 #chatWindow .chat-header .ch-avatar {
-  width: 42px;
-  height: 42px;
-  border-radius: 50%;
-  border: 2px solid var(--chat-glow);
-  box-shadow: 0 0 16px rgba(0, 245, 255, 0.5);
-  overflow: hidden;
-  background: #0a0320;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 20px;
-  flex-shrink: 0;
+  width:42px; height:42px; border-radius:50%; border:2px solid var(--chat-glow);
+  box-shadow:0 0 16px rgba(0,245,255,.5); overflow:hidden; background:#0a0320;
+  display:flex; align-items:center; justify-content:center; font-size:20px; flex-shrink:0;
 }
-#chatWindow .chat-header .ch-avatar img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-#chatWindow .chat-header .ch-info {
-  flex: 1;
-  text-align: right;
-}
-#chatWindow .chat-header .ch-info strong {
-  display: block;
-  font-size: 14px;
-  color: #fff;
-}
+#chatWindow .chat-header .ch-info { flex:1; text-align:right; }
+#chatWindow .chat-header .ch-info strong { display:block; font-size:14px; color:#fff; }
 #chatWindow .chat-header .ch-info span {
-  font-size: 11px;
-  color: var(--lime);
-  display: flex;
-  align-items: center;
-  gap: 5px;
+  font-size:11px; color:var(--lime); display:flex; align-items:center; gap:5px;
 }
 #chatWindow .chat-header .ch-info span::before {
-  content: '';
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: var(--lime);
-  box-shadow: 0 0 10px var(--lime);
+  content:''; width:7px; height:7px; border-radius:50%;
+  background:var(--lime); box-shadow:0 0 10px var(--lime);
 }
 #chatWindow .chat-header .ch-close {
-  background: transparent;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  color: #fff;
-  width: 32px;
-  height: 32px;
-  border-radius: 10px;
-  font-size: 16px;
-  cursor: pointer;
-  transition: 0.18s;
+  background:transparent; border:1px solid rgba(255,255,255,.2); color:#fff;
+  width:32px; height:32px; border-radius:10px; font-size:16px; cursor:pointer; transition:.18s;
 }
 #chatWindow .chat-header .ch-close:hover {
-  background: rgba(255, 0, 110, 0.3);
-  border-color: var(--chat-pink);
+  background:rgba(255,0,110,.3); border-color:var(--chat-pink);
 }
 #chatMessages {
-  flex: 1;
-  overflow-y: auto;
-  padding: 18px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  scroll-behavior: smooth;
+  flex:1; overflow-y:auto; padding:18px;
+  display:flex; flex-direction:column; gap:10px; scroll-behavior:smooth;
 }
-#chatMessages::-webkit-scrollbar {
-  width: 5px;
-}
+#chatMessages::-webkit-scrollbar { width:5px; }
 #chatMessages::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, var(--chat-glow), var(--chat-purple));
-  border-radius: 4px;
+  background:linear-gradient(180deg, var(--chat-glow), var(--chat-purple)); border-radius:4px;
 }
 .chat-msg {
-  max-width: 80%;
-  padding: 10px 14px;
-  border-radius: 16px;
-  font-size: 13px;
-  line-height: 1.6;
-  word-break: break-word;
-  animation: msgIn 0.25s ease;
+  max-width:80%; padding:10px 14px; border-radius:16px; font-size:13px;
+  line-height:1.6; word-break:break-word; animation:msgIn .25s ease;
 }
-@keyframes msgIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes msgIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
 .chat-msg.sent {
-  align-self: flex-start; /* RTL: sent appears on left visually? Actually in RTL, flex-start is right; keep simple */
-  background: linear-gradient(135deg, rgba(0, 245, 255, 0.25), rgba(181, 55, 242, 0.25));
-  border: 1px solid rgba(0, 245, 255, 0.4);
-  color: #fff;
-  border-bottom-right-radius: 4px;
+  align-self:flex-end;
+  background:linear-gradient(135deg, rgba(0,245,255,.25), rgba(181,55,242,.25));
+  border:1px solid rgba(0,245,255,.4); color:#fff;
+  border-bottom-right-radius:4px;
 }
 .chat-msg.received {
-  align-self: flex-end;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  color: #e8f4ff;
-  border-bottom-left-radius: 4px;
+  align-self:flex-start;
+  background:rgba(255,255,255,.08);
+  border:1px solid rgba(255,255,255,.15); color:#e8f4ff;
+  border-bottom-left-radius:4px;
 }
 .chat-msg .msg-time {
-  display: block;
-  font-size: 9px;
-  color: #8fb8e8;
-  margin-top: 4px;
-  text-align: left;
+  display:block; font-size:9px; color:#8fb8e8; margin-top:4px;
 }
 #chatInputArea {
-  display: flex;
-  gap: 10px;
-  padding: 12px 16px;
-  border-top: 1px solid rgba(0, 245, 255, 0.25);
-  background: rgba(10, 3, 32, 0.8);
-  flex-shrink: 0;
+  display:flex; gap:10px; padding:12px 16px;
+  border-top:1px solid rgba(0,245,255,.25);
+  background:rgba(10,3,32,.8); flex-shrink:0;
 }
 #chatInput {
-  flex: 1;
-  padding: 12px 16px;
-  border-radius: 14px;
-  border: 1px solid rgba(0, 245, 255, 0.4);
-  background: rgba(20, 10, 50, 0.8);
-  color: #fff;
-  font-size: 13px;
-  font-family: inherit;
-  outline: none;
-  transition: 0.18s;
+  flex:1; padding:12px 16px; border-radius:14px;
+  border:1px solid rgba(0,245,255,.4); background:rgba(20,10,50,.8);
+  color:#fff; font-size:13px; font-family:inherit; outline:none; transition:.18s;
 }
 #chatInput:focus {
-  border-color: var(--chat-glow);
-  box-shadow: 0 0 0 3px rgba(0, 245, 255, 0.2), 0 0 24px rgba(0, 245, 255, 0.3);
+  border-color:var(--chat-glow);
+  box-shadow:0 0 0 3px rgba(0,245,255,.2), 0 0 24px rgba(0,245,255,.3);
 }
 #chatSendBtn {
-  padding: 12px 20px;
-  border-radius: 14px;
-  border: 1px solid var(--chat-glow);
-  background: linear-gradient(135deg, var(--chat-glow), var(--chat-purple));
-  color: #021018;
-  font-weight: 800;
-  font-size: 13px;
-  cursor: pointer;
-  transition: 0.18s;
-  box-shadow: 0 0 20px rgba(0, 245, 255, 0.4);
+  padding:12px 20px; border-radius:14px; border:1px solid var(--chat-glow);
+  background:linear-gradient(135deg, var(--chat-glow), var(--chat-purple));
+  color:#021018; font-weight:800; font-size:13px; cursor:pointer; transition:.18s;
+  box-shadow:0 0 20px rgba(0,245,255,.4);
 }
-#chatSendBtn:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 0 30px rgba(0, 245, 255, 0.7);
-}
-#chatSendBtn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-  box-shadow: none;
-}
+#chatSendBtn:hover { transform:translateY(-1px); box-shadow:0 0 30px rgba(0,245,255,.7); }
+#chatSendBtn:disabled { opacity:.5; cursor:not-allowed; box-shadow:none; }
 
-/* إشعارات صغيرة داخل الدردشة (اختياري) */
-.chat-system-msg {
-  text-align: center;
-  font-size: 10px;
-  color: #8fb8e8;
-  padding: 6px;
-}
-
-@media (max-width: 480px) {
-  #chatWindow .chat-container {
-    height: 92vh;
-    border-radius: 18px 18px 0 0;
-  }
-  #chatRequestNotification {
-    min-width: auto;
-    width: calc(100vw - 32px);
-  }
+@media (max-width:480px) {
+  #chatWindow .chat-container { height:92vh; border-radius:18px 18px 0 0; }
+  #chatRequestNotification { min-width:auto; width:calc(100vw - 32px); }
 }
 </style>
 </head>
@@ -684,17 +427,12 @@ button{font-family:inherit}
   <button class="tool" id="toggleTraffic">🚦 السرعات</button>
   <button class="tool" id="pickDest">🎯 وجهة</button>
   <button class="tool" id="clearRoute">❌ مسح المسار</button>
-  <!-- ✦ زر طلب الدردشة الجديد -->
   <button class="tool" id="chatRequestBtn" title="طلب دردشة">💬 طلب دردشة</button>
 </div>
 
 <div id="toast"></div>
 
-<!-- =========================================================
-     ✦ عناصر نظام الدردشة
-     ========================================================= -->
-
-<!-- إشعار الطلبات الجديدة -->
+<!-- ===== عناصر الدردشة ===== -->
 <div id="chatRequestNotification">
   <div class="notif-icon">💬</div>
   <div class="notif-text">
@@ -704,7 +442,6 @@ button{font-family:inherit}
   <div class="notif-count" id="notifCount">0</div>
 </div>
 
-<!-- نافذة قبول / رفض الطلب -->
 <div id="chatRequestModal">
   <div class="modal-card">
     <div class="modal-avatar" id="reqAvatar">👤</div>
@@ -717,7 +454,6 @@ button{font-family:inherit}
   </div>
 </div>
 
-<!-- نافذة المحادثة المباشرة -->
 <div id="chatWindow">
   <div class="chat-container">
     <div class="chat-header">
@@ -738,7 +474,7 @@ button{font-family:inherit}
 
 <script>
 /* =========================================================
-   IRAQ MIND MAP 3D — REAL DATA EDITION (Complete)
+   IRAQ MIND MAP 3D — REAL DATA EDITION
    ========================================================= */
 
 const PROVINCE_META = [
@@ -789,7 +525,6 @@ let terrainOn   = true;
 let labelsOn    = true;
 let osmtogeojsonReady = false;
 let mapLoaded   = false;
-let osmLoaded   = false;
 let map;
 let userMarker = null;
 let userLocation = null;
@@ -842,12 +577,6 @@ function hideLoading(){
   l.style.opacity = '0';
   setTimeout(()=>{ l.style.display = 'none'; }, 550);
 }
-function withTimeout(promise, ms){
-  return Promise.race([
-    promise,
-    new Promise((_, r)=> setTimeout(()=>r(new Error('timeout')), ms))
-  ]);
-}
 async function fetchWithTimeout(url, ms){
   const ctrl = new AbortController();
   const timer = setTimeout(()=>ctrl.abort(), ms);
@@ -873,8 +602,7 @@ function createFallbackStyle(){
           'https://b.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}@2x.png',
           'https://c.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}@2x.png'
         ],
-        tileSize: 512,
-        maxzoom: 19,
+        tileSize: 512, maxzoom: 19,
         attribution: '© OpenStreetMap © CARTO'
       },
       'iraq-dem': {
@@ -906,7 +634,6 @@ async function buildMapStyle(){
     }catch(e){}
   }
   if(!style) style = createFallbackStyle();
-
   if(!style.glyphs) style.glyphs = 'https://tiles.openfreemap.org/fonts/{fontstack}/{range}.pbf';
   if(!style.sources) style.sources = {};
   if(!style.sources['iraq-dem']){
@@ -923,16 +650,13 @@ function applyVividTheme(){
   if(!map) return;
   const style = map.getStyle();
   if(!style || !style.layers) return;
-
   style.layers.forEach(layer => {
     const id = layer.id;
     const srcLayer = layer['source-layer'] || '';
     const type = layer.type;
-
     try{
       if(type === 'background'){ map.setPaintProperty(id, 'background-color', '#0a0320'); return; }
       if(!srcLayer) return;
-
       if(srcLayer === 'water'){
         if(type === 'fill'){ map.setPaintProperty(id, 'fill-color', '#00d9ff'); map.setPaintProperty(id, 'fill-opacity', 0.9); }
         else if(type === 'fill-extrusion'){ map.setPaintProperty(id, 'fill-extrusion-color', '#00d9ff'); }
@@ -974,7 +698,6 @@ function applyVividTheme(){
       if(srcLayer === 'poi' || srcLayer === 'aerodrome_label'){
         if(type === 'symbol'){
           try{ map.setPaintProperty(id, 'icon-color', '#ff2ec4'); }catch(e){}
-          try{ map.setPaintProperty(id, 'icon-halo-color', '#1a0045'); }catch(e){}
           try{ map.setPaintProperty(id, 'text-color', '#ffffff'); }catch(e){}
           try{ map.setPaintProperty(id, 'text-halo-color', '#1a0045'); }catch(e){}
           try{ map.setPaintProperty(id, 'text-halo-width', 1.5); }catch(e){}
@@ -1001,23 +724,20 @@ function addVividBuildings(){
   const style = map.getStyle();
   if(!style || !style.layers) return;
   if(map.getLayer('vivid-buildings')) return;
-
   let buildingSrc = null;
   style.layers.forEach(l=>{
     if(l['source-layer'] === 'building' && l.source) buildingSrc = l.source;
   });
   if(!buildingSrc) return;
-
   const firstSymbol = style.layers.find(l => l.type === 'symbol');
   const beforeId = firstSymbol ? firstSymbol.id : undefined;
-
   const layer = {
     id:'vivid-buildings', type:'fill-extrusion',
     source:buildingSrc, 'source-layer':'building', minzoom:13.5,
     paint:{
       'fill-extrusion-color':[
         'interpolate',['linear'],['coalesce',['get','render_height'],['get','height'],0],
-        0,   '#8338EC', 15,  '#b537f2', 40,  '#ff006e', 80,  '#fb5607', 150, '#ffe600'
+        0, '#8338EC', 15, '#b537f2', 40, '#ff006e', 80, '#fb5607', 150, '#ffe600'
       ],
       'fill-extrusion-height':['coalesce',['get','render_height'],['get','height'],8],
       'fill-extrusion-base':0,
@@ -1043,9 +763,7 @@ function addLayerSafe(layer, beforeId){
   }
 }
 
-/* =========================================================
-   OSM / Overpass
-   ========================================================= */
+/* OSM / Overpass */
 function ensureOSMToGeoJSON(){
   if(osmtogeojsonReady) return Promise.resolve();
   return new Promise((resolve,reject)=>{
@@ -1125,18 +843,14 @@ function buildProvinces(geojson){
     if(!f.geometry) return;
     const t = f.geometry.type;
     if(t !== 'Polygon' && t !== 'MultiPolygon') return;
-
     const tags = (f.properties && f.properties.tags) || {};
     const rawName = tags['name:ar'] || tags.name || tags['name:en'] || ('محافظة ' + (i+1));
     const meta = lookupMeta(rawName) || lookupMeta(tags['name:en']) || lookupMeta(tags.name) || null;
-
     const bb = bboxOf(f.geometry);
     const bboxCenter = [(bb[0]+bb[2])/2, (bb[1]+bb[3])/2];
-
     let osmId = null;
     if(f.properties && f.properties.id != null) osmId = f.properties.id;
     else if(f.id != null) osmId = f.id;
-
     list.push({
       idx: list.length, name: meta ? meta.ar : rawName,
       nameEn: tags['name:en'] || (meta ? meta.en : '') || '',
@@ -1159,19 +873,8 @@ function buildProvinces(geojson){
   return list;
 }
 
-function clearMapData(){
-  PROVINCES.forEach(p=>{ if(p.marker){ try{ p.marker.remove(); }catch(e){} } });
-  ['province-border','province-glow','province-glow2','province-3d'].forEach(id=>{
-    try{ if(map.getLayer(id)) map.removeLayer(id); }catch(e){}
-  });
-  try{ if(map.getSource('provinces')) map.removeSource('provinces'); }catch(e){}
-  const list = $('provList'); if(list) list.innerHTML = '';
-  selectedIdx = null; hoveredIdx = null;
-}
-
 function addProvinceLayers(){
   const withGeom = PROVINCES.filter(p=>p.geometry);
-
   if(withGeom.length){
     const fc = {
       type:'FeatureCollection',
@@ -1181,20 +884,19 @@ function addProvinceLayers(){
       }))
     };
     map.addSource('provinces', { type:'geojson', data:fc });
-
     map.addLayer({
       id:'province-3d', type:'fill-extrusion', source:'provinces',
       paint:{
         'fill-extrusion-color':[
           'case',
           ['boolean',['feature-state','selected'],false], '#FFFFFF',
-          ['boolean',['feature-state','hover'],false],    '#FFE600',
+          ['boolean',['feature-state','hover'],false], '#FFE600',
           ['get','color']
         ],
         'fill-extrusion-height':[
           'case',
           ['boolean',['feature-state','selected'],false], 3400,
-          ['boolean',['feature-state','hover'],false],    2600,
+          ['boolean',['feature-state','hover'],false], 2600,
           1700
         ],
         'fill-extrusion-base':0, 'fill-extrusion-opacity':0.78,
@@ -1218,20 +920,19 @@ function addProvinceLayers(){
         'line-color':[
           'case',
           ['boolean',['feature-state','selected'],false], '#FFE600',
-          ['boolean',['feature-state','hover'],false],    '#FFFFFF',
+          ['boolean',['feature-state','hover'],false], '#FFFFFF',
           '#E8F4FF'
         ],
         'line-width':[
           'case',
           ['boolean',['feature-state','selected'],false], 4,
-          ['boolean',['feature-state','hover'],false],    3.5,
+          ['boolean',['feature-state','hover'],false], 3.5,
           2.2
         ],
         'line-opacity':1
       }
     });
   }
-
   if(!provinceHandlersRegistered){
     map.on('mousemove','province-3d', e=>{
       if(destPicking) return;
@@ -1266,7 +967,6 @@ function addProvinceLayers(){
     });
     provinceHandlersRegistered = true;
   }
-
   PROVINCES.forEach(p=>createNode(p));
   renderProvinceList();
 }
@@ -1350,11 +1050,9 @@ function selectProvince(idx){
   }
   syncActiveItem(idx);
   clearBranch(true);
-
   const pn = $('provinceName'); if(pn) pn.textContent = p.name;
   const pe = $('provinceEn'); if(pe) pe.textContent = p.nameEn ? p.nameEn.toUpperCase() : '';
   const pi = $('provinceInfo'); if(pi) pi.textContent = p.note || 'محافظة من محافظات العراق.';
-
   const grid = $('statGrid');
   if(grid){
     grid.innerHTML = '';
@@ -1371,7 +1069,6 @@ function selectProvince(idx){
       grid.appendChild(d);
     });
   }
-
   const box = $('branches');
   if(box){
     box.innerHTML = '';
@@ -1383,7 +1080,6 @@ function selectProvince(idx){
       box.appendChild(btn);
     });
   }
-
   const admin = $('adminInfo');
   if(admin){
     admin.innerHTML = '';
@@ -1397,10 +1093,8 @@ function selectProvince(idx){
       admin.appendChild(el);
     });
   }
-
   const panel = $('panel');
   if(panel) panel.style.display = 'block';
-
   if(p.bbox){
     map.fitBounds([[p.bbox[0],p.bbox[1]],[p.bbox[2],p.bbox[3]]], {
       padding:{top:90,bottom:90,left:60,right:360}, pitch:58, bearing:-6, duration:1400, maxZoom:9.5
@@ -1436,26 +1130,21 @@ async function runBranch(branch, btn){
     toast('⚠️ لا تتوفر بيانات OSM لهذه المحافظة'); return;
   }
   if(btn.classList.contains('active')){ clearBranch(); return; }
-
   clearBranch(true);
   btn.classList.add('active');
   toast('⏳ جاري جلب ' + branch.label + '...', 8000);
-
   const areaId = 3600000000 + Number(p.osmId);
   const query = '[out:json][timeout:45];\n' + 'area(' + areaId + ')->.a;\n' + branch.q + '(area.a);\n' + 'out geom 900;';
   const data = await fetchOverpassDynamic(query, 30000);
-
   if(!data || !data.elements || !data.elements.length){
     btn.classList.remove('active'); toast('❌ لم يتم العثور على بيانات'); return;
   }
-
   try{
     await ensureOSMToGeoJSON();
     let gj = window.osmtogeojson(data, {flatProperties:true});
     if(gj && typeof gj.then === 'function') gj = await gj;
     const feats = (gj.features || []).filter(f=>f.geometry);
     if(!feats.length) throw new Error('empty');
-
     map.addSource('branch', { type:'geojson', data:{ type:'FeatureCollection', features:feats } });
     map.addLayer({
       id:'branch-fill', type:'fill', source:'branch',
@@ -1475,9 +1164,7 @@ async function runBranch(branch, btn){
   }
 }
 
-/* =========================================================
-   🏗️ المباني
-   ========================================================= */
+/* المباني */
 async function loadBuildingsForViewport(silent){
   if(!map || !mapLoaded) return false;
   if(map.getZoom() < 15){
@@ -1492,27 +1179,23 @@ async function loadBuildingsForViewport(silent){
   relation["building"](${bbox});
 );
 out geom 800;`;
-
   if(!silent) toast('🏗️ جاري تحميل المباني من OSM...', 8000);
   const data = await fetchOverpassDynamic(query, 15000);
   if(!data || !data.elements?.length){
     if(!silent) toast('❌ لا توجد مباني في هذه المنطقة');
     return false;
   }
-
   try{
     await ensureOSMToGeoJSON();
     let gj = window.osmtogeojson(data, { flatProperties: false });
     if(gj && typeof gj.then === 'function') gj = await gj;
     const feats = (gj.features || []).filter(f => f.geometry);
     if(!feats.length) return false;
-
     feats.forEach(f => {
       const tags = (f.properties && f.properties.tags) || f.properties || {};
       const h = parseFloat(tags.height) ||
                 parseFloat(tags['building:height']) ||
-                (parseFloat(tags['building:levels']) || 0) * 3.2 ||
-                6;
+                (parseFloat(tags['building:levels']) || 0) * 3.2 || 6;
       f.properties = f.properties || {};
       f.properties._h = Math.max(h, 3);
       const type = String(tags.building || 'yes').toLowerCase();
@@ -1521,16 +1204,13 @@ out geom 800;`;
       else if (/school|university|hospital|government|mosque|church/.test(type)) f.properties._color = '#A0D8FF';
       else f.properties._color = '#C0C0C0';
     });
-
     if(map.getSource('real-buildings')){
       map.getSource('real-buildings').setData({ type: 'FeatureCollection', features: feats });
     } else {
       map.addSource('real-buildings', { type: 'geojson', data: { type: 'FeatureCollection', features: feats } });
       const firstSymbol = map.getStyle().layers.find(l => l.type === 'symbol');
       addLayerSafe({
-        id: 'real-buildings-3d',
-        type: 'fill-extrusion',
-        source: 'real-buildings',
+        id: 'real-buildings-3d', type: 'fill-extrusion', source: 'real-buildings',
         paint: {
           'fill-extrusion-color': ['get', '_color'],
           'fill-extrusion-height': ['get', '_h'],
@@ -1550,9 +1230,7 @@ function clearBuildings(){
   try{ if(map.getSource('real-buildings')) map.removeSource('real-buildings'); }catch(e){}
 }
 
-/* =========================================================
-   🛣️ الطرق
-   ========================================================= */
+/* الطرق */
 const ROAD_TYPE_COLOR = [
   'match', ['get', 'highway'],
   'motorway', '#FF006E', 'motorway_link', '#FF006E',
@@ -1598,21 +1276,18 @@ async function loadRoadsForViewport(silent){
   way["tunnel"="yes"](${bbox});
 );
 out geom 2000;`;
-
   if(!silent) toast('🛣️ جاري تحميل الطرق من OSM...', 8000);
   const data = await fetchOverpassDynamic(query, 15000);
   if(!data || !data.elements?.length){
     if(!silent) toast('❌ لا توجد طرق في هذه المنطقة');
     return false;
   }
-
   try{
     await ensureOSMToGeoJSON();
     let gj = window.osmtogeojson(data, { flatProperties: true });
     if(gj && typeof gj.then === 'function') gj = await gj;
     const feats = (gj.features || []).filter(f => f.geometry && (f.geometry.type === 'LineString' || f.geometry.type === 'MultiLineString'));
     if(!feats.length) return false;
-
     feats.forEach(f => {
       const tags = f.properties || {};
       if(tags.maxspeed){
@@ -1622,14 +1297,12 @@ out geom 2000;`;
         f.properties._speed = null;
       }
     });
-
     if(map.getSource('real-roads')){
       map.getSource('real-roads').setData({ type: 'FeatureCollection', features: feats });
     } else {
       map.addSource('real-roads', { type: 'geojson', data: { type: 'FeatureCollection', features: feats } });
       const firstSymbol = map.getStyle().layers.find(l => l.type === 'symbol');
       const beforeId = firstSymbol ? firstSymbol.id : undefined;
-
       addLayerSafe({
         id: 'real-tunnels', type: 'line', source: 'real-roads',
         filter: ['==', ['get', 'tunnel'], 'yes'],
@@ -1657,9 +1330,7 @@ function clearRoads(){
   try{ if(map.getSource('real-roads')) map.removeSource('real-roads'); }catch(e){}
 }
 
-/* =========================================================
-   ✈️ المطارات
-   ========================================================= */
+/* المطارات */
 async function loadAirports(){
   if(!map || !mapLoaded || airportsLoaded) return false;
   toast('✈️ جاري تحميل المطارات...', 8000);
@@ -1673,22 +1344,18 @@ area["ISO3166-1"="IQ"]["admin_level"="2"]->.a;
   node["aeroway"="helipad"](area.a);
 );
 out geom;`;
-
   const data = await fetchOverpassDynamic(query, 30000);
   if(!data || !data.elements?.length){ toast('❌ لا تتوفر بيانات مطارات'); return false; }
-
   try{
     await ensureOSMToGeoJSON();
     let gj = window.osmtogeojson(data, { flatProperties: true });
     if(gj && typeof gj.then === 'function') gj = await gj;
     const feats = (gj.features || []).filter(f => f.geometry);
     if(!feats.length) return false;
-
     ['airports-runways','airports-taxiways','airports-points','airports-labels'].forEach(id=>{
       try{ if(map.getLayer(id)) map.removeLayer(id); }catch(e){}
     });
     try{ if(map.getSource('airports')) map.removeSource('airports'); }catch(e){}
-
     map.addSource('airports', { type: 'geojson', data: { type: 'FeatureCollection', features: feats } });
     map.addLayer({
       id: 'airports-taxiways', type: 'line', source: 'airports',
@@ -1714,9 +1381,7 @@ out geom;`;
       layout: {
         'text-field': ['coalesce', ['get', 'name:ar'], ['get', 'name'], ['get', 'name:en'], 'مطار'],
         'text-font': ['Noto Sans Regular'],
-        'text-size': 11,
-        'text-offset': [0, -1.8],
-        'text-anchor': 'bottom'
+        'text-size': 11, 'text-offset': [0, -1.8], 'text-anchor': 'bottom'
       },
       paint: { 'text-color': '#FFFFFF', 'text-halo-color': '#0a0320', 'text-halo-width': 1.5 }
     });
@@ -1726,38 +1391,23 @@ out geom;`;
   } catch (e){ console.warn(e); toast('❌ تعذر تحميل المطارات'); return false; }
 }
 
-/* =========================================================
-   🛩️ الطائرات الحية
-   ========================================================= */
+/* الطائرات الحية */
 function ensureAircraftIcon(){
   if(!map || map.hasImage('aircraft-icon')) return;
   try{
     const c = document.createElement('canvas');
     c.width = 32; c.height = 32;
     const ctx = c.getContext('2d');
-    ctx.fillStyle = '#00F5FF';
-    ctx.strokeStyle = '#FFFFFF';
-    ctx.lineWidth = 1.5;
+    ctx.fillStyle = '#00F5FF'; ctx.strokeStyle = '#FFFFFF'; ctx.lineWidth = 1.5;
     ctx.beginPath();
-    ctx.moveTo(16, 2);
-    ctx.lineTo(20, 12);
-    ctx.lineTo(30, 14);
-    ctx.lineTo(30, 18);
-    ctx.lineTo(20, 16);
-    ctx.lineTo(20, 26);
-    ctx.lineTo(24, 30);
-    ctx.lineTo(12, 30);
-    ctx.lineTo(12, 26);
-    ctx.lineTo(12, 16);
-    ctx.lineTo(2, 18);
-    ctx.lineTo(2, 14);
-    ctx.lineTo(12, 12);
-    ctx.closePath();
-    ctx.fill();
-    ctx.stroke();
+    ctx.moveTo(16, 2); ctx.lineTo(20, 12); ctx.lineTo(30, 14); ctx.lineTo(30, 18);
+    ctx.lineTo(20, 16); ctx.lineTo(20, 26); ctx.lineTo(24, 30); ctx.lineTo(12, 30);
+    ctx.lineTo(12, 26); ctx.lineTo(12, 16); ctx.lineTo(2, 18); ctx.lineTo(2, 14);
+    ctx.lineTo(12, 12); ctx.closePath();
+    ctx.fill(); ctx.stroke();
     const imgData = ctx.getImageData(0, 0, 32, 32);
     map.addImage('aircraft-icon', imgData);
-  } catch(e){ console.warn('icon error', e); }
+  } catch(e){}
 }
 
 async function fetchLiveAircraft(){
@@ -1773,13 +1423,9 @@ async function fetchLiveAircraft(){
       geometry: { type: 'Point', coordinates: [s[5], s[6]] },
       properties: {
         callsign: (s[1] || '').trim() || '—',
-        altitude: (s[7] !== null && s[7] !== undefined) ? s[7] : ((s[13] !== null && s[13] !== undefined) ? s[13] : 0),
-        velocity: (s[9] !== null && s[9] !== undefined) ? s[9] : 0,
-        heading: (s[10] !== null && s[10] !== undefined) ? s[10] : 0,
-        country: s[2] || ''
+        heading: (s[10] !== null && s[10] !== undefined) ? s[10] : 0
       }
     })).filter(f => f.geometry.coordinates[0] != null && f.geometry.coordinates[1] != null);
-
     if(map.getSource('live-aircraft')){
       map.getSource('live-aircraft').setData({ type: 'FeatureCollection', features });
     } else {
@@ -1803,7 +1449,7 @@ async function fetchLiveAircraft(){
         paint: { 'text-color': '#FFFFFF', 'text-halo-color': '#0a0320', 'text-halo-width': 1 }
       });
     }
-  } catch (e){ /* تجاهل */ }
+  } catch (e){}
 }
 
 function startAircraftTracking(){
@@ -1820,13 +1466,10 @@ function stopAircraftTracking(){
   try{ if(map.getSource('live-aircraft')) map.removeSource('live-aircraft'); }catch(e){}
 }
 
-/* =========================================================
-   🚦 السرعات
-   ========================================================= */
+/* السرعات */
 function toggleTrafficMode(){
   if(!map || !map.getLayer('real-roads-line')){
-    toast('⚠️ حمّل الطرق أولاً (🛣️)');
-    return;
+    toast('⚠️ حمّل الطرق أولاً (🛣️)'); return;
   }
   trafficMode = !trafficMode;
   if(trafficMode){
@@ -1847,9 +1490,7 @@ function toggleTrafficMode(){
   $('toggleTraffic').classList.toggle('on', trafficMode);
 }
 
-/* =========================================================
-   🧭 OSRM
-   ========================================================= */
+/* OSRM */
 function clearRoute(){
   routeSources.forEach(id => {
     try{ if(map.getLayer(id + '-line')) map.removeLayer(id + '-line'); }catch(e){}
@@ -1860,10 +1501,7 @@ function clearRoute(){
 }
 
 async function routeToDestination(destLng, destLat){
-  if(!userLocation){
-    toast('⚠️ اضغط 📍 موقعي أولاً لتحديد نقطة البداية');
-    return;
-  }
+  if(!userLocation){ toast('⚠️ اضغط 📍 موقعي أولاً لتحديد نقطة البداية'); return; }
   const [uLng, uLat] = userLocation;
   const url = `https://router.project-osrm.org/route/v1/driving/${uLng},${uLat};${destLng},${destLat}?overview=full&geometries=geojson&alternatives=true&steps=false`;
   toast('🧭 جاري حساب المسار عبر OSRM...', 6000);
@@ -1872,7 +1510,6 @@ async function routeToDestination(destLng, destLat){
     if(!res.ok) throw new Error('OSRM ' + res.status);
     const json = await res.json();
     if(!json.routes || !json.routes.length){ toast('❌ تعذر حساب المسار'); return; }
-
     clearRoute();
     const main = json.routes[0];
     map.addSource('route-main', {
@@ -1885,13 +1522,9 @@ async function routeToDestination(destLng, destLat){
       paint: { 'line-color': '#00F5FF', 'line-width': 7, 'line-opacity': 0.95, 'line-blur': 1 }
     });
     routeSources.push('route-main');
-
     json.routes.slice(1).forEach((r, i) => {
       const id = `route-alt-${i}`;
-      map.addSource(id, {
-        type: 'geojson',
-        data: { type: 'Feature', geometry: r.geometry, properties: {} }
-      });
+      map.addSource(id, { type: 'geojson', data: { type: 'Feature', geometry: r.geometry, properties: {} } });
       map.addLayer({
         id: `${id}-line`, type: 'line', source: id,
         layout: { 'line-join': 'round', 'line-cap': 'round' },
@@ -1899,17 +1532,14 @@ async function routeToDestination(destLng, destLat){
       });
       routeSources.push(id);
     });
-
     const el = document.createElement('div');
     el.style.cssText = 'width:20px;height:20px;background:#FF006E;border:3px solid #fff;border-radius:50% 50% 50% 0;transform:rotate(-45deg);box-shadow:0 0 24px #FF006E;';
     destinationMarker = new maplibregl.Marker({ element: el, anchor: 'bottom' })
       .setLngLat([destLng, destLat]).addTo(map);
-
     const km = (main.distance / 1000).toFixed(1);
     const min = Math.round(main.duration / 60);
     const altCount = json.routes.length - 1;
     toast(`✨ الأسرع: ${km} كم — ${min} دقيقة${altCount > 0 ? ' (' + altCount + ' بديل)' : ''}`, 5000);
-
     const coords = main.geometry.coordinates;
     const lngs = coords.map(c => c[0]), lats = coords.map(c => c[1]);
     map.fitBounds(
@@ -1922,16 +1552,12 @@ async function routeToDestination(destLng, destLat){
   }
 }
 
-/* =========================================================
-   تعديل ارتفاع المحافظات عند التقريب
-   ========================================================= */
 function updateProvinceExtrusionForZoom(){
   if(!map || !map.getLayer('province-3d')) return;
   const z = map.getZoom();
   const bucket = Math.floor(z);
   if(bucket === lastBldZoomBucket) return;
   lastBldZoomBucket = bucket;
-
   let h = 1700, op = 0.78;
   if(buildingsActive && z > 11){
     const t = Math.min(1, (z - 11) / 4);
@@ -1949,9 +1575,7 @@ function updateProvinceExtrusionForZoom(){
   } catch(e){}
 }
 
-/* =========================================================
-   ربط الأزرار (الأصلية)
-   ========================================================= */
+/* ربط الأزرار الأصلية */
 $('close').addEventListener('click', ()=>{
   $('panel').style.display = 'none'; deselectProvince();
 });
@@ -1995,52 +1619,31 @@ $('clearBranch').addEventListener('click', ()=>clearBranch());
 $('loadBuildings').addEventListener('click', async function(){
   if(!map || !mapLoaded) return;
   if(buildingsActive){
-    clearBuildings();
-    buildingsActive = false;
-    lastBldZoomBucket = -1;
-    updateProvinceExtrusionForZoom();
-    this.classList.remove('on');
-    toast('🗑️ تم مسح المباني');
-    return;
+    clearBuildings(); buildingsActive = false;
+    lastBldZoomBucket = -1; updateProvinceExtrusionForZoom();
+    this.classList.remove('on'); toast('🗑️ تم مسح المباني'); return;
   }
-  if(map.getZoom() < 15){
-    toast('⚠️ قرّب الخريطة أكثر (zoom ≥ 15) لتحميل المباني');
-    return;
-  }
-  buildingsActive = true;
-  lastBldZoomBucket = -1;
-  updateProvinceExtrusionForZoom();
+  if(map.getZoom() < 15){ toast('⚠️ قرّب الخريطة أكثر (zoom ≥ 15)'); return; }
+  buildingsActive = true; lastBldZoomBucket = -1; updateProvinceExtrusionForZoom();
   this.classList.add('on');
   const ok = await loadBuildingsForViewport();
   if(!ok && !map.getSource('real-buildings')){
-    this.classList.remove('on');
-    buildingsActive = false;
-    lastBldZoomBucket = -1;
-    updateProvinceExtrusionForZoom();
+    this.classList.remove('on'); buildingsActive = false;
+    lastBldZoomBucket = -1; updateProvinceExtrusionForZoom();
   }
 });
 
 $('loadRoads').addEventListener('click', async function(){
   if(!map || !mapLoaded) return;
   if(roadsActive){
-    clearRoads();
-    roadsActive = false;
+    clearRoads(); roadsActive = false;
     if(trafficMode){ trafficMode = false; $('toggleTraffic').classList.remove('on'); }
-    this.classList.remove('on');
-    toast('🗑️ تم مسح الطرق');
-    return;
+    this.classList.remove('on'); toast('🗑️ تم مسح الطرق'); return;
   }
-  if(map.getZoom() < 13){
-    toast('⚠️ قرّب الخريطة أكثر (zoom ≥ 13) لتحميل الطرق');
-    return;
-  }
-  roadsActive = true;
-  this.classList.add('on');
+  if(map.getZoom() < 13){ toast('⚠️ قرّب الخريطة أكثر (zoom ≥ 13)'); return; }
+  roadsActive = true; this.classList.add('on');
   const ok = await loadRoadsForViewport();
-  if(!ok && !map.getSource('real-roads')){
-    this.classList.remove('on');
-    roadsActive = false;
-  }
+  if(!ok && !map.getSource('real-roads')){ this.classList.remove('on'); roadsActive = false; }
 });
 
 $('loadAirportsBtn').addEventListener('click', async function(){
@@ -2050,10 +1653,8 @@ $('loadAirportsBtn').addEventListener('click', async function(){
       try{ if(map.getLayer(id)) map.removeLayer(id); }catch(e){}
     });
     try{ if(map.getSource('airports')) map.removeSource('airports'); }catch(e){}
-    airportsLoaded = false;
-    this.classList.remove('on');
-    toast('🗑️ تم مسح المطارات');
-    return;
+    airportsLoaded = false; this.classList.remove('on');
+    toast('🗑️ تم مسح المطارات'); return;
   }
   this.classList.add('on');
   const ok = await loadAirports();
@@ -2063,12 +1664,10 @@ $('loadAirportsBtn').addEventListener('click', async function(){
 $('toggleAircraft').addEventListener('click', function(){
   if(!map || !mapLoaded){ toast('⚠️ انتظر تحميل الخريطة'); return; }
   if(aircraftTimer){
-    stopAircraftTracking();
-    this.classList.remove('on');
+    stopAircraftTracking(); this.classList.remove('on');
     toast('🛩️ تم إيقاف تتبع الطائرات');
   } else {
-    startAircraftTracking();
-    this.classList.add('on');
+    startAircraftTracking(); this.classList.add('on');
     toast('🛩️ تتبع الطائرات مباشر (OpenSky)');
   }
 });
@@ -2078,14 +1677,11 @@ $('toggleTraffic').addEventListener('click', toggleTrafficMode);
 $('pickDest').addEventListener('click', function(){
   if(!map || !mapLoaded) return;
   if(destPicking){
-    destPicking = false;
-    this.classList.remove('on');
+    destPicking = false; this.classList.remove('on');
     map.getCanvas().style.cursor = '';
-    toast('❌ تم إلغاء اختيار الوجهة');
-    return;
+    toast('❌ تم إلغاء اختيار الوجهة'); return;
   }
-  destPicking = true;
-  this.classList.add('on');
+  destPicking = true; this.classList.add('on');
   map.getCanvas().style.cursor = 'crosshair';
   toast('🎯 اضغط على الخريطة لاختيار الوجهة');
 });
@@ -2115,6 +1711,8 @@ $('myLocation').addEventListener('click', function(){
       userMarker = new maplibregl.Marker({element: el, anchor: 'center'}).setLngLat([lng, lat]).addTo(map);
       map.flyTo({center: [lng, lat], zoom: 14, pitch: 60, duration: 1500});
       toast('📍 تم تحديد موقعك — اضغط 🎯 وجهة للتنقل');
+      // تحديث الموقع في نظام الدردشة إذا كان جاهزاً
+      if(typeof updateMyChatLocation === 'function') updateMyChatLocation(lat, lng);
     },
     (err) => {
       this.classList.remove('on');
@@ -2124,29 +1722,18 @@ $('myLocation').addEventListener('click', function(){
   );
 });
 
-/* =========================================================
-   🗺️ تهيئة الخريطة
-   ========================================================= */
+/* تهيئة الخريطة */
 async function initMap(){
   try{
     progress(8, 'جاري تحميل ستايل الخريطة...');
     const style = await buildMapStyle();
     progress(20, 'تهيئة محرك الخريطة...');
-
     map = new maplibregl.Map({
-      container: 'map',
-      style: style,
-      center: [43.7, 33.3],
-      zoom: 6,
-      pitch: 52,
-      bearing: -8,
-      maxZoom: 18,
-      minZoom: 4,
-      antialias: true
+      container: 'map', style: style,
+      center: [43.7, 33.3], zoom: 6, pitch: 52, bearing: -8,
+      maxZoom: 18, minZoom: 4, antialias: true
     });
-
     map.on('error', (e) => console.warn('map error:', e && e.error ? e.error.message : e));
-
     map.on('click', (e) => {
       if(!destPicking) return;
       const { lng, lat } = e.lngLat;
@@ -2155,13 +1742,8 @@ async function initMap(){
       map.getCanvas().style.cursor = '';
       routeToDestination(lng, lat);
     });
-
-    map.on('moveend', () => {
-      updateProvinceExtrusionForZoom();
-    });
-
+    map.on('moveend', () => { updateProvinceExtrusionForZoom(); });
     progress(30, 'انتظار تحميل الطبقات...');
-
     await new Promise((resolve) => {
       let done = false;
       const finish = () => { if(!done){ done = true; resolve(); } };
@@ -2169,21 +1751,16 @@ async function initMap(){
       map.on('error', finish);
       setTimeout(finish, 12000);
     });
-
     mapLoaded = true;
     progress(40, 'تهيئة التضاريس ثلاثية الأبعاد...');
-
     try{
       if(map.getSource('iraq-dem')){
         map.setTerrain({source: 'iraq-dem', exaggeration: 1.35});
       }
-    }catch(e){ console.warn('terrain:', e); }
-
+    }catch(e){}
     try{ applyFullVividTheme(); }catch(e){}
-
     progress(55, 'تحميل محافظات العراق من OSM...');
     setStatus('جاري تحميل المحافظات...');
-
     let loaded = false;
     try{
       const data = await loadProvincesFromOSM();
@@ -2196,25 +1773,18 @@ async function initMap(){
       addProvinceLayers();
       loaded = true;
       setStatus('الخريطة جاهزة — ' + PROVINCES.length + ' محافظة');
-    }catch(e){
-      console.warn('OSM provinces failed:', e);
-    }
-
+    }catch(e){ console.warn('OSM provinces failed:', e); }
     if(!loaded){
       progress(86, 'استخدام البيانات المحلية...');
       PROVINCES = buildProvinces({features: []});
       addProvinceLayers();
       setStatus('جاهز (بيانات محلية)');
     }
-
     progress(100, 'جاهز للاستكشاف!');
     setTimeout(() => hideLoading(), 500);
-
     map.fitBounds(IRAQ_BOUNDS, {padding: 40, pitch: 45, bearing: 0, duration: 1500});
 
-    /* ✦ تهيئة نظام الدردشة بعد جاهزية الخريطة */
     initChatSystem();
-
   }catch(err){
     console.error('init failed:', err);
     progress(100, 'حدث خطأ — حاول التحديث');
@@ -2223,183 +1793,207 @@ async function initMap(){
 }
 
 /* =========================================================
-   ✦✦✦ نظام الدردشة الاجتماعي (Neon 3D Live Chat) ✦✦✦
+   ✦✦✦ نظام الدردشة (Supabase) ✦✦✦
    ========================================================= */
 
-/* ---------- إعدادات Firebase (استبدلها بإعدادات مشروعك) ---------- */
-const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_PROJECT.firebaseapp.com",
-  databaseURL: "https://YOUR_PROJECT-default-rtdb.firebaseio.com",
-  projectId: "YOUR_PROJECT",
-  storageBucket: "YOUR_PROJECT.appspot.com",
-  messagingSenderId: "YOUR_SENDER_ID",
-  appId: "YOUR_APP_ID"
-};
-/* 
-   ⚠️ مهم: أنشئ مشروع Firebase، فعّل Authentication (Anonymous)،
-   وفعّل Realtime Database بقواعد مناسبة. استبدل القيم أعلاه.
-*/
+/* ⚠️ ضع مفاتيح مشروعك هنا */
+const SUPABASE_URL = 'https://YOUR-PROJECT.supabase.co';
+const SUPABASE_ANON_KEY = 'YOUR_ANON_PUBLIC_KEY';
 
-let chatAuth = null;
-let chatDb = null;
-let currentUser = null;          // { uid, name, avatar, lat, lng }
-let chatMarkers = {};            // uid -> { marker, bubbleEl, plusEl }
-let activeChatPartner = null;    // { uid, name, avatar }
-let currentChatId = null;        // معرف المحادثة (مرتب أبجدياً بين UID)
-let pendingRequests = [];        // طلبات واردة
-let requestListener = null;
-let chatMessagesListener = null;
-let usersListener = null;
-let requestPickingMode = false;  // وضع "طلب دردشة": النقر على مستخدم لإرسال طلب
-let newRequestsCount = 0;
+let sb = null;
+let currentUser = null;   // { uid, name, avatar, lat, lng }
+let chatMarkers = {};     // uid -> { marker, bubbleEl, plusEl, userData }
+let presenceChannel = null;
+let requestsChannel = null;
+let messagesChannel = null;
+let chatRequestsChannelId = null;
+let activeChatPartner = null;
+let currentChatId = null;
+let pendingRequests = [];
+let requestPickingMode = false;
 
-/* أسماء وصور رمزية عشوائية */
 const ARABIC_NAMES = ['علي','حسين','فاطمة','زينب','محمد','نور','يوسف','مريم','عمر','سارة','كرار','رقية','أحمد','هدى','مصطفى','بنين'];
 const AVATAR_EMOJIS = ['🧑‍🚀','🧕','👨‍💻','👩‍🔬','🧑‍🎨','👨‍🍳','👩‍🚒','🧑‍🌾','👨‍⚕️','👩‍🏫','🧑‍🎤','👩‍💻'];
+const randomChoice = arr => arr[Math.floor(Math.random()*arr.length)];
+const randomAvatar = () => randomChoice(AVATAR_EMOJIS);
+const randomName   = () => randomChoice(ARABIC_NAMES) + ' ' + Math.floor(Math.random()*900+100);
 
-function randomChoice(arr){ return arr[Math.floor(Math.random() * arr.length)]; }
-function randomAvatar(){ return randomChoice(AVATAR_EMOJIS); }
-function randomName(){ return randomChoice(ARABIC_NAMES) + ' ' + Math.floor(Math.random()*900+100); }
+function escapeHtml(text){
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
 
-/* تهيئة Firebase والمستخدم المجهول */
 async function initChatSystem(){
-  if(!firebaseConfig.apiKey || firebaseConfig.apiKey === 'YOUR_API_KEY'){
-    console.warn('⚠️ لم يتم تكوين Firebase. نظام الدردشة معطل حتى تضع إعداداتك.');
-    toast('⚠️ نظام الدردشة يحتاج إعداد Firebase (راجع الكود)', 6000);
+  if(!SUPABASE_URL.includes('supabase.co') || SUPABASE_ANON_KEY === 'YOUR_ANON_PUBLIC_KEY'){
+    console.warn('⚠️ لم يتم تكوين Supabase. ضع URL والمفتاح في الكود.');
+    toast('⚠️ نظام الدردشة يحتاج إعداد Supabase (راجع الكود)', 6000);
     return;
   }
   try{
-    firebase.initializeApp(firebaseConfig);
-    chatAuth = firebase.auth();
-    chatDb = firebase.database();
+    sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     /* مصادقة مجهولة */
-    const cred = await chatAuth.signInAnonymously();
-    const uid = cred.user.uid;
+    const { data: authData, error: authErr } = await sb.auth.signInAnonymously();
+    if(authErr) throw authErr;
+    const uid = authData.user.id;
 
-    /* جلب أو إنشاء ملف المستخدم */
-    const userRef = chatDb.ref('users/' + uid);
-    const snap = await userRef.once('value');
-    let profile = snap.val();
+    /* جلب أو إنشاء ملف */
+    const { data: profile, error: profErr } = await sb
+      .from('profiles').select('*').eq('id', uid).maybeSingle();
+    if(profErr) console.warn(profErr);
+
+    let name, avatar;
     if(!profile){
-      profile = {
-        name: randomName(),
-        avatar: randomAvatar(),
-        createdAt: firebase.database.ServerValue.TIMESTAMP
-      };
-      await userRef.set(profile);
+      name = randomName();
+      avatar = randomAvatar();
+      await sb.from('profiles').insert({ id: uid, name, avatar });
+    } else {
+      name = profile.name || randomName();
+      avatar = profile.avatar || randomAvatar();
     }
-    currentUser = {
-      uid: uid,
-      name: profile.name,
-      avatar: profile.avatar,
-      lat: null,
-      lng: null
-    };
 
-    /* تعيين الحضور: متصل الآن + onDisconnect */
-    const presenceRef = chatDb.ref('users/' + uid + '/online');
-    await presenceRef.set(true);
-    presenceRef.onDisconnect().set(false);
-    /* عند قطع الاتصال، يمكن أيضاً تعيين lastSeen */
-    userRef.child('lastSeen').onDisconnect().set(firebase.database.ServerValue.TIMESTAMP);
+    currentUser = { uid, name, avatar, lat: null, lng: null };
 
-    /* تحديث الموقع الجغرافي إذا توفر */
+    /* طلب الموقع */
     if(navigator.geolocation){
-      navigator.geolocation.getCurrentPosition(async (pos)=>{
-        const lat = pos.coords.latitude;
-        const lng = pos.coords.longitude;
-        currentUser.lat = lat; currentUser.lng = lng;
-        await userRef.update({ lat, lng, lastLocationUpdate: firebase.database.ServerValue.TIMESTAMP });
-      }, ()=>{}, { enableHighAccuracy: true, timeout: 10000 });
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          currentUser.lat = pos.coords.latitude;
+          currentUser.lng = pos.coords.longitude;
+          reTrackPresence();
+        },
+        () => {},
+        { enableHighAccuracy: true, timeout: 10000 }
+      );
     }
 
-    /* الاستماع إلى المستخدمين الآخرين المتصلين */
-    listenToChatUsers();
+    /* بدء تتبع الحضور */
+    startPresenceTracking();
 
-    /* الاستماع إلى طلبات الدردشة الواردة */
-    listenToChatRequests();
+    /* جلب الطلبات المعلقة مسبقاً */
+    await loadInitialPendingRequests();
+
+    /* الاشتراك بطلبات جديدة */
+    startRequestsSubscription();
 
     toast('💬 نظام الدردشة جاهز — اضغط 💬 طلب دردشة', 4000);
-
   } catch(err){
     console.error('Chat init error:', err);
-    toast('❌ تعذر تهيئة الدردشة: ' + (err.message || ''), 5000);
+    toast('❌ تعذر تهيئة الدردشة: ' + (err.message||''), 5000);
   }
 }
 
-/* ---------- عرض المستخدمين على الخريطة ---------- */
-function listenToChatUsers(){
-  if(!chatDb) return;
-  const usersRef = chatDb.ref('users');
-  usersListener = usersRef.on('value', (snapshot)=>{
-    const users = snapshot.val() || {};
-    Object.keys(users).forEach(uid => {
-      if(uid === currentUser.uid) return; // لا نعرض أنفسنا
-      const u = users[uid];
-      if(!u.online) {
-        removeChatMarker(uid);
-        return;
-      }
-      if(u.lat == null || u.lng == null) return;
-      updateChatMarker(uid, u);
+function updateMyChatLocation(lat, lng){
+  if(!currentUser) return;
+  currentUser.lat = lat;
+  currentUser.lng = lng;
+  reTrackPresence();
+}
+
+/* ====== Presence: المستخدمون المتصلون ====== */
+function startPresenceTracking(){
+  presenceChannel = sb.channel('online-users', {
+    config: { presence: { key: currentUser.uid } }
+  });
+
+  presenceChannel
+    .on('presence', { event: 'sync' }, () => {
+      const state = presenceChannel.presenceState();
+      renderPresenceMarkers(state);
+    })
+    .on('presence', { event: 'join' }, () => {
+      const state = presenceChannel.presenceState();
+      renderPresenceMarkers(state);
+    })
+    .on('presence', { event: 'leave' }, () => {
+      const state = presenceChannel.presenceState();
+      renderPresenceMarkers(state);
     });
-    // إزالة علامات المستخدمين الذين لم يعودوا موجودين
-    Object.keys(chatMarkers).forEach(uid => {
-      if(!users[uid] || !users[uid].online) removeChatMarker(uid);
+
+  presenceChannel.subscribe(async (status) => {
+    if(status === 'SUBSCRIBED'){
+      await trackSelf();
+    }
+  });
+}
+
+async function trackSelf(){
+  if(!presenceChannel || !currentUser) return;
+  try{
+    await presenceChannel.track({
+      name: currentUser.name,
+      avatar: currentUser.avatar,
+      lat: currentUser.lat,
+      lng: currentUser.lng
     });
+  } catch(e){ console.warn('track error', e); }
+}
+function reTrackPresence(){ trackSelf(); }
+
+function renderPresenceMarkers(state){
+  const seen = new Set();
+  Object.keys(state).forEach(uid => {
+    if(uid === currentUser.uid) return;
+    const presenceList = state[uid];
+    if(!presenceList || !presenceList.length) return;
+    const p = presenceList[0];
+    if(p.lat == null || p.lng == null) return;
+    seen.add(uid);
+    updateChatMarker(uid, {
+      name: p.name || 'مستخدم',
+      avatar: p.avatar || '👤',
+      lat: p.lat, lng: p.lng
+    });
+  });
+  /* إزالة من لم يعد موجوداً */
+  Object.keys(chatMarkers).forEach(uid => {
+    if(!seen.has(uid)) removeChatMarker(uid);
   });
 }
 
 function updateChatMarker(uid, userData){
   const pos = [userData.lng, userData.lat];
   if(chatMarkers[uid]){
+    chatMarkers[uid].userData = userData;
     chatMarkers[uid].marker.setLngLat(pos);
-    // تحديث الفقاعة إذا كان هناك طلب معلق
     updateRequestBubbleForUser(uid, userData);
     return;
   }
-
   const el = document.createElement('div');
   el.className = 'chat-user-marker';
   el.dataset.uid = uid;
 
   const avatarDiv = document.createElement('div');
   avatarDiv.className = 'cu-avatar';
-  avatarDiv.innerHTML = userData.avatar || '👤';
+  avatarDiv.textContent = userData.avatar || '👤';
 
   const plus = document.createElement('div');
   plus.className = 'cu-plus';
   plus.textContent = '+';
-  plus.style.display = 'none'; // يظهر فقط عند وجود طلب
+  plus.style.display = 'none';
 
-  el.appendChild(avatarDiv);
-  el.appendChild(plus);
-
-  // فقاعة طلب (مخفية افتراضياً)
   const bubble = document.createElement('div');
   bubble.className = 'chat-request-bubble';
   bubble.style.display = 'none';
+
+  el.appendChild(avatarDiv);
+  el.appendChild(plus);
   el.appendChild(bubble);
 
-  /* النقر على المستخدم */
   el.addEventListener('click', (ev)=>{
     ev.stopPropagation();
     if(requestPickingMode){
       sendChatRequestTo(uid);
     } else {
-      // عرض خيار بدء دردشة أو معلومات
       toast(`👤 ${userData.name} — متصل الآن`, 2500);
     }
   });
 
   const marker = new maplibregl.Marker({ element: el, anchor: 'center' })
-    .setLngLat(pos)
-    .addTo(map);
+    .setLngLat(pos).addTo(map);
 
   chatMarkers[uid] = { marker, bubbleEl: bubble, plusEl: plus, userData };
-
   updateRequestBubbleForUser(uid, userData);
 }
 
@@ -2410,12 +2004,11 @@ function removeChatMarker(uid){
   }
 }
 
-/* تحديث فقاعة الطلب وعلامة + لمستخدم معين */
 function updateRequestBubbleForUser(uid, userData){
   const entry = chatMarkers[uid];
   if(!entry) return;
-  const hasPending = pendingRequests.some(r => r.from === uid && r.status === 'pending');
-  if(hasPending){
+  const has = pendingRequests.some(r => r.from_id === uid);
+  if(has){
     entry.bubbleEl.textContent = `${userData.name || 'مستخدم'} يريد دردشة`;
     entry.bubbleEl.style.display = 'block';
     entry.plusEl.style.display = 'flex';
@@ -2425,46 +2018,69 @@ function updateRequestBubbleForUser(uid, userData){
   }
 }
 
-/* ---------- طلب دردشة ---------- */
-function sendChatRequestTo(targetUid){
-  if(!chatDb || !currentUser) return;
+/* ====== إرسال طلب دردشة ====== */
+async function sendChatRequestTo(targetUid){
+  if(!sb || !currentUser) return;
   if(targetUid === currentUser.uid) return;
 
-  const requestRef = chatDb.ref('chatRequests').push();
-  requestRef.set({
-    from: currentUser.uid,
-    fromName: currentUser.name,
-    fromAvatar: currentUser.avatar,
-    to: targetUid,
-    status: 'pending',
-    timestamp: firebase.database.ServerValue.TIMESTAMP
-  }).then(()=>{
-    toast('📨 تم إرسال طلب الدردشة', 3000);
-    exitRequestPickingMode();
-  }).catch(err=>{
-    toast('❌ فشل إرسال الطلب: ' + (err.message||''), 4000);
+  const { error } = await sb.from('chat_requests').insert({
+    from_id: currentUser.uid,
+    from_name: currentUser.name,
+    from_avatar: currentUser.avatar,
+    to_id: targetUid,
+    status: 'pending'
+  });
+  if(error){
+    toast('❌ فشل إرسال الطلب: ' + error.message, 4000);
+    return;
+  }
+  toast('📨 تم إرسال طلب الدردشة', 3000);
+  exitRequestPickingMode();
+}
+
+/* ====== تحميل الطلبات المعلقة عند البدء ====== */
+async function loadInitialPendingRequests(){
+  if(!sb || !currentUser) return;
+  const { data, error } = await sb
+    .from('chat_requests')
+    .select('*')
+    .eq('to_id', currentUser.uid)
+    .eq('status', 'pending')
+    .order('created_at', { ascending: true });
+  if(error){ console.warn(error); return; }
+  pendingRequests = data || [];
+  updateNotificationUI();
+  Object.keys(chatMarkers).forEach(uid => {
+    updateRequestBubbleForUser(uid, chatMarkers[uid].userData);
   });
 }
 
-/* الاستماع إلى طلبات الدردشة الواردة */
-function listenToChatRequests(){
-  if(!chatDb || !currentUser) return;
-  const reqRef = chatDb.ref('chatRequests').orderByChild('to').equalTo(currentUser.uid);
-  requestListener = reqRef.on('value', (snapshot)=>{
-    const data = snapshot.val() || {};
-    pendingRequests = Object.keys(data).map(id => ({ id, ...data[id] }))
-      .filter(r => r.status === 'pending');
-
-    newRequestsCount = pendingRequests.length;
-    updateNotificationUI();
-
-    // تحديث فقاعات المستخدمين
-    Object.keys(chatMarkers).forEach(uid => {
-      const entry = chatMarkers[uid];
-      if(!entry) return;
-      updateRequestBubbleForUser(uid, entry.userData);
-    });
-  });
+/* ====== الاشتراك بطلبات جديدة ====== */
+function startRequestsSubscription(){
+  requestsChannel = sb.channel('chat-requests-stream-' + currentUser.uid)
+    .on('postgres_changes',
+      { event: 'INSERT', schema: 'public', table: 'chat_requests', filter: `to_id=eq.${currentUser.uid}` },
+      (payload) => {
+        const req = payload.new;
+        if(req.status === 'pending'){
+          pendingRequests.push(req);
+          updateNotificationUI();
+          const entry = chatMarkers[req.from_id];
+          if(entry) updateRequestBubbleForUser(req.from_id, entry.userData);
+          toast('💬 ' + (req.from_name || 'شخص') + ' يريد دردشة', 4000);
+        }
+      })
+    .on('postgres_changes',
+      { event: 'UPDATE', schema: 'public', table: 'chat_requests', filter: `to_id=eq.${currentUser.uid}` },
+      (payload) => {
+        const req = payload.new;
+        pendingRequests = pendingRequests.filter(r => r.id !== req.id);
+        updateNotificationUI();
+        Object.keys(chatMarkers).forEach(uid => {
+          updateRequestBubbleForUser(uid, chatMarkers[uid].userData);
+        });
+      })
+    .subscribe();
 }
 
 function updateNotificationUI(){
@@ -2476,115 +2092,112 @@ function updateNotificationUI(){
     notif.classList.add('visible');
     countEl.textContent = pendingRequests.length;
     subEl.textContent = pendingRequests.length === 1
-      ? pendingRequests[0].fromName + ' يريد دردشة'
+      ? (pendingRequests[0].from_name || 'شخص') + ' يريد دردشة'
       : `${pendingRequests.length} أشخاص يريدون دردشة`;
   } else {
     notif.classList.remove('visible');
   }
 }
 
-/* عند النقر على الإشعار: فتح نافذة القبول */
 function openRequestModalForFirst(){
   if(!pendingRequests.length) return;
   const req = pendingRequests[0];
-  $('reqName').textContent = req.fromName || 'مستخدم';
-  $('reqAvatar').innerHTML = req.fromAvatar || '👤';
+  $('reqName').textContent = req.from_name || 'مستخدم';
+  $('reqAvatar').textContent = req.from_avatar || '👤';
   $('chatRequestModal').classList.add('open');
   $('chatRequestModal').dataset.reqId = req.id;
 }
 
-/* قبول الطلب */
+/* ====== قبول / رفض ====== */
 async function acceptChatRequest(reqId){
-  if(!chatDb || !currentUser) return;
-  const reqRef = chatDb.ref('chatRequests/' + reqId);
-  const snap = await reqRef.once('value');
-  const req = snap.val();
-  if(!req) return;
+  if(!sb || !currentUser) return;
+  const req = pendingRequests.find(r => String(r.id) === String(reqId));
+  if(!req){ $('chatRequestModal').classList.remove('open'); return; }
 
-  await reqRef.update({ status: 'accepted', acceptedAt: firebase.database.ServerValue.TIMESTAMP });
+  const { error } = await sb.from('chat_requests')
+    .update({ status: 'accepted' })
+    .eq('id', reqId);
+  if(error){ toast('❌ ' + error.message, 3000); return; }
+
   $('chatRequestModal').classList.remove('open');
-
-  const partnerUid = req.from;
-  const partnerName = req.fromName;
-  const partnerAvatar = req.fromAvatar;
-
-  openChatWindow(partnerUid, partnerName, partnerAvatar);
+  openChatWindow(req.from_id, req.from_name || 'مستخدم', req.from_avatar || '👤');
 }
 
-/* رفض الطلب */
 async function rejectChatRequest(reqId){
-  if(!chatDb) return;
-  await chatDb.ref('chatRequests/' + reqId).update({ status: 'rejected', rejectedAt: firebase.database.ServerValue.TIMESTAMP });
+  if(!sb) return;
+  await sb.from('chat_requests').update({ status: 'rejected' }).eq('id', reqId);
   $('chatRequestModal').classList.remove('open');
   toast('❌ تم رفض الطلب', 2500);
 }
 
-/* فتح نافذة المحادثة */
-function openChatWindow(partnerUid, partnerName, partnerAvatar){
+/* ====== نافذة المحادثة ====== */
+async function openChatWindow(partnerUid, partnerName, partnerAvatar){
   activeChatPartner = { uid: partnerUid, name: partnerName, avatar: partnerAvatar };
   currentChatId = [currentUser.uid, partnerUid].sort().join('_');
 
   $('chatHeaderName').textContent = partnerName || 'مستخدم';
-  $('chatHeaderAvatar').innerHTML = partnerAvatar || '👤';
+  $('chatHeaderAvatar').textContent = partnerAvatar || '👤';
   $('chatMessages').innerHTML = '';
   $('chatWindow').classList.add('open');
 
-  // إزالة مستمع الرسائل القديم
-  if(chatMessagesListener){
-    chatDb.ref('chats/' + currentChatId + '/messages').off('value', chatMessagesListener);
-    chatMessagesListener = null;
-  }
+  /* تحميل الرسائل السابقة */
+  const { data: oldMsgs } = await sb.from('messages')
+    .select('*').eq('chat_id', currentChatId)
+    .order('created_at', { ascending: true });
 
-  // الاستماع إلى الرسائل
-  const msgsRef = chatDb.ref('chats/' + currentChatId + '/messages').orderByChild('timestamp');
-  chatMessagesListener = msgsRef.on('value', (snapshot)=>{
-    const data = snapshot.val() || {};
-    const msgBox = $('chatMessages');
-    msgBox.innerHTML = '';
-    Object.keys(data).forEach(mid => {
-      const m = data[mid];
-      const div = document.createElement('div');
-      div.className = 'chat-msg ' + (m.sender === currentUser.uid ? 'sent' : 'received');
-      const time = m.timestamp ? new Date(m.timestamp).toLocaleTimeString('ar-IQ', {hour:'2-digit', minute:'2-digit'}) : '';
-      div.innerHTML = `${escapeHtml(m.text)}<span class="msg-time">${time}</span>`;
-      msgBox.appendChild(div);
-    });
-    msgBox.scrollTop = msgBox.scrollHeight;
-  });
+  (oldMsgs || []).forEach(renderMessage);
+
+  /* الاشتراك برسائل جديدة */
+  if(messagesChannel){ sb.removeChannel(messagesChannel); messagesChannel = null; }
+  messagesChannel = sb.channel('messages-' + currentChatId)
+    .on('postgres_changes',
+      { event: 'INSERT', schema: 'public', table: 'messages', filter: `chat_id=eq.${currentChatId}` },
+      (payload) => renderMessage(payload.new)
+    )
+    .subscribe();
 }
 
-function escapeHtml(text){
+function renderMessage(m){
+  const msgBox = $('chatMessages');
+  if(!msgBox) return;
+  /* منع التكرار */
+  if(msgBox.querySelector(`[data-mid="${m.id}"]`)) return;
+
   const div = document.createElement('div');
-  div.textContent = text;
-  return div.innerHTML;
+  div.className = 'chat-msg ' + (m.sender_id === currentUser.uid ? 'sent' : 'received');
+  div.dataset.mid = m.id;
+  const time = m.created_at
+    ? new Date(m.created_at).toLocaleTimeString('ar-IQ', {hour:'2-digit', minute:'2-digit'})
+    : '';
+  div.innerHTML = escapeHtml(m.text) + `<span class="msg-time">${time}</span>`;
+  msgBox.appendChild(div);
+  msgBox.scrollTop = msgBox.scrollHeight;
 }
 
-/* إغلاق نافذة المحادثة */
 function closeChatWindow(){
   $('chatWindow').classList.remove('open');
-  if(chatMessagesListener && chatDb){
-    chatDb.ref('chats/' + currentChatId + '/messages').off('value', chatMessagesListener);
-    chatMessagesListener = null;
-  }
+  if(messagesChannel){ sb.removeChannel(messagesChannel); messagesChannel = null; }
   activeChatPartner = null;
   currentChatId = null;
 }
 
-/* إرسال رسالة */
-function sendChatMessage(){
-  if(!chatDb || !currentUser || !activeChatPartner || !currentChatId) return;
+async function sendChatMessage(){
+  if(!sb || !currentUser || !activeChatPartner || !currentChatId) return;
   const input = $('chatInput');
   const text = input.value.trim();
   if(!text) return;
   input.value = '';
-  chatDb.ref('chats/' + currentChatId + '/messages').push({
-    sender: currentUser.uid,
-    text: text,
-    timestamp: firebase.database.ServerValue.TIMESTAMP
+  const { error } = await sb.from('messages').insert({
+    chat_id: currentChatId,
+    sender_id: currentUser.uid,
+    sender_name: currentUser.name,
+    sender_avatar: currentUser.avatar,
+    text: text
   });
+  if(error) toast('❌ فشل إرسال الرسالة: ' + error.message, 3500);
 }
 
-/* وضع اختيار مستخدم لطلب الدردشة */
+/* ====== وضع اختيار مستخدم لطلب دردشة ====== */
 function enterRequestPickingMode(){
   if(!map) return;
   requestPickingMode = true;
@@ -2623,15 +2236,11 @@ $('rejectChatBtn').addEventListener('click', ()=>{
 });
 $('closeChatBtn').addEventListener('click', closeChatWindow);
 $('chatSendBtn').addEventListener('click', sendChatMessage);
-$('chatInput').addEventListener('keydown', (e)=>{
-  if(e.key === 'Enter') sendChatMessage();
-});
+$('chatInput').addEventListener('keydown', (e)=>{ if(e.key === 'Enter') sendChatMessage(); });
 
-/* عند إغلاق النافذة، أغلق المحادثة */
+/* تنظيف عند الإغلاق */
 window.addEventListener('beforeunload', ()=>{
-  if(chatDb && currentUser){
-    chatDb.ref('users/' + currentUser.uid + '/online').set(false);
-  }
+  if(presenceChannel){ try{ presenceChannel.untrack(); }catch(e){} }
 });
 
 /* بدء التطبيق */
