@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>IRAQ MIND MAP 3D — FULL EDITION (FIXED)</title>
+<title>IRAQ MIND MAP 3D — NEON EDITION</title>
 
 <link href="https://unpkg.com/maplibre-gl@5.6.2/dist/maplibre-gl.css" rel="stylesheet">
 <script src="https://unpkg.com/maplibre-gl@5.6.2/dist/maplibre-gl.js"></script>
@@ -50,7 +50,7 @@ button{font-family:inherit}
 #myLocation.on{background:linear-gradient(135deg,#ffe600,#ff006e);border-color:#ffe600;color:#021018;box-shadow:0 0 24px #ffe60088;animation:pulseBtn 2s infinite;}
 @keyframes pulseBtn{0%,100%{box-shadow:0 0 24px #ffe60088;}50%{box-shadow:0 0 40px #ffe600cc;}}
 
-#panel{position:absolute;z-index:25;right:12px;top:74px;bottom:12px;width:min(350px,86vw);background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:16px;overflow-y:auto;display:none;box-shadow:0 20px 70px #000c, 0 0 0 1px #4a2dff44 inset;backdrop-filter:blur(18px);animation:slideIn .35s ease;}
+#panel{position:absolute;z-index:25;right:12px;top:74px;bottom:150px;width:min(350px,86vw);background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:16px;overflow-y:auto;display:none;box-shadow:0 20px 70px #000c, 0 0 0 1px #4a2dff44 inset;backdrop-filter:blur(18px);animation:slideIn .35s ease;max-height:calc(100dvh - 160px);}
 @keyframes slideIn{from{opacity:0;transform:translateX(-14px)}to{opacity:1;transform:none}}
 #panel::-webkit-scrollbar{width:7px}
 #panel::-webkit-scrollbar-thumb{background:linear-gradient(180deg,#00f5ff,#ff006e);border-radius:4px}
@@ -80,7 +80,7 @@ button{font-family:inherit}
 #close{position:absolute;left:12px;top:12px;width:32px;height:32px;background:linear-gradient(135deg,#4a2dff,#b537f2);color:#fff;border:0;border-radius:10px;cursor:pointer;font-size:15px;font-weight:800;transition:.16s;box-shadow:0 4px 16px #4a2dff66;}
 #close:hover{background:linear-gradient(135deg,#ff006e,#b537f2);transform:rotate(90deg);box-shadow:0 0 24px #ff006e88;}
 
-#sideList{position:absolute;z-index:22;left:12px;top:74px;bottom:12px;width:min(260px,80vw);background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:13px;display:flex;flex-direction:column;box-shadow:0 20px 70px #000c, 0 0 0 1px #4a2dff44 inset;backdrop-filter:blur(18px);transition:transform .3s ease,opacity .3s ease;}
+#sideList{position:absolute;z-index:22;left:12px;top:74px;bottom:150px;width:min(260px,80vw);background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:13px;display:flex;flex-direction:column;box-shadow:0 20px 70px #000c, 0 0 0 1px #4a2dff44 inset;backdrop-filter:blur(18px);transition:transform .3s ease,opacity .3s ease;max-height:calc(100dvh - 160px);}
 #sideList.hidden{transform:translateX(-115%);opacity:0;pointer-events:none}
 #sideList h4{margin:2px 0 11px;font-size:12px;font-weight:700;letter-spacing:.5px;display:flex;justify-content:space-between;align-items:center;color:#ffe600;text-shadow:0 0 10px #ffe60077;}
 #search{width:100%;padding:10px 12px;margin-bottom:10px;background:rgba(20,10,50,.8);border:1px solid #4a2dff88;border-radius:11px;color:#fff;font-size:12px;font-family:inherit;outline:none;transition:.16s;}
@@ -184,36 +184,18 @@ button{font-family:inherit}
 #chatSendBtn:hover { transform: translateY(-1px); box-shadow: 0 0 30px rgba(0, 245, 255, 0.7); }
 
 #videoControls {
-  position: absolute;
-  bottom: 15px;
-  left: 12px;
-  right: 12px;
-  z-index: 24;
-  display: flex;
-  gap: 12px;
+  position: absolute; bottom: 15px; left: 12px; right: 12px; z-index: 30;
+  display: flex; gap: 12px; padding: 0 8px;
 }
 #videoControls button {
-  flex: 1;
-  padding: 16px 10px;
-  font-size: 15px;
-  font-weight: 800;
-  border-radius: 16px;
+  flex: 1; padding: 12px 8px; font-size: 13px; font-weight: 800; border-radius: 16px;
   border: 2px solid var(--chat-glow);
   background: linear-gradient(135deg, rgba(20, 10, 50, 0.95), rgba(10, 30, 60, 0.95));
-  color: #fff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  cursor: pointer;
-  box-shadow: 0 0 20px rgba(0, 245, 255, 0.3), 0 0 40px rgba(181, 55, 242, 0.2);
-  transition: all 0.25s ease;
-  backdrop-filter: blur(10px);
+  color: #fff; display: flex; align-items: center; justify-content: center; gap: 8px;
+  cursor: pointer; box-shadow: 0 0 20px rgba(0, 245, 255, 0.3), 0 0 40px rgba(181, 55, 242, 0.2);
+  transition: all 0.25s ease; backdrop-filter: blur(10px);
 }
-#videoControls button:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 0 30px rgba(0, 245, 255, 0.6), 0 0 60px rgba(181, 55, 242, 0.4);
-}
+#videoControls button:hover { transform: translateY(-2px); box-shadow: 0 0 30px rgba(0, 245, 255, 0.6), 0 0 60px rgba(181, 55, 242, 0.4); }
 #videoControls button svg { width: 24px; height: 24px; fill: currentColor; }
 
 #videoFeedModal { position: fixed; inset: 0; z-index: 100; background: #000; display: none; flex-direction: column; }
@@ -266,18 +248,6 @@ button{font-family:inherit}
 .video-map-marker { width: 40px; height: 40px; background: rgba(0,0,0,0.7); border: 2px solid var(--chat-pink); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; color: #fff; cursor: pointer; box-shadow: 0 0 20px var(--chat-pink); transition: 0.2s; }
 .video-map-marker:hover { transform: scale(1.1); box-shadow: 0 0 30px var(--chat-pink), 0 0 60px rgba(255, 0, 110, 0.3); }
 
-/* ✅ [FIX #4] معالجة تراكم واجهة المستخدم على الموبايل */
-#panel, #sideList {
-  bottom: 150px !important;
-  max-height: calc(100dvh - 160px);
-}
-#videoControls {
-  z-index: 30;
-  bottom: 12px;
-  padding: 0 8px;
-}
-#videoControls button { padding: 12px 8px; font-size: 13px; }
-
 @media (max-width: 600px) {
   #panel { width: 92vw; right: 4vw; top: 68px; }
   #sideList { width: 82vw; }
@@ -290,20 +260,9 @@ button{font-family:inherit}
   #videoControls button svg { width: 18px; height: 18px; }
 }
 
-/* [FIX #5] بانر إرشاد Firebase */
-#fbSetupBanner {
-  position:fixed; bottom:170px; left:50%; transform:translateX(-50%);
-  z-index:70; max-width:92vw; background:linear-gradient(135deg,#1a1060,#2a1580);
-  border:1px solid #00f5ff; border-radius:16px; padding:14px 18px;
-  color:#e8f4ff; font-size:12px; line-height:1.8; text-align:right;
-  box-shadow:0 20px 60px #000c, 0 0 30px #00f5ff44; backdrop-filter:blur(16px);
-  display:flex; gap:12px; align-items:center;
-}
+#fbSetupBanner { position:fixed; bottom:170px; left:50%; transform:translateX(-50%); z-index:70; max-width:92vw; background:linear-gradient(135deg,#1a1060,#2a1580); border:1px solid #00f5ff; border-radius:16px; padding:14px 18px; color:#e8f4ff; font-size:12px; line-height:1.8; text-align:right; box-shadow:0 20px 60px #000c, 0 0 30px #00f5ff44; backdrop-filter:blur(16px); display:flex; gap:12px; align-items:center; }
 #fbSetupBanner code { background:#000a; padding:2px 6px; border-radius:4px; }
-#fbSetupBanner .close-btn {
-  background:transparent; border:1px solid #fff3; color:#fff;
-  width:30px; height:30px; border-radius:8px; cursor:pointer; font-size:16px;
-}
+#fbSetupBanner .close-btn { background:transparent; border:1px solid #fff3; color:#fff; width:30px; height:30px; border-radius:8px; cursor:pointer; font-size:16px; }
 </style>
 </head>
 <body>
@@ -463,7 +422,7 @@ button{font-family:inherit}
 
 <script>
 /* =========================================================
-   IRAQ MIND MAP 3D — FULL FIXED EDITION
+   IRAQ MIND MAP 3D — FULL NEON EDITION
    ========================================================= */
 
 const PROVINCE_META = [
@@ -567,47 +526,40 @@ function hideLoading(){
   setTimeout(()=>{ l.style.display = 'none'; }, 550);
 }
 
-/* ✅ [FIX #1 + #2] نمط خريطة موثوق بدون API KEY */
-function getReliableMapStyle(){
-  return {
-    version: 8,
-    name: 'Iraq Mind Map',
-    glyphs: 'https://demotiles.maplibre.org/font/{fontstack}/{range}.pbf',
-    sources: {
-      'osm-tiles': {
-        type: 'raster',
-        tiles: [
-          'https://a.tile.openstreetmap.org/{z}/{x}/{y}.png',
-          'https://b.tile.openstreetmap.org/{z}/{x}/{y}.png',
-          'https://c.tile.openstreetmap.org/{z}/{x}/{y}.png'
-        ],
-        tileSize: 256,
-        maxzoom: 19,
-        attribution: '© OpenStreetMap contributors'
-      }
-    },
-    layers: [
-      { id:'background', type:'background', paint:{ 'background-color':'#0a0320' } },
-      {
-        id:'osm-dark-layer',
-        type:'raster',
-        source:'osm-tiles',
-        paint:{
-          'raster-brightness-min': 0.05,
-          'raster-brightness-max': 0.38,
-          'raster-saturation': -0.65,
-          'raster-contrast': 0.45,
-          'raster-opacity': 0.95
-        }
-      }
-    ]
-  };
-}
-
+/* ✅ [جديد] استخدام OpenFreeMap - خرائط Vector مجانية بدون API Key */
 async function buildMapStyle(){
-  return getReliableMapStyle();
+  try {
+    // جلب ستايل داكن مجاني 100% من OpenFreeMap
+    const res = await fetch('https://tiles.openfreemap.org/styles/dark');
+    if (!res.ok) throw new Error('فشل تحميل الستايل');
+    const style = await res.json();
+    
+    // ضمان وجود الخطوط العربية
+    if(!style.glyphs) style.glyphs = 'https://tiles.openfreemap.org/fonts/{fontstack}/{range}.pbf';
+    
+    return style;
+  } catch (e) {
+    console.warn('فشل تحميل OpenFreeMap، جاري استخدام النمط الاحتياطي...', e);
+    // نمط احتياطي (صور) في حال انقطاع السيرفر
+    return {
+      version: 8,
+      glyphs: 'https://demotiles.maplibre.org/font/{fontstack}/{range}.pbf',
+      sources: {
+        'osm-tiles': {
+          type: 'raster',
+          tiles: ['https://a.tile.openstreetmap.org/{z}/{x}/{y}.png'],
+          tileSize: 256
+        }
+      },
+      layers: [
+        { id:'background', type:'background', paint:{ 'background-color':'#0a0320' } },
+        { id:'osm-dark', type:'raster', source:'osm-tiles', paint:{ 'raster-brightness-min':0.05, 'raster-brightness-max':0.38, 'raster-saturation':-0.65, 'raster-contrast':0.45 } }
+      ]
+    };
+  }
 }
 
+/* ✅ إعادة الألوان النيون للخرائط الـ Vector */
 function applyVividTheme(){
   if(!map) return;
   const style = map.getStyle();
@@ -621,23 +573,110 @@ function applyVividTheme(){
     try{
       if(type === 'background'){ map.setPaintProperty(id, 'background-color', '#0a0320'); return; }
       if(!srcLayer) return;
-      // With raster basemap, none of these source-layers exist — skip silently
+
+      if(srcLayer === 'water'){
+        if(type === 'fill'){ map.setPaintProperty(id, 'fill-color', '#00d9ff'); map.setPaintProperty(id, 'fill-opacity', 0.9); }
+        else if(type === 'fill-extrusion'){ map.setPaintProperty(id, 'fill-extrusion-color', '#00d9ff'); }
+        else if(type === 'line'){ map.setPaintProperty(id, 'line-color', '#00d9ff'); }
+        return;
+      }
+      if(srcLayer === 'waterway' && type === 'line'){ map.setPaintProperty(id, 'line-color', '#00f5ff'); return; }
+      if(srcLayer === 'building' && type === 'fill'){
+        map.setPaintProperty(id, 'fill-color', '#ff006e');
+        map.setPaintProperty(id, 'fill-opacity', 0.85);
+        map.setPaintProperty(id, 'fill-outline-color', '#ffe600');
+        return;
+      }
+      if((srcLayer === 'landcover' || srcLayer === 'landuse' || srcLayer === 'park') && type === 'fill'){
+        map.setPaintProperty(id, 'fill-color', '#06ffa5');
+        map.setPaintProperty(id, 'fill-opacity', 0.3);
+        return;
+      }
+      if(srcLayer === 'transportation'){
+        let color = '#b537f2';
+        if(/motorway/i.test(id)) color = /casing|outline/i.test(id) ? '#8a0050' : /tunnel/i.test(id) ? '#a8004a' : '#ff006e';
+        else if(/trunk/i.test(id)) color = /casing|outline/i.test(id) ? '#8a3000' : '#fb5607';
+        else if(/primary/i.test(id)) color = /casing|outline/i.test(id) ? '#8a7000' : '#ffe600';
+        else if(/secondary/i.test(id)) color = '#00f5ff';
+        else if(/tertiary/i.test(id)) color = '#06ffa5';
+        else if(/minor|residential|service|pedestrian/i.test(id)) color = '#b537f2';
+        else if(/rail|transit/i.test(id)) color = '#ff8ec7';
+        if(type === 'line'){
+          map.setPaintProperty(id, 'line-color', color);
+          map.setPaintProperty(id, 'line-opacity', 0.92);
+        } else if(type === 'fill'){ map.setPaintProperty(id, 'fill-color', color); }
+        return;
+      }
+      if(srcLayer === 'boundary' && type === 'line'){
+        map.setPaintProperty(id, 'line-color', '#ffe600');
+        map.setPaintProperty(id, 'line-opacity', 0.85);
+        return;
+      }
+      if(srcLayer === 'poi' || srcLayer === 'aerodrome_label'){
+        if(type === 'symbol'){
+          try{ map.setPaintProperty(id, 'icon-color', '#ff2ec4'); }catch(e){}
+          try{ map.setPaintProperty(id, 'icon-halo-color', '#1a0045'); }catch(e){}
+          try{ map.setPaintProperty(id, 'text-color', '#ffffff'); }catch(e){}
+          try{ map.setPaintProperty(id, 'text-halo-color', '#1a0045'); }catch(e){}
+          try{ map.setPaintProperty(id, 'text-halo-width', 1.5); }catch(e){}
+        }
+        return;
+      }
+      if(srcLayer === 'place' && type === 'symbol'){
+        try{ map.setPaintProperty(id, 'text-color', '#ffffff'); }catch(e){}
+        try{ map.setPaintProperty(id, 'text-halo-color', '#0a0320'); }catch(e){}
+        try{ map.setPaintProperty(id, 'text-halo-width', 1.8); }catch(e){}
+        return;
+      }
       if(type === 'symbol'){
         try{ map.setPaintProperty(id, 'text-color', '#ffffff'); }catch(e){}
         try{ map.setPaintProperty(id, 'text-halo-color', '#0a0320'); }catch(e){}
+        try{ map.setPaintProperty(id, 'icon-color', '#ff2ec4'); }catch(e){}
       }
     }catch(err){}
   });
 }
 
 function addVividBuildings(){
-  // No vector 'building' source with raster basemap — skip
-  return;
+  if(!map) return;
+  const style = map.getStyle();
+  if(!style || !style.layers) return;
+  if(map.getLayer('vivid-buildings')) return;
+
+  let buildingSrc = null;
+  style.layers.forEach(l=>{
+    if(l['source-layer'] === 'building' && l.source) buildingSrc = l.source;
+  });
+  if(!buildingSrc) return;
+
+  const firstSymbol = style.layers.find(l => l.type === 'symbol');
+  const beforeId = firstSymbol ? firstSymbol.id : undefined;
+
+  const layer = {
+    id:'vivid-buildings', type:'fill-extrusion',
+    source:buildingSrc, 'source-layer':'building', minzoom:13.5,
+    paint:{
+      'fill-extrusion-color':[
+        'interpolate',['linear'],['coalesce',['get','render_height'],['get','height'],0],
+        0,   '#8338EC', 15,  '#b537f2', 40,  '#ff006e', 80,  '#fb5607', 150, '#ffe600'
+      ],
+      'fill-extrusion-height':['coalesce',['get','render_height'],['get','height'],8],
+      'fill-extrusion-base':0,
+      'fill-extrusion-opacity':0.9,
+      'fill-extrusion-vertical-gradient':true
+    }
+  };
+  try{
+    if(beforeId) map.addLayer(layer, beforeId);
+    else map.addLayer(layer);
+  }catch(err){}
 }
+
 function applyFullVividTheme(){
   try{ applyVividTheme(); }catch(e){}
   try{ addVividBuildings(); }catch(e){}
 }
+
 function addLayerSafe(layer, beforeId){
   try{
     if(beforeId && map.getLayer(beforeId)) map.addLayer(layer, beforeId);
@@ -1568,7 +1607,7 @@ $('reset').addEventListener('click', ()=>{
 $('terrain').addEventListener('click', function(){
   terrainOn = !terrainOn;
   this.classList.toggle('on', terrainOn);
-  toast(terrainOn ? '⛰️ وضع التضاريس غير متاح مع النمط الحالي' : '🗺️ عرض مسطح');
+  toast(terrainOn ? '⛰️ التضاريس غير متوفرة في هذا النمط' : '🗺️ عرض مسطح');
 });
 $('labels').addEventListener('click', function(){
   labelsOn = !labelsOn;
@@ -1714,7 +1753,7 @@ $('myLocation').addEventListener('click', function(){
 });
 
 /* =========================================================
-   🗺️ تهيئة الخريطة — تم إصلاح Race Condition و تطبيق load-local-first
+   🗺️ تهيئة الخريطة
    ========================================================= */
 async function initMap(){
   try{
@@ -1744,7 +1783,6 @@ async function initMap(){
 
     map.on('error', (e) => {
       const msg = e && e.error ? e.error.message : String(e);
-      // تجاهل الأخطاء غير الحرجة
       if(/Failed to load glyph|font|tile/i.test(msg)) return;
       console.warn('map error:', msg);
     });
@@ -1781,7 +1819,6 @@ async function initMap(){
 
     progress(30, 'انتظار تحميل الطبقات...');
 
-    /* ✅ [FIX #3] إصلاح تعارض التوقيت: لا نُنهي الـ Promise عند أي خطأ */
     await new Promise((resolve) => {
       let done = false;
       const finish = () => { if(!done){ done = true; resolve(); } };
@@ -1791,15 +1828,14 @@ async function initMap(){
     });
 
     mapLoaded = true;
-    progress(40, 'تهيئة الطبقات ثلاثية الأبعاد...');
+    progress(40, 'تهيئة التضاريس ثلاثية الأبعاد...');
 
+    // ✅ تطبيق ألوان النيون على الخريطة
     try{ applyFullVividTheme(); }catch(e){}
 
-    /* ✅ [FIX] تحميل محلي فوري ثم ترقية في الخلفية من OSM */
     progress(55, 'تحميل بيانات المحافظات...');
     setStatus('جاري تحميل المحافظات...');
 
-    // 1) محلي فوري
     PROVINCES = buildProvinces({ features: [] });
     addProvinceLayers();
     setStatus('جاهز — ' + PROVINCES.length + ' محافظة');
@@ -1811,7 +1847,6 @@ async function initMap(){
       pitch: 45, bearing: 0, duration: 1500
     });
 
-    // 2) ترقية في الخلفية
     (async () => {
       try{
         const data = await loadProvincesFromOSM();
@@ -1830,7 +1865,6 @@ async function initMap(){
       }catch(e){ console.warn('OSM background update failed:', e); }
     })();
 
-    // 3) Firebase
     initFirebaseSystem();
 
   }catch(err){
@@ -1875,7 +1909,6 @@ function randomChoice(arr){ return arr[Math.floor(Math.random() * arr.length)]; 
 function randomAvatar(){ return randomChoice(AVATAR_EMOJIS); }
 function randomName(){ return randomChoice(ARABIC_NAMES) + ' ' + Math.floor(Math.random()*900+100); }
 
-/* ✅ [FIX #5] Firebase: اكتشاف عدم التهيئة وإظهار بانر إرشادي */
 async function initFirebaseSystem(){
   const needsSetup =
     !firebaseConfig.apiKey ||
@@ -2224,20 +2257,19 @@ window.addEventListener('beforeunload', ()=>{
 });
 
 /* =========================================================
-   ✦✦✦ الفيديو (مع إصلاح تسرب الذاكرة) ✦✦✦
+   ✦✦✦ الفيديو
    ========================================================= */
 
 let videoFeedObserver = null;
 let currentFeedVideos = [];
 let mapVideoMarkers = {};
 
-/* ✅ [FIX #6] دالة تنظيف مركزية تُطلق كل الموارد */
 function cleanupVideoFeed(){
   document.querySelectorAll('#videoFeedContainer video').forEach(v => {
     try {
       v.pause();
       v.removeAttribute('src');
-      v.load();          // يُجبر المتصفح على تحرير الذاكرة
+      v.load();
     } catch(e){}
   });
   if(videoFeedObserver){
